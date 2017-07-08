@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "scripts": {
+    "start": "elm-live elm/Main.elm --output=elm.js --open -- --debug"
+  },
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-format": "^0.7.0-exp",
+    "elm-live": "^2.7.4",
+    "eslint": "^4.1.1",
+    "eslint-plugin-prettier": "^2.1.2",
+    "prettier": "^1.5.2"
+  }
+}
