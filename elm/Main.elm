@@ -1,13 +1,30 @@
 module Main exposing (..)
 
-import Html exposing (p, text)
+import Html
+import Types exposing (..)
+import View
 
 
-main : Program Never () msg
+main : Program Never Model Msg
 main =
     Html.program
-        { init = ( (), Cmd.none )
-        , update = \msg model -> ( model, Cmd.none )
-        , subscriptions = \model -> Sub.none
-        , view = \model -> p [] [ text "Hello, World!" ]
+        { init = init
+        , update = update
+        , subscriptions = subscriptions
+        , view = View.view
         }
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( { videoUrl = "TODO" }, Cmd.none )
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    ( model, Cmd.none )
