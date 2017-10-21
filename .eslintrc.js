@@ -1,19 +1,21 @@
-/* eslint-env node */
-
 module.exports = {
-  env: {
-    es6: true
-  },
-  extends: ["eslint:recommended"],
+  extends: ["lydell"],
   plugins: ["prettier"],
+  parser: "babel-eslint",
+  env: { es6: true },
   rules: {
-    "no-console": "off",
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
   },
   globals: {
     Elm: false,
     console: false,
     document: false,
-    window: false
-  }
+    window: false,
+  },
+  overrides: [
+    {
+      files: [".*.js", "*.config.js"],
+      env: { node: true },
+    },
+  ],
 };

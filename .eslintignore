@@ -1,2 +1,5 @@
+!/*.js
+!/**/.eslintrc.js
+/build/
+/elm-stuff/
 /elm.js
-!/.eslintrc.js
