@@ -1,9 +1,10 @@
 module View exposing (view)
 
-import Html exposing (Html, p, text)
+import Element exposing (Element, el, text)
+import StyleSheet exposing (Styles(..))
 import Types exposing (..)
 
 
-view : Model -> Html Msg
+view : a -> Element Styles variation Msg
 view model =
-    p [] [ text "Hello, World!" ]
+    el Title [] (text "hello!")
