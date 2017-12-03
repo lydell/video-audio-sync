@@ -19,7 +19,11 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { videoUrl = "TODO" }, Cmd.none )
+    ( { videoDuration = 0
+      , audioDuration = 0
+      }
+    , Cmd.none
+    )
 
 
 subscriptions : Model -> Sub Msg
@@ -35,4 +39,12 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
+        VideoMetaData duration ->
+            ( { model | videoDuration = duration }, Cmd.none )
+
+        AudioMetaData duration ->
+            ( { model | audioDuration = duration }, Cmd.none )

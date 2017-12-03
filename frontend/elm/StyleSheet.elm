@@ -8,6 +8,7 @@ import Style.Font as Font
 
 type Styles
     = Title
+    | NoStyle
 
 
 styleSheet : StyleSheet Styles variation
