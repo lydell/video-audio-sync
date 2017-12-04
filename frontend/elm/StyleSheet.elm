@@ -19,4 +19,5 @@ styleSheet =
             , Color.background Color.white
             , Font.size 16
             ]
+        , Style.style NoStyle []
         ]
