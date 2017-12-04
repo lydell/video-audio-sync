@@ -37,25 +37,37 @@ view model =
 decodeMediaMetaData : (Time -> msg) -> Decoder msg
 decodeMediaMetaData msg =
     Decode.at [ "currentTarget", "duration" ] Decode.float
-        |> Decode.map msg
+        |> Decode.map ((*) Time.second >> msg)
 
 
 formatDuration : Time -> String
 formatDuration duration =
     let
-        hours =
-            floor (duration / Time.hour)
+        ( hours, hoursRest ) =
+            divRem duration Time.hour
 
-        minutes =
-            floor ((duration - toFloat hours) / Time.minute)
+        ( minutes, minutesRest ) =
+            divRem hoursRest Time.minute
 
-        seconds =
-            floor ((duration - toFloat hours - toFloat minutes) / Time.second)
+        ( seconds, secondsRest ) =
+            divRem minutesRest Time.second
 
-        milliseconds =
-            floor ((duration - toFloat hours - toFloat minutes - toFloat seconds) / Time.millisecond)
+        ( milliseconds, millisecondsRest ) =
+            divRem secondsRest Time.millisecond
     in
     pad hours 2 ++ ":" ++ pad minutes 2 ++ ":" ++ pad seconds 2 ++ "." ++ pad milliseconds 3
+
+
+divRem : Float -> Float -> ( Int, Float )
+divRem numerator divisor =
+    let
+        whole =
+            truncate (numerator / divisor)
+
+        rest =
+            numerator - toFloat whole * divisor
+    in
+    ( whole, rest )
 
 
 pad : Int -> Int -> String
