@@ -13,17 +13,18 @@ view : Model -> Element Styles variation Msg
 view model =
     column NoStyle
         []
-        [ el Title [] (text "hello!")
-        , node "video"
+        [ node "video"
             (el NoStyle
-                [ attribute "src" "/sommaren.mp4"
+                [ attribute "src" "/sommaren_vid.mp4"
+                , attribute "controls" "controls"
                 , on "loadedmetadata" (decodeMediaMetaData VideoMetaData)
                 ]
                 empty
             )
         , node "audio"
             (el NoStyle
-                [ attribute "src" "/sommaren.mp4"
+                [ attribute "src" "/sommaren.aac"
+                , attribute "controls" "controls"
                 , on "loadedmetadata" (decodeMediaMetaData AudioMetaData)
                 ]
                 empty
