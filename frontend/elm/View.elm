@@ -1,36 +1,30 @@
 module View exposing (view)
 
-import Element exposing (Element, column, el, empty, node, text)
-import Element.Attributes exposing (attribute)
-import Element.Events exposing (on)
+import Html exposing (Html, audio, div, p, text, video)
+import Html.Attributes exposing (controls, src)
+import Html.Events exposing (on)
 import Json.Decode as Decode exposing (Decoder)
-import StyleSheet exposing (Styles(..))
 import Time exposing (Time)
 import Types exposing (..)
 
 
-view : Model -> Element Styles variation Msg
+view : Model -> Html Msg
 view model =
-    column NoStyle
-        []
-        [ node "video"
-            (el NoStyle
-                [ attribute "src" "/sommaren_vid.mp4"
-                , attribute "controls" "controls"
-                , on "loadedmetadata" (decodeMediaMetaData VideoMetaData)
-                ]
-                empty
-            )
-        , node "audio"
-            (el NoStyle
-                [ attribute "src" "/sommaren.aac"
-                , attribute "controls" "controls"
-                , on "loadedmetadata" (decodeMediaMetaData AudioMetaData)
-                ]
-                empty
-            )
-        , el NoStyle [] (text ("Video duration: " ++ formatDuration model.videoDuration))
-        , el NoStyle [] (text ("Audio duration: " ++ formatDuration model.audioDuration))
+    div []
+        [ video
+            [ src "/sommaren_vid.mp4"
+            , controls True
+            , on "loadedmetadata" (decodeMediaMetaData VideoMetaData)
+            ]
+            []
+        , audio
+            [ src "/sommaren.aac"
+            , controls True
+            , on "loadedmetadata" (decodeMediaMetaData AudioMetaData)
+            ]
+            []
+        , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
+        , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
         ]
 
 

@@ -1,8 +1,6 @@
 module Main exposing (..)
 
-import Element
 import Html exposing (Html)
-import StyleSheet
 import Types exposing (..)
 import View
 
@@ -33,8 +31,7 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    Element.viewport StyleSheet.styleSheet <|
-        View.view model
+    View.view model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
