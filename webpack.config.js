@@ -1,3 +1,4 @@
+const ExtractPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
 const path = require("path");
@@ -10,6 +11,11 @@ const PUBLIC_PATH = "/";
 const constants = {
   "process.env.NODE_ENV": JSON.stringify(DEBUG ? "development" : "production"),
 };
+
+const extractCss = new ExtractPlugin({
+  filename: DEBUG ? "[name].css" : "[name].[contenthash].css",
+  disable: DEBUG,
+});
 
 module.exports = {
   context: path.resolve(__dirname, "frontend"),
@@ -61,6 +67,25 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.css$/,
+        use: extractCss.extract({
+          fallback: {
+            loader: "style-loader",
+            options: {
+              sourceMap: true,
+            },
+          },
+          use: [
+            {
+              loader: "css-loader",
+              options: {
+                sourceMap: true,
+              },
+            },
+          ],
+        }),
+      },
     ],
   },
 
@@ -72,6 +97,8 @@ module.exports = {
       }),
 
     new webpack.DefinePlugin(constants),
+
+    extractCss,
 
     DEBUG && new webpack.HotModuleReplacementPlugin(),
 
