@@ -22,9 +22,9 @@ def main(argv):
     if not is_argv_valid:
         message = (
             'Usage:\n'
-            '    python sync.py VIDEO_FILE JSON_FILE AUDIO_EXTENSION [force]\n'
-            'Example:'
-            '    python sync.py video.mp4 points.json aac force\n'
+            '    python sync.py VIDEO_FILE AUDIO_FILE JSON_FILE [force]\n'
+            'Example:\n'
+            '    python sync.py video.mp4 audio.aac points.json force\n'
             '\n'
             'Python 3.5 or later is required.'
         )
@@ -32,12 +32,20 @@ def main(argv):
         return
 
     video_file_path = argv[0]
-    json_file_path = argv[1]
-    audio_extension = argv[2]
+    audio_file_path = argv[1]
+    json_file_path = argv[2]
+
+    (_, audio_extension) = os.path.splitext(audio_file_path)
 
     if not os.path.isfile(video_file_path):
         yield (1, '{file} is not an existing file.'.format(
             file=video_file_path,
+        ))
+        return
+
+    if not os.path.isfile(audio_file_path):
+        yield (1, '{file} is not an existing file.'.format(
+            file=audio_file_path,
         ))
         return
 
@@ -175,7 +183,7 @@ def main(argv):
         subprocess.run(filter(None, [
             'ffmpeg',
             '-i',
-            video_file_path,
+            audio_file_path,
             '-ss',
             str(seconds),
             None if is_last else '-t',
@@ -220,7 +228,7 @@ def main(argv):
     with open(input_file_path, 'w') as input_file:
         input_file.write(input_file_contents + '\n')
 
-    concat_file_path = os.path.join(dir, 'concat.{}'.format(audio_extension))
+    concat_file_path = os.path.join(dir, 'concat{}'.format(audio_extension))
 
     subprocess.run([
         'ffmpeg',
@@ -237,7 +245,7 @@ def main(argv):
         concat_file_path,
     ])
 
-    yield banner('Genrating new video')
+    yield banner('Generating new video')
 
     output_file_path = os.path.join(dir, os.path.basename(video_file_path))
 
@@ -261,7 +269,7 @@ def main(argv):
 
 
 def part_name(dir, index, audio_extension, suffix=None):
-    return os.path.join(dir, '{index}{suffix}.{extension}'.format(
+    return os.path.join(dir, '{index}{suffix}{extension}'.format(
         index=index,
         suffix='' if suffix is None else '_{}'.format(suffix),
         extension=audio_extension,
