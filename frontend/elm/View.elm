@@ -12,13 +12,13 @@ view : Model -> Html Msg
 view model =
     div []
         [ video
-            [ src "/sommaren_vid.mp4"
+            [ src "/sommaren_video.mp4"
             , controls True
             , on "loadedmetadata" (decodeMediaMetaData VideoMetaData)
             ]
             []
         , audio
-            [ src "/sommaren.aac"
+            [ src "/sommaren_audio.aac"
             , controls True
             , on "loadedmetadata" (decodeMediaMetaData AudioMetaData)
             ]
