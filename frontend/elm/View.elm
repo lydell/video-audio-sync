@@ -48,8 +48,17 @@ formatDuration duration =
 
         ( milliseconds, millisecondsRest ) =
             divRem secondsRest Time.millisecond
+
+        pad number numChars =
+            String.padLeft numChars '0' (toString number)
     in
-    pad hours 2 ++ ":" ++ pad minutes 2 ++ ":" ++ pad seconds 2 ++ "." ++ pad milliseconds 3
+    pad hours 2
+        ++ ":"
+        ++ pad minutes 2
+        ++ ":"
+        ++ pad seconds 2
+        ++ "."
+        ++ pad milliseconds 3
 
 
 divRem : Float -> Float -> ( Int, Float )
@@ -62,8 +71,3 @@ divRem numerator divisor =
             numerator - toFloat whole * divisor
     in
     ( whole, rest )
-
-
-pad : Int -> Int -> String
-pad number numChars =
-    String.right numChars (String.repeat numChars "0" ++ toString number)
