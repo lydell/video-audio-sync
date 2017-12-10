@@ -4,12 +4,20 @@ import Html exposing (Html, audio, div, p, text, video)
 import Html.Attributes exposing (controls, src)
 import Html.Events exposing (on)
 import Json.Decode as Decode exposing (Decoder)
+import Svg exposing (line, svg)
+import Svg.Attributes exposing (stroke, viewBox, x1, x2, y1, y2)
 import Time exposing (Time)
 import Types exposing (..)
 
 
 view : Model -> Html Msg
 view model =
+    let
+        viewBoxString =
+            [ 0, 0, model.windowSize.width, model.windowSize.height ]
+                |> List.map toString
+                |> String.join " "
+    in
     div []
         [ video
             [ src "/sommaren_video.mp4"
@@ -25,6 +33,9 @@ view model =
             []
         , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
         , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
+        , svg [ viewBox viewBoxString ]
+            [ line [ x1 "0", y1 "10", x2 "200", y2 "10", stroke "black" ] []
+            ]
         ]
 
 

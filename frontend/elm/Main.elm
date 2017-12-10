@@ -1,8 +1,10 @@
 module Main exposing (..)
 
 import Html exposing (Html)
+import Task
 import Types exposing (..)
 import View
+import Window
 
 
 main : Program Never Model Msg
@@ -17,16 +19,17 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { videoDuration = 0
+    ( { windowSize = { width = 0, height = 0 }
+      , videoDuration = 0
       , audioDuration = 0
       }
-    , Cmd.none
+    , Task.perform WindowSize Window.size
     )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Window.resizes WindowSize
 
 
 view : Model -> Html Msg
@@ -39,6 +42,9 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        WindowSize size ->
+            ( { model | windowSize = size }, Cmd.none )
 
         VideoMetaData duration ->
             ( { model | videoDuration = duration }, Cmd.none )
