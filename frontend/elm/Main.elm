@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (Html)
+import Ports exposing (OutgoingMessage(TestOut))
 import Task
 import Types exposing (..)
 import View
@@ -23,13 +24,19 @@ init =
       , videoDuration = 0
       , audioDuration = 0
       }
-    , Task.perform WindowSize Window.size
+    , Cmd.batch
+        [ Task.perform WindowSize Window.size
+        , Ports.send (TestOut "Hello, JS!")
+        ]
     )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Window.resizes WindowSize
+    Sub.batch
+        [ Window.resizes WindowSize
+        , Ports.subscribe JsMessage
+        ]
 
 
 view : Model -> Html Msg
@@ -41,6 +48,20 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp ->
+            ( model, Cmd.none )
+
+        JsMessage (Ok incomingMessage) ->
+            let
+                _ =
+                    Debug.log "incomingMessage" incomingMessage
+            in
+            ( model, Cmd.none )
+
+        JsMessage (Err message) ->
+            let
+                _ =
+                    Debug.log "incomingMessage error" message
+            in
             ( model, Cmd.none )
 
         WindowSize size ->
