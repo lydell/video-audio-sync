@@ -1,8 +1,8 @@
 module View exposing (view)
 
-import Html exposing (Html, audio, div, p, text, video)
-import Html.Attributes exposing (controls, src)
-import Html.Events exposing (on)
+import Html exposing (Html, audio, button, div, p, text, video)
+import Html.Attributes exposing (controls, src, type_)
+import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Svg exposing (line, svg)
 import Svg.Attributes exposing (stroke, viewBox, x1, x2, y1, y2)
@@ -14,7 +14,7 @@ view : Model -> Html Msg
 view model =
     let
         viewBoxString =
-            [ 0, 0, model.windowSize.width, model.windowSize.height ]
+            [ 0, 0, model.windowSize.width, 200 ]
                 |> List.map toString
                 |> String.join " "
     in
@@ -35,6 +35,22 @@ view model =
         , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
         , svg [ viewBox viewBoxString ]
             [ line [ x1 "0", y1 "10", x2 "200", y2 "10", stroke "black" ] []
+            ]
+        , div []
+            [ button
+                [ type_ "button"
+                , onClick <|
+                    if model.playing then
+                        Pause
+                    else
+                        Play
+                ]
+                [ text <|
+                    if model.playing then
+                        "Pause"
+                    else
+                        "Play"
+                ]
             ]
         ]
 

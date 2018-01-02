@@ -9,6 +9,7 @@ type alias Model =
     { windowSize : Window.Size
     , videoDuration : Time
     , audioDuration : Time
+    , playing : Bool
     }
 
 
@@ -18,3 +19,5 @@ type Msg
     | WindowSize Window.Size
     | VideoMetaData Time
     | AudioMetaData Time
+    | Play
+    | Pause

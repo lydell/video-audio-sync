@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (Html)
-import Ports exposing (OutgoingMessage(TestOut))
+import Ports exposing (OutgoingMessage(JsPause, JsPlay, TestOut))
 import Task
 import Types exposing (..)
 import View
@@ -23,6 +23,7 @@ init =
     ( { windowSize = { width = 0, height = 0 }
       , videoDuration = 0
       , audioDuration = 0
+      , playing = False
       }
     , Cmd.batch
         [ Task.perform WindowSize Window.size
@@ -72,3 +73,9 @@ update msg model =
 
         AudioMetaData duration ->
             ( { model | audioDuration = duration }, Cmd.none )
+
+        Play ->
+            ( { model | playing = True }, Ports.send JsPlay )
+
+        Pause ->
+            ( { model | playing = False }, Ports.send JsPause )

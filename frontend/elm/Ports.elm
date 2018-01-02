@@ -12,6 +12,8 @@ type alias TaggedData =
 
 type OutgoingMessage
     = TestOut String
+    | JsPlay
+    | JsPause
 
 
 type IncomingMessage
@@ -23,6 +25,12 @@ encode outgoingMessage =
     case outgoingMessage of
         TestOut string ->
             { tag = "TestOut", data = Encode.string string }
+
+        JsPlay ->
+            { tag = "JsPlay", data = Encode.null }
+
+        JsPause ->
+            { tag = "JsPause", data = Encode.null }
 
 
 decoder : String -> Result String (Decoder IncomingMessage)
