@@ -1,13 +1,19 @@
 module View exposing (view)
 
 import Html exposing (Html, audio, button, div, p, text, video)
-import Html.Attributes exposing (controls, src, type_)
+import Html.Attributes exposing (src, type_, width)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Svg exposing (line, svg)
 import Svg.Attributes exposing (stroke, viewBox, x1, x2, y1, y2)
 import Time exposing (Time)
 import Types exposing (..)
+
+
+controlsHeight : Int
+controlsHeight =
+    -- px
+    150
 
 
 view : Model -> Html Msg
@@ -17,18 +23,38 @@ view model =
             [ 0, 0, model.windowSize.width, 200 ]
                 |> List.map toString
                 |> String.join " "
+
+        aspectRatio =
+            model.videoSize.width / model.videoSize.height
+
+        maxWidth =
+            toFloat model.windowSize.width
+
+        maxHeight =
+            toFloat (model.windowSize.height - controlsHeight)
+
+        heightIfMaxWidth =
+            maxWidth / aspectRatio
+
+        clampedWidth =
+            if heightIfMaxWidth <= maxHeight then
+                maxWidth
+            else
+                maxHeight * aspectRatio
+
+        finalWidth =
+            min model.videoSize.width clampedWidth
     in
     div []
         [ video
             [ src "/sommaren_video.mp4"
-            , controls True
-            , on "loadedmetadata" (decodeMediaMetaData VideoMetaData)
+            , width (truncate finalWidth)
+            , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
             ]
             []
         , audio
             [ src "/sommaren_audio.aac"
-            , controls True
-            , on "loadedmetadata" (decodeMediaMetaData AudioMetaData)
+            , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
             ]
             []
         , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
@@ -55,10 +81,30 @@ view model =
         ]
 
 
-decodeMediaMetaData : (Time -> msg) -> Decoder msg
-decodeMediaMetaData msg =
+decodeVideoMetaData : (VideoMetaDataDetails -> msg) -> Decoder msg
+decodeVideoMetaData msg =
+    Decode.map3
+        (\duration width height ->
+            msg
+                { duration = duration * Time.second
+                , width = width
+                , height = height
+                }
+        )
+        (Decode.at [ "currentTarget", "duration" ] Decode.float)
+        (Decode.at [ "currentTarget", "videoWidth" ] Decode.float)
+        (Decode.at [ "currentTarget", "videoHeight" ] Decode.float)
+
+
+decodeAudioMetaData : (AudioMetaDataDetails -> msg) -> Decoder msg
+decodeAudioMetaData msg =
     Decode.at [ "currentTarget", "duration" ] Decode.float
-        |> Decode.map ((*) Time.second >> msg)
+        |> Decode.map
+            (\duration ->
+                msg
+                    { duration = duration * Time.second
+                    }
+            )
 
 
 formatDuration : Time -> String

@@ -7,9 +7,22 @@ import Window
 
 type alias Model =
     { windowSize : Window.Size
+    , videoSize : { width : Float, height : Float }
     , videoDuration : Time
     , audioDuration : Time
     , playing : Bool
+    }
+
+
+type alias VideoMetaDataDetails =
+    { duration : Time
+    , width : Float
+    , height : Float
+    }
+
+
+type alias AudioMetaDataDetails =
+    { duration : Time
     }
 
 
@@ -17,7 +30,7 @@ type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
     | WindowSize Window.Size
-    | VideoMetaData Time
-    | AudioMetaData Time
+    | VideoMetaData VideoMetaDataDetails
+    | AudioMetaData AudioMetaDataDetails
     | Play
     | Pause

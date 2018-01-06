@@ -21,6 +21,7 @@ main =
 init : ( Model, Cmd Msg )
 init =
     ( { windowSize = { width = 0, height = 0 }
+      , videoSize = { width = 0, height = 0 }
       , videoDuration = 0
       , audioDuration = 0
       , playing = False
@@ -68,10 +69,15 @@ update msg model =
         WindowSize size ->
             ( { model | windowSize = size }, Cmd.none )
 
-        VideoMetaData duration ->
-            ( { model | videoDuration = duration }, Cmd.none )
+        VideoMetaData { duration, width, height } ->
+            ( { model
+                | videoDuration = duration
+                , videoSize = { width = width, height = height }
+              }
+            , Cmd.none
+            )
 
-        AudioMetaData duration ->
+        AudioMetaData { duration } ->
             ( { model | audioDuration = duration }, Cmd.none )
 
         Play ->

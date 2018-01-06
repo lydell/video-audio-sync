@@ -4,3 +4,12 @@ html {
   font: menu;
   font-size: 16px;
 }
+
+body {
+  margin: 0;
+}
+
+video {
+  display: block;
+  margin: auto;
+}
