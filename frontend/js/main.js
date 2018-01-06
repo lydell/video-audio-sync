@@ -10,43 +10,32 @@ app.ports.elmToJs.subscribe(message => {
       app.ports.jsToElm.send({ tag: "TestIn", data: "Hello, Elm!" });
       break;
 
-    case "JsPlay": {
-      console.log("play");
-
-      const video = document.querySelector("video");
-
-      if (video) {
+    case "JsPlay":
+      withMedia((video, audio) => {
         video.play();
-      }
-
-      const audio = document.querySelector("audio");
-
-      if (audio) {
         audio.play();
-      }
-
+      });
       break;
-    }
 
-    case "JsPause": {
-      console.log("pause");
-
-      const video = document.querySelector("video");
-
-      if (video) {
+    case "JsPause":
+      withMedia((video, audio) => {
         video.pause();
-      }
-
-      const audio = document.querySelector("audio");
-
-      if (audio) {
         audio.pause();
-      }
-
+      });
       break;
-    }
 
     default:
       console.error("Unexpected message", message);
   }
 });
+
+function withMedia(fn) {
+  const video = document.querySelector("video");
+  const audio = document.querySelector("audio");
+
+  if (video && audio) {
+    fn(video, audio);
+  } else {
+    console.error("Could not find both video and audio.", { video, audio });
+  }
+}
