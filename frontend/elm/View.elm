@@ -4,8 +4,8 @@ import Html exposing (Html, audio, button, div, p, text, video)
 import Html.Attributes exposing (src, type_, width)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
-import Svg exposing (line, svg)
-import Svg.Attributes exposing (stroke, viewBox, x1, x2, y1, y2)
+import Svg exposing (circle, line, svg)
+import Svg.Attributes exposing (cx, cy, r, stroke, viewBox, x1, x2, y1, y2)
 import Time exposing (Time)
 import Types exposing (..)
 
@@ -19,10 +19,22 @@ controlsHeight =
 view : Model -> Html Msg
 view model =
     let
+        svgWidth =
+            toFloat model.windowSize.width
+
         viewBoxString =
-            [ 0, 0, model.windowSize.width, 200 ]
+            [ 0, 0, svgWidth, 200 ]
                 |> List.map toString
                 |> String.join " "
+
+        ratio =
+            model.videoDuration / model.audioDuration
+
+        ( videoLineWidth, audioLineWidth, scale ) =
+            if ratio >= 1 then
+                ( svgWidth, svgWidth / ratio, model.videoDuration / svgWidth )
+            else
+                ( svgWidth * ratio, svgWidth, model.audioDuration / svgWidth )
 
         aspectRatio =
             model.videoSize.width / model.videoSize.height
@@ -50,17 +62,22 @@ view model =
             [ src "/sommaren_video.mp4"
             , width (truncate finalWidth)
             , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
+            , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
             ]
             []
         , audio
             [ src "/sommaren_audio.aac"
             , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
+            , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
             ]
             []
         , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
         , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
         , svg [ viewBox viewBoxString ]
-            [ line [ x1 "0", y1 "10", x2 "200", y2 "10", stroke "black" ] []
+            [ line [ x1 "0", y1 "10", x2 (toString videoLineWidth), y2 "10", stroke "black" ] []
+            , line [ x1 "0", y1 "20", x2 (toString audioLineWidth), y2 "20", stroke "black" ] []
+            , circle [ cx (toString (model.videoCurrentTime / scale)), cy "10", r "2" ] []
+            , circle [ cx (toString (model.audioCurrentTime / scale)), cy "20", r "2" ] []
             ]
         , div []
             [ button
@@ -105,6 +122,12 @@ decodeAudioMetaData msg =
                     { duration = duration * Time.second
                     }
             )
+
+
+decodeMediaCurrentTime : (Time -> msg) -> Decoder msg
+decodeMediaCurrentTime msg =
+    Decode.at [ "currentTarget", "currentTime" ] Decode.float
+        |> Decode.map ((*) Time.second >> msg)
 
 
 formatDuration : Time -> String

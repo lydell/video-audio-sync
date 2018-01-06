@@ -24,6 +24,8 @@ init =
       , videoSize = { width = 0, height = 0 }
       , videoDuration = 0
       , audioDuration = 0
+      , videoCurrentTime = 0
+      , audioCurrentTime = 0
       , playing = False
       }
     , Cmd.batch
@@ -79,6 +81,12 @@ update msg model =
 
         AudioMetaData { duration } ->
             ( { model | audioDuration = duration }, Cmd.none )
+
+        VideoCurrentTime currentTime ->
+            ( { model | videoCurrentTime = currentTime }, Cmd.none )
+
+        AudioCurrentTime currentTime ->
+            ( { model | audioCurrentTime = currentTime }, Cmd.none )
 
         Play ->
             ( { model | playing = True }, Ports.send JsPlay )

@@ -10,6 +10,8 @@ type alias Model =
     , videoSize : { width : Float, height : Float }
     , videoDuration : Time
     , audioDuration : Time
+    , videoCurrentTime : Time
+    , audioCurrentTime : Time
     , playing : Bool
     }
 
@@ -32,5 +34,7 @@ type Msg
     | WindowSize Window.Size
     | VideoMetaData VideoMetaDataDetails
     | AudioMetaData AudioMetaDataDetails
+    | VideoCurrentTime Time
+    | AudioCurrentTime Time
     | Play
     | Pause
