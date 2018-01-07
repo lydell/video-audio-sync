@@ -88,6 +88,12 @@ update msg model =
         AudioCurrentTime currentTime ->
             ( { model | audioCurrentTime = currentTime }, Cmd.none )
 
+        VideoPlayState playing ->
+            ( { model | playing = playing }, Cmd.none )
+
+        AudioPlayState playing ->
+            ( { model | playing = playing }, Cmd.none )
+
         Play ->
             ( { model | playing = True }, Ports.send JsPlay )
 

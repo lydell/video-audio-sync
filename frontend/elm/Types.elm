@@ -36,5 +36,7 @@ type Msg
     | AudioMetaData AudioMetaDataDetails
     | VideoCurrentTime Time
     | AudioCurrentTime Time
+    | VideoPlayState Bool
+    | AudioPlayState Bool
     | Play
     | Pause

@@ -59,17 +59,21 @@ view model =
     in
     div []
         [ video
-            [ src "/sommaren_video.mp4"
-            , width (truncate finalWidth)
-            , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
-            , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
-            ]
+            ([ src "/sommaren_video.mp4"
+             , width (truncate finalWidth)
+             , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
+             , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
+             ]
+                ++ playEvents VideoPlayState
+            )
             []
         , audio
-            [ src "/sommaren_audio.aac"
-            , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
-            , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
-            ]
+            ([ src "/sommaren_audio.aac"
+             , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
+             , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
+             ]
+                ++ playEvents VideoPlayState
+            )
             []
         , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
         , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
@@ -96,6 +100,29 @@ view model =
                 ]
             ]
         ]
+
+
+playEvents : (Bool -> value) -> List (Html.Attribute value)
+playEvents msg =
+    let
+        decoder =
+            decodeMediaPlayState msg
+    in
+    [ on "abort" decoder
+    , on "ended" decoder
+    , on "error" decoder
+    , on "pause" decoder
+    , on "play" decoder
+    , on "playing" decoder
+    , on "stalled" decoder
+    , on "suspend" decoder
+    ]
+
+
+decodeMediaPlayState : (Bool -> msg) -> Decoder msg
+decodeMediaPlayState msg =
+    Decode.at [ "currentTarget", "paused" ] Decode.bool
+        |> Decode.map (not >> msg)
 
 
 decodeVideoMetaData : (VideoMetaDataDetails -> msg) -> Decoder msg
