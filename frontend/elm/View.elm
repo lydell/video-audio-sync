@@ -1,19 +1,51 @@
 module View exposing (view)
 
 import Html exposing (Html, audio, button, div, p, text, video)
-import Html.Attributes exposing (src, type_, width)
+import Html.Attributes exposing (class, property, src, type_, width)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import Svg exposing (circle, line, svg)
-import Svg.Attributes exposing (cx, cy, r, stroke, viewBox, x1, x2, y1, y2)
+import Svg.Attributes exposing (cx, cy, dy, r, strokeWidth, textAnchor, viewBox, x, x1, x2, y, y1, y2)
 import Time exposing (Time)
 import Types exposing (..)
 
 
+lineHeight : Int
+lineHeight =
+    10
+
+
+lineMargin : Int
+lineMargin =
+    20
+
+
+markerWidth : Int
+markerWidth =
+    10
+
+
+markerBaseHeight : Int
+markerBaseHeight =
+    10
+
+
+svgHeight : Int
+svgHeight =
+    (markerBaseHeight * 2)
+        + (lineHeight * 2)
+        + lineMargin
+
+
 controlsHeight : Int
 controlsHeight =
-    -- px
-    150
+    svgHeight
+        + (32 * 2)
+
+
+
+-- for the buttons
 
 
 view : Model -> Html Msg
@@ -23,7 +55,7 @@ view model =
             toFloat model.windowSize.width
 
         viewBoxString =
-            [ 0, 0, svgWidth, 200 ]
+            [ 0, 0, svgWidth, toFloat svgHeight ]
                 |> List.map toString
                 |> String.join " "
 
@@ -35,6 +67,12 @@ view model =
                 ( svgWidth, svgWidth / ratio, model.videoDuration / svgWidth )
             else
                 ( svgWidth * ratio, svgWidth, model.audioDuration / svgWidth )
+
+        videoLineY =
+            markerBaseHeight + (lineHeight // 2)
+
+        audioLineY =
+            videoLineY + lineHeight + lineMargin
 
         aspectRatio =
             model.videoSize.width / model.videoSize.height
@@ -53,20 +91,20 @@ view model =
                 maxWidth
             else
                 maxHeight * aspectRatio
-
-        finalWidth =
-            min model.videoSize.width clampedWidth
     in
     div []
-        [ video
-            ([ src "/sommaren_video.mp4"
-             , width (truncate finalWidth)
-             , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
-             , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
-             ]
-                ++ playEvents VideoPlayState
-            )
-            []
+        [ div [ class "VideoWrapper" ]
+            [ video
+                ([ src "/sommaren_video.mp4"
+                 , width (truncate clampedWidth)
+                 , property "muted" (Encode.bool True)
+                 , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
+                 , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
+                 ]
+                    ++ playEvents VideoPlayState
+                )
+                []
+            ]
         , audio
             ([ src "/sommaren_audio.aac"
              , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
@@ -75,8 +113,6 @@ view model =
                 ++ playEvents AudioPlayState
             )
             []
-        , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
-        , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
         , div []
             [ button
                 [ type_ "button"
@@ -91,10 +127,50 @@ view model =
                 ]
             ]
         , svg [ viewBox viewBoxString ]
-            [ line [ x1 "0", y1 "10", x2 (toString videoLineWidth), y2 "10", stroke "black" ] []
-            , line [ x1 "0", y1 "20", x2 (toString audioLineWidth), y2 "20", stroke "black" ] []
-            , circle [ cx (toString (model.videoCurrentTime / scale)), cy "10", r "2" ] []
-            , circle [ cx (toString (model.audioCurrentTime / scale)), cy "20", r "2" ] []
+            [ line
+                [ x1 "0"
+                , y1 (toString videoLineY)
+                , x2 (toString videoLineWidth)
+                , y2 (toString videoLineY)
+                , strokeWidth (toString lineHeight)
+                ]
+                []
+            , line
+                [ x1 "0"
+                , y1 (toString audioLineY)
+                , x2 (toString audioLineWidth)
+                , y2 (toString audioLineY)
+                , strokeWidth (toString lineHeight)
+                ]
+                []
+            , Svg.text_
+                [ x (toString videoLineWidth)
+                , y (toString videoLineY)
+                , dy "-0.5em"
+                , textAnchor "end"
+                ]
+                [ Svg.text (formatDuration model.videoDuration)
+                ]
+            , Svg.text_
+                [ x (toString audioLineWidth)
+                , y (toString (audioLineY + lineHeight))
+                , dy "0.5em"
+                , textAnchor "end"
+                ]
+                [ Svg.text (formatDuration model.audioDuration)
+                ]
+            , circle
+                [ cx (toString (model.videoCurrentTime / scale))
+                , cy (toString videoLineY)
+                , r (toString (lineHeight // 2))
+                ]
+                []
+            , circle
+                [ cx (toString (model.audioCurrentTime / scale))
+                , cy (toString audioLineY)
+                , r (toString (lineHeight // 2))
+                ]
+                []
             ]
         , div []
             [ button
