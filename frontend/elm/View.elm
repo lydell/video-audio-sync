@@ -1,7 +1,7 @@
 module View exposing (view)
 
-import Html exposing (Html, audio, button, div, p, text, video)
-import Html.Attributes exposing (class, property, src, type_, width)
+import Html exposing (Html, audio, button, div, p, span, text, video)
+import Html.Attributes exposing (attribute, class, property, src, title, type_, width)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -116,14 +116,18 @@ view model =
         , div []
             [ button
                 [ type_ "button"
-                , onClick <|
-                    VideoPlayState (not model.videoPlaying)
-                ]
-                [ text <|
+                , title <|
                     if model.videoPlaying then
                         "Pause video"
                     else
                         "Play video"
+                , onClick <|
+                    VideoPlayState (not model.videoPlaying)
+                ]
+                [ if model.videoPlaying then
+                    fontawesome "pause"
+                  else
+                    fontawesome "play"
                 ]
             ]
         , svg [ viewBox viewBoxString ]
@@ -175,17 +179,30 @@ view model =
         , div []
             [ button
                 [ type_ "button"
-                , onClick <|
-                    AudioPlayState (not model.audioPlaying)
-                ]
-                [ text <|
+                , title <|
                     if model.audioPlaying then
                         "Pause audio"
                     else
                         "Play audio"
+                , onClick <|
+                    AudioPlayState (not model.audioPlaying)
+                ]
+                [ if model.audioPlaying then
+                    fontawesome "pause"
+                  else
+                    fontawesome "play"
                 ]
             ]
         ]
+
+
+fontawesome : String -> Html msg
+fontawesome name =
+    span
+        [ attribute "aria-hidden" "true"
+        , class ("fa fa-" ++ name)
+        ]
+        []
 
 
 playEvents : (Bool -> value) -> List (Html.Attribute value)
