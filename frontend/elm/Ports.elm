@@ -12,8 +12,8 @@ type alias TaggedData =
 
 type OutgoingMessage
     = TestOut String
-    | JsPlay
-    | JsPause
+    | JsVideoPlayState Bool
+    | JsAudioPlayState Bool
 
 
 type IncomingMessage
@@ -26,11 +26,11 @@ encode outgoingMessage =
         TestOut string ->
             { tag = "TestOut", data = Encode.string string }
 
-        JsPlay ->
-            { tag = "JsPlay", data = Encode.null }
+        JsVideoPlayState playing ->
+            { tag = "JsVideoPlayState", data = Encode.bool playing }
 
-        JsPause ->
-            { tag = "JsPause", data = Encode.null }
+        JsAudioPlayState playing ->
+            { tag = "JsAudioPlayState", data = Encode.bool playing }
 
 
 decoder : String -> Result String (Decoder IncomingMessage)

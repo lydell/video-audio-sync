@@ -10,32 +10,37 @@ app.ports.elmToJs.subscribe(message => {
       app.ports.jsToElm.send({ tag: "TestIn", data: "Hello, Elm!" });
       break;
 
-    case "JsPlay":
-      withMedia((video, audio) => {
-        video.play();
-        audio.play();
-      });
+    case "JsVideoPlayState": {
+      const playing = message.data;
+      const video = document.querySelector("video");
+      if (video) {
+        if (playing) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      } else {
+        console.error("Could not find video.");
+      }
       break;
+    }
 
-    case "JsPause":
-      withMedia((video, audio) => {
-        video.pause();
-        audio.pause();
-      });
+    case "JsAudioPlayState": {
+      const playing = message.data;
+      const audio = document.querySelector("audio");
+      if (audio) {
+        if (playing) {
+          audio.play();
+        } else {
+          audio.pause();
+        }
+      } else {
+        console.error("Could not find audio.");
+      }
       break;
+    }
 
     default:
       console.error("Unexpected message", message);
   }
 });
-
-function withMedia(fn) {
-  const video = document.querySelector("video");
-  const audio = document.querySelector("audio");
-
-  if (video && audio) {
-    fn(video, audio);
-  } else {
-    console.error("Could not find both video and audio.", { video, audio });
-  }
-}

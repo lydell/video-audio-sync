@@ -12,7 +12,8 @@ type alias Model =
     , audioDuration : Time
     , videoCurrentTime : Time
     , audioCurrentTime : Time
-    , playing : Bool
+    , videoPlaying : Bool
+    , audioPlaying : Bool
     }
 
 
@@ -38,5 +39,3 @@ type Msg
     | AudioCurrentTime Time
     | VideoPlayState Bool
     | AudioPlayState Bool
-    | Play
-    | Pause

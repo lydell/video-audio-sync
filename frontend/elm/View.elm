@@ -72,11 +72,24 @@ view model =
              , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
              , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
              ]
-                ++ playEvents VideoPlayState
+                ++ playEvents AudioPlayState
             )
             []
         , p [] [ text ("Video duration: " ++ formatDuration model.videoDuration) ]
         , p [] [ text ("Audio duration: " ++ formatDuration model.audioDuration) ]
+        , div []
+            [ button
+                [ type_ "button"
+                , onClick <|
+                    VideoPlayState (not model.videoPlaying)
+                ]
+                [ text <|
+                    if model.videoPlaying then
+                        "Pause video"
+                    else
+                        "Play video"
+                ]
+            ]
         , svg [ viewBox viewBoxString ]
             [ line [ x1 "0", y1 "10", x2 (toString videoLineWidth), y2 "10", stroke "black" ] []
             , line [ x1 "0", y1 "20", x2 (toString audioLineWidth), y2 "20", stroke "black" ] []
@@ -87,16 +100,13 @@ view model =
             [ button
                 [ type_ "button"
                 , onClick <|
-                    if model.playing then
-                        Pause
-                    else
-                        Play
+                    AudioPlayState (not model.audioPlaying)
                 ]
                 [ text <|
-                    if model.playing then
-                        "Pause"
+                    if model.audioPlaying then
+                        "Pause audio"
                     else
-                        "Play"
+                        "Play audio"
                 ]
             ]
         ]
