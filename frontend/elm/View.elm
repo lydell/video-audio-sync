@@ -5,8 +5,8 @@ import Html.Attributes exposing (attribute, class, property, src, title, type_, 
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Svg exposing (circle, line, svg)
-import Svg.Attributes exposing (cx, cy, dy, r, strokeWidth, textAnchor, viewBox, x, x1, x2, y, y1, y2)
+import Svg
+import Svg.Attributes as Svg
 import Time exposing (Time)
 import Types exposing (..)
 
@@ -18,30 +18,23 @@ lineHeight =
 
 lineMargin : Int
 lineMargin =
+    10
+
+
+lineBetween : Int
+lineBetween =
     20
-
-
-markerWidth : Int
-markerWidth =
-    10
-
-
-markerBaseHeight : Int
-markerBaseHeight =
-    10
 
 
 svgHeight : Int
 svgHeight =
-    (markerBaseHeight * 2)
-        + (lineHeight * 2)
-        + lineMargin
+    (lineHeight * 2) + lineBetween
 
 
 controlsHeight : Int
 controlsHeight =
     svgHeight
-        + (32 * 2)
+        + (41 * 2)
 
 
 
@@ -62,17 +55,26 @@ view model =
         ratio =
             model.videoDuration / model.audioDuration
 
+        maxLineWidth =
+            svgWidth - toFloat lineMargin * 2
+
         ( videoLineWidth, audioLineWidth, scale ) =
             if ratio >= 1 then
-                ( svgWidth, svgWidth / ratio, model.videoDuration / svgWidth )
+                ( maxLineWidth
+                , maxLineWidth / ratio
+                , model.videoDuration / maxLineWidth
+                )
             else
-                ( svgWidth * ratio, svgWidth, model.audioDuration / svgWidth )
+                ( maxLineWidth * ratio
+                , maxLineWidth
+                , model.audioDuration / maxLineWidth
+                )
 
         videoLineY =
-            markerBaseHeight + (lineHeight // 2)
+            0
 
         audioLineY =
-            videoLineY + lineHeight + lineMargin
+            videoLineY + lineHeight + lineBetween
 
         aspectRatio =
             model.videoSize.width / model.videoSize.height
@@ -113,8 +115,9 @@ view model =
                 ++ playEvents AudioPlayState
             )
             []
-        , div []
-            [ button
+        , div [ class "Toolbar" ]
+            [ fontawesome "video-camera"
+            , button
                 [ type_ "button"
                 , title <|
                     if model.videoPlaying then
@@ -129,55 +132,50 @@ view model =
                   else
                     fontawesome "play"
                 ]
+            , p []
+                [ text <|
+                    formatDuration model.videoCurrentTime
+                        ++ " / "
+                        ++ formatDuration model.videoDuration
+                ]
             ]
-        , svg [ viewBox viewBoxString ]
-            [ line
-                [ x1 "0"
-                , y1 (toString videoLineY)
-                , x2 (toString videoLineWidth)
-                , y2 (toString videoLineY)
-                , strokeWidth (toString lineHeight)
+        , Svg.svg [ Svg.viewBox viewBoxString, Svg.class "Progress" ]
+            [ Svg.rect
+                [ Svg.x (toString lineMargin)
+                , Svg.y (toString videoLineY)
+                , Svg.width (toString videoLineWidth)
+                , Svg.height (toString lineHeight)
+                , Svg.class "Progress-line"
                 ]
                 []
-            , line
-                [ x1 "0"
-                , y1 (toString audioLineY)
-                , x2 (toString audioLineWidth)
-                , y2 (toString audioLineY)
-                , strokeWidth (toString lineHeight)
+            , Svg.rect
+                [ Svg.x (toString lineMargin)
+                , Svg.y (toString audioLineY)
+                , Svg.width (toString audioLineWidth)
+                , Svg.height (toString lineHeight)
+                , Svg.class "Progress-line"
                 ]
                 []
-            , Svg.text_
-                [ x (toString videoLineWidth)
-                , y (toString videoLineY)
-                , dy "-0.5em"
-                , textAnchor "end"
-                ]
-                [ Svg.text (formatDuration model.videoDuration)
-                ]
-            , Svg.text_
-                [ x (toString audioLineWidth)
-                , y (toString (audioLineY + lineHeight))
-                , dy "0.5em"
-                , textAnchor "end"
-                ]
-                [ Svg.text (formatDuration model.audioDuration)
-                ]
-            , circle
-                [ cx (toString (model.videoCurrentTime / scale))
-                , cy (toString videoLineY)
-                , r (toString (lineHeight // 2))
+            , Svg.rect
+                [ Svg.x (toString lineMargin)
+                , Svg.y (toString videoLineY)
+                , Svg.width (toString (model.videoCurrentTime / scale))
+                , Svg.height (toString lineHeight)
+                , Svg.class "Progress-elapsed"
                 ]
                 []
-            , circle
-                [ cx (toString (model.audioCurrentTime / scale))
-                , cy (toString audioLineY)
-                , r (toString (lineHeight // 2))
+            , Svg.rect
+                [ Svg.x (toString lineMargin)
+                , Svg.y (toString audioLineY)
+                , Svg.width (toString (model.audioCurrentTime / scale))
+                , Svg.height (toString lineHeight)
+                , Svg.class "Progress-elapsed"
                 ]
                 []
             ]
-        , div []
-            [ button
+        , div [ class "Toolbar" ]
+            [ fontawesome "volume-up"
+            , button
                 [ type_ "button"
                 , title <|
                     if model.audioPlaying then
@@ -191,6 +189,12 @@ view model =
                     fontawesome "pause"
                   else
                     fontawesome "play"
+                ]
+            , p []
+                [ text <|
+                    formatDuration model.audioCurrentTime
+                        ++ " / "
+                        ++ formatDuration model.audioDuration
                 ]
             ]
         ]

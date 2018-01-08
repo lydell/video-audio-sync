@@ -9,20 +9,53 @@ body {
   margin: 0;
 }
 
-.VideoWrapper {
-  background-color: black;
-}
-
 video {
   display: block;
   margin: auto;
 }
 
-svg {
-  overflow: visible;
-  display: block;
+button {
+  margin: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
 }
 
-line {
-  stroke: #eee;
+button:hover,
+button:focus {
+  background-color: #eee;
+}
+
+p {
+  margin: 0;
+}
+
+.Progress {
+  overflow: visible;
+  display: block;
+  margin: 10px 0;
+}
+
+.Progress-line {
+  fill: #eee;
+}
+
+.Progress-elapsed {
+  fill: red;
+}
+
+.Toolbar {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.Toolbar > * + * {
+  margin-left: 10px;
+}
+
+.VideoWrapper {
+  background-color: black;
 }
