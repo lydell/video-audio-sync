@@ -1,46 +1,72 @@
 import { Main } from "../elm/Main.elm";
 import "../css/main.css";
 
-const app = Main.embed(document.getElementById("app"));
+function start() {
+  const app = Main.embed(document.getElementById("app"));
 
-app.ports.elmToJs.subscribe(message => {
-  switch (message.tag) {
-    case "TestOut":
-      console.log("TestOut", message.data);
-      app.ports.jsToElm.send({ tag: "TestIn", data: "Hello, Elm!" });
-      break;
+  app.ports.elmToJs.subscribe(message => {
+    switch (message.tag) {
+      case "MeasureArea": {
+        const id = message.data;
+        const element = document.getElementById(id);
 
-    case "JsVideoPlayState": {
-      const playing = message.data;
-      const video = document.querySelector("video");
-      if (video) {
-        if (playing) {
-          video.play();
-        } else {
-          video.pause();
+        if (element == null) {
+          console.error("Could not find element with id", id);
+          return;
         }
-      } else {
-        console.error("Could not find video.");
-      }
-      break;
-    }
 
-    case "JsAudioPlayState": {
-      const playing = message.data;
-      const audio = document.querySelector("audio");
-      if (audio) {
-        if (playing) {
-          audio.play();
+        const rect = element.getBoundingClientRect();
+
+        app.ports.jsToElm.send({
+          tag: "AreaMeasurement",
+          data: {
+            id,
+            area: {
+              width: rect.width,
+              height: rect.height,
+              x: rect.left,
+              y: rect.top,
+            },
+          },
+        });
+        break;
+      }
+
+      case "JsVideoPlayState": {
+        const playing = message.data;
+        const video = document.querySelector("video");
+        if (video) {
+          if (playing) {
+            video.play();
+          } else {
+            video.pause();
+          }
         } else {
-          audio.pause();
+          console.error("Could not find video.");
         }
-      } else {
-        console.error("Could not find audio.");
+        break;
       }
-      break;
-    }
 
-    default:
-      console.error("Unexpected message", message);
-  }
-});
+      case "JsAudioPlayState": {
+        const playing = message.data;
+        const audio = document.querySelector("audio");
+        if (audio) {
+          if (playing) {
+            audio.play();
+          } else {
+            audio.pause();
+          }
+        } else {
+          console.error("Could not find audio.");
+        }
+        break;
+      }
+
+      default:
+        console.error("Unexpected message", message);
+    }
+  });
+}
+
+// Wait for CSS to load in development.
+window.setTimeout(start, 0);

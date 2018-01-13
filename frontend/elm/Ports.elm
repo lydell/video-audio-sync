@@ -1,5 +1,6 @@
-port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subscribe)
+port module Ports exposing (Area, IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
+import DomId exposing (DomId)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
@@ -11,33 +12,41 @@ type alias TaggedData =
 
 
 type OutgoingMessage
-    = TestOut String
-    | JsVideoPlayState Bool
+    = JsVideoPlayState Bool
     | JsAudioPlayState Bool
+    | MeasureArea DomId
 
 
 type IncomingMessage
-    = TestIn String
+    = AreaMeasurement DomId Area
+
+
+type alias Area =
+    { width : Float
+    , height : Float
+    , x : Float
+    , y : Float
+    }
 
 
 encode : OutgoingMessage -> TaggedData
 encode outgoingMessage =
     case outgoingMessage of
-        TestOut string ->
-            { tag = "TestOut", data = Encode.string string }
-
         JsVideoPlayState playing ->
             { tag = "JsVideoPlayState", data = Encode.bool playing }
 
         JsAudioPlayState playing ->
             { tag = "JsAudioPlayState", data = Encode.bool playing }
 
+        MeasureArea id ->
+            { tag = "MeasureArea", data = Encode.string (DomId.toString id) }
+
 
 decoder : String -> Result String (Decoder IncomingMessage)
 decoder tag =
     case tag of
-        "TestIn" ->
-            Ok <| Decode.map TestIn Decode.string
+        "AreaMeasurement" ->
+            Ok <| areaMeasurementDecoder
 
         _ ->
             Err <| "Unknown message tag: " ++ tag
@@ -61,3 +70,31 @@ port elmToJs : TaggedData -> Cmd msg
 
 
 port jsToElm : (TaggedData -> msg) -> Sub msg
+
+
+areaMeasurementDecoder : Decoder IncomingMessage
+areaMeasurementDecoder =
+    Decode.map2 AreaMeasurement
+        (Decode.field "id"
+            (Decode.string |> Decode.andThen (DomId.fromString >> fromResult))
+        )
+        (Decode.field "area" areaDecoder)
+
+
+areaDecoder : Decoder Area
+areaDecoder =
+    Decode.map4 Area
+        (Decode.field "width" Decode.float)
+        (Decode.field "height" Decode.float)
+        (Decode.field "x" Decode.float)
+        (Decode.field "y" Decode.float)
+
+
+fromResult : Result String a -> Decoder a
+fromResult result =
+    case result of
+        Ok a ->
+            Decode.succeed a
+
+        Err message ->
+            Decode.fail message

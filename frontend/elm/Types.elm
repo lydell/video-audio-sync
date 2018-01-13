@@ -1,6 +1,6 @@
 module Types exposing (..)
 
-import Ports exposing (IncomingMessage)
+import Ports exposing (Area, IncomingMessage)
 import Time exposing (Time)
 import Window
 
@@ -14,6 +14,8 @@ type alias Model =
     , audioCurrentTime : Time
     , videoPlaying : Bool
     , audioPlaying : Bool
+    , videoArea : Area
+    , controlsArea : Area
     }
 
 

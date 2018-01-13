@@ -1,7 +1,8 @@
 module Main exposing (..)
 
+import DomId exposing (DomId(IdControlsArea, IdVideoArea))
 import Html exposing (Html)
-import Ports exposing (OutgoingMessage(JsAudioPlayState, JsVideoPlayState, TestOut))
+import Ports exposing (Area, IncomingMessage(AreaMeasurement), OutgoingMessage(JsAudioPlayState, JsVideoPlayState, MeasureArea))
 import Task
 import Types exposing (..)
 import View
@@ -28,12 +29,20 @@ init =
       , audioCurrentTime = 0
       , videoPlaying = False
       , audioPlaying = False
+      , videoArea = emptyArea
+      , controlsArea = emptyArea
       }
-    , Cmd.batch
-        [ Task.perform WindowSize Window.size
-        , Ports.send (TestOut "Hello, JS!")
-        ]
+    , Task.perform WindowSize Window.size
     )
+
+
+emptyArea : Area
+emptyArea =
+    { width = 0
+    , height = 0
+    , x = 0
+    , y = 0
+    }
 
 
 subscriptions : Model -> Sub Msg
@@ -56,11 +65,14 @@ update msg model =
             ( model, Cmd.none )
 
         JsMessage (Ok incomingMessage) ->
-            let
-                _ =
-                    Debug.log "incomingMessage" incomingMessage
-            in
-            ( model, Cmd.none )
+            case incomingMessage of
+                AreaMeasurement id area ->
+                    case id of
+                        IdVideoArea ->
+                            ( { model | videoArea = area }, Cmd.none )
+
+                        IdControlsArea ->
+                            ( { model | controlsArea = area }, Cmd.none )
 
         JsMessage (Err message) ->
             let
@@ -70,7 +82,12 @@ update msg model =
             ( model, Cmd.none )
 
         WindowSize size ->
-            ( { model | windowSize = size }, Cmd.none )
+            ( { model | windowSize = size }
+            , Cmd.batch
+                [ Ports.send (MeasureArea IdVideoArea)
+                , Ports.send (MeasureArea IdControlsArea)
+                ]
+            )
 
         VideoMetaData { duration, width, height } ->
             ( { model

@@ -1,7 +1,8 @@
 module View exposing (view)
 
+import DomId exposing (DomId(IdControlsArea, IdVideoArea))
 import Html exposing (Html, audio, button, div, p, span, text, video)
-import Html.Attributes exposing (attribute, class, property, src, title, type_, width)
+import Html.Attributes exposing (attribute, class, id, property, src, style, title, type_, width)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -31,21 +32,11 @@ svgHeight =
     (lineHeight * 2) + lineBetween
 
 
-controlsHeight : Int
-controlsHeight =
-    svgHeight
-        + (41 * 2)
-
-
-
--- for the buttons
-
-
 view : Model -> Html Msg
 view model =
     let
         svgWidth =
-            toFloat model.windowSize.width
+            model.controlsArea.width
 
         viewBoxString =
             [ 0, 0, svgWidth, toFloat svgHeight ]
@@ -53,10 +44,13 @@ view model =
                 |> String.join " "
 
         ratio =
-            model.videoDuration / model.audioDuration
+            if model.audioDuration == 0 then
+                1
+            else
+                model.videoDuration / model.audioDuration
 
         maxLineWidth =
-            svgWidth - toFloat lineMargin * 2
+            max 1 (svgWidth - toFloat lineMargin * 2)
 
         ( videoLineWidth, audioLineWidth, scale ) =
             if ratio >= 1 then
@@ -70,6 +64,12 @@ view model =
                 , model.audioDuration / maxLineWidth
                 )
 
+        toScale number =
+            if scale == 0 then
+                1
+            else
+                number / scale
+
         videoLineY =
             0
 
@@ -77,13 +77,16 @@ view model =
             videoLineY + lineHeight + lineBetween
 
         aspectRatio =
-            model.videoSize.width / model.videoSize.height
+            if model.videoSize.height == 0 then
+                1
+            else
+                model.videoSize.width / model.videoSize.height
 
         maxWidth =
-            toFloat model.windowSize.width
+            model.videoArea.width
 
         maxHeight =
-            toFloat (model.windowSize.height - controlsHeight)
+            model.videoArea.height
 
         heightIfMaxWidth =
             maxWidth / aspectRatio
@@ -94,8 +97,8 @@ view model =
             else
                 maxHeight * aspectRatio
     in
-    div []
-        [ div [ class "VideoWrapper" ]
+    div [ class "Layout" ]
+        [ div [ class "Layout-video", id (DomId.toString IdVideoArea) ]
             [ video
                 ([ src "/sommaren_video.mp4"
                  , width (truncate clampedWidth)
@@ -106,95 +109,107 @@ view model =
                     ++ playEvents VideoPlayState
                 )
                 []
+            , audio
+                ([ src "/sommaren_audio.aac"
+                 , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
+                 , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
+                 ]
+                    ++ playEvents AudioPlayState
+                )
+                []
             ]
-        , audio
-            ([ src "/sommaren_audio.aac"
-             , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
-             , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
-             ]
-                ++ playEvents AudioPlayState
-            )
-            []
-        , div [ class "Toolbar" ]
+        , div [ class "Layout-controls" ]
             [ fontawesome "video-camera"
-            , button
-                [ type_ "button"
-                , title <|
-                    if model.videoPlaying then
-                        "Pause video"
-                    else
-                        "Play video"
-                , onClick <|
-                    VideoPlayState (not model.videoPlaying)
+            , div [ class "Toolbar" ]
+                [ button
+                    [ type_ "button"
+                    , title <|
+                        if model.videoPlaying then
+                            "Pause video"
+                        else
+                            "Play video"
+                    , onClick <|
+                        VideoPlayState (not model.videoPlaying)
+                    ]
+                    [ if model.videoPlaying then
+                        fontawesome "pause"
+                      else
+                        fontawesome "play"
+                    ]
+                , p []
+                    [ text <|
+                        formatDuration model.videoCurrentTime
+                            ++ " / "
+                            ++ formatDuration model.videoDuration
+                    ]
                 ]
-                [ if model.videoPlaying then
-                    fontawesome "pause"
-                  else
-                    fontawesome "play"
+            , fontawesome "lock"
+            , div
+                [ id (DomId.toString IdControlsArea)
+                , class "Progress"
+                , style [ ( "height", toString svgHeight ++ "px" ) ]
                 ]
-            , p []
-                [ text <|
-                    formatDuration model.videoCurrentTime
-                        ++ " / "
-                        ++ formatDuration model.videoDuration
+                [ Svg.svg
+                    [ Svg.viewBox viewBoxString
+                    , Svg.class "Progress-svg"
+                    ]
+                    [ Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString videoLineY)
+                        , Svg.width (toString videoLineWidth)
+                        , Svg.height (toString lineHeight)
+                        , Svg.class "Progress-line"
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString audioLineY)
+                        , Svg.width (toString audioLineWidth)
+                        , Svg.height (toString lineHeight)
+                        , Svg.class "Progress-line"
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString videoLineY)
+                        , Svg.width (toString (toScale model.videoCurrentTime))
+                        , Svg.height (toString lineHeight)
+                        , Svg.class "Progress-elapsed"
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString audioLineY)
+                        , Svg.width (toString (toScale model.audioCurrentTime))
+                        , Svg.height (toString lineHeight)
+                        , Svg.class "Progress-elapsed"
+                        ]
+                        []
+                    ]
                 ]
-            ]
-        , Svg.svg [ Svg.viewBox viewBoxString, Svg.class "Progress" ]
-            [ Svg.rect
-                [ Svg.x (toString lineMargin)
-                , Svg.y (toString videoLineY)
-                , Svg.width (toString videoLineWidth)
-                , Svg.height (toString lineHeight)
-                , Svg.class "Progress-line"
-                ]
-                []
-            , Svg.rect
-                [ Svg.x (toString lineMargin)
-                , Svg.y (toString audioLineY)
-                , Svg.width (toString audioLineWidth)
-                , Svg.height (toString lineHeight)
-                , Svg.class "Progress-line"
-                ]
-                []
-            , Svg.rect
-                [ Svg.x (toString lineMargin)
-                , Svg.y (toString videoLineY)
-                , Svg.width (toString (model.videoCurrentTime / scale))
-                , Svg.height (toString lineHeight)
-                , Svg.class "Progress-elapsed"
-                ]
-                []
-            , Svg.rect
-                [ Svg.x (toString lineMargin)
-                , Svg.y (toString audioLineY)
-                , Svg.width (toString (model.audioCurrentTime / scale))
-                , Svg.height (toString lineHeight)
-                , Svg.class "Progress-elapsed"
-                ]
-                []
-            ]
-        , div [ class "Toolbar" ]
-            [ fontawesome "volume-up"
-            , button
-                [ type_ "button"
-                , title <|
-                    if model.audioPlaying then
-                        "Pause audio"
-                    else
-                        "Play audio"
-                , onClick <|
-                    AudioPlayState (not model.audioPlaying)
-                ]
-                [ if model.audioPlaying then
-                    fontawesome "pause"
-                  else
-                    fontawesome "play"
-                ]
-            , p []
-                [ text <|
-                    formatDuration model.audioCurrentTime
-                        ++ " / "
-                        ++ formatDuration model.audioDuration
+            , fontawesome "volume-up"
+            , div [ class "Toolbar" ]
+                [ button
+                    [ type_ "button"
+                    , title <|
+                        if model.audioPlaying then
+                            "Pause audio"
+                        else
+                            "Play audio"
+                    , onClick <|
+                        AudioPlayState (not model.audioPlaying)
+                    ]
+                    [ if model.audioPlaying then
+                        fontawesome "pause"
+                      else
+                        fontawesome "play"
+                    ]
+                , p []
+                    [ text <|
+                        formatDuration model.audioCurrentTime
+                            ++ " / "
+                            ++ formatDuration model.audioDuration
+                    ]
                 ]
             ]
         ]
