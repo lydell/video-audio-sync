@@ -2,6 +2,7 @@ port module Ports exposing (Area, IncomingMessage(..), OutgoingMessage(..), send
 
 import DomId exposing (DomId)
 import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Custom
 import Json.Encode as Encode
 
 
@@ -86,7 +87,10 @@ areaMeasurementDecoder : Decoder IncomingMessage
 areaMeasurementDecoder =
     Decode.map2 AreaMeasurement
         (Decode.field "id"
-            (Decode.string |> Decode.andThen (DomId.fromString >> fromResult))
+            (Decode.string
+                |> Decode.andThen
+                    (DomId.fromString >> Json.Decode.Custom.fromResult)
+            )
         )
         (Decode.field "area" areaDecoder)
 
@@ -98,13 +102,3 @@ areaDecoder =
         (Decode.field "height" Decode.float)
         (Decode.field "x" Decode.float)
         (Decode.field "y" Decode.float)
-
-
-fromResult : Result String a -> Decoder a
-fromResult result =
-    case result of
-        Ok a ->
-            Decode.succeed a
-
-        Err message ->
-            Decode.fail message

@@ -1,5 +1,7 @@
 module Types exposing (..)
 
+import Html.Events.Custom exposing (MetaDataDetails)
+import MediaPlayer exposing (MediaPlayer)
 import Mouse
 import Ports exposing (Area, IncomingMessage)
 import Time exposing (Time)
@@ -7,58 +9,39 @@ import Window
 
 
 type alias Model =
-    { windowSize : Window.Size
+    { audio : MediaPlayer
+    , video : MediaPlayer
     , drag : Drag
-    , videoSize : { width : Float, height : Float }
-    , videoDuration : Time
-    , audioDuration : Time
-    , videoCurrentTime : Time
-    , audioCurrentTime : Time
-    , videoPlaying : Bool
-    , audioPlaying : Bool
     , videoArea : Area
     , controlsArea : Area
+    , windowSize : Window.Size
     }
 
 
-type Drag
-    = NoDrag
-    | Drag DragElement FooPosition Mouse.Position
-
-
-type DragElement
+type MediaPlayerId
     = Audio
     | Video
 
 
-type alias FooPosition =
+type Drag
+    = Drag MediaPlayerId DragBar Mouse.Position
+    | NoDrag
+
+
+type alias DragBar =
     { x : Float
     , width : Float
-    }
-
-
-type alias VideoMetaDataDetails =
-    { duration : Time
-    , width : Float
-    , height : Float
-    }
-
-
-type alias AudioMetaDataDetails =
-    { duration : Time
     }
 
 
 type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
-    | WindowSize Window.Size
-    | VideoMetaData VideoMetaDataDetails
-    | AudioMetaData AudioMetaDataDetails
-    | VideoCurrentTime Time
-    | AudioCurrentTime Time
-    | VideoPlayState Bool
-    | AudioPlayState Bool
-    | DragStart DragElement FooPosition Mouse.Position
+    | MetaData MediaPlayerId MetaDataDetails
+    | CurrentTime MediaPlayerId Time
+    | Play MediaPlayerId
+    | Pause MediaPlayerId
+    | DragStart MediaPlayerId DragBar Mouse.Position
     | DragMove Mouse.Position
     | DragEnd Mouse.Position
+    | WindowSize Window.Size

@@ -2,38 +2,39 @@ module View exposing (view)
 
 import DomId
 import Html exposing (Attribute, Html, audio, button, div, p, span, text, video)
-import Html.Attributes exposing (attribute, class, id, property, src, style, title, type_, width)
-import Html.Events exposing (on, onClick, onMouseDown, onWithOptions)
+import Html.Attributes exposing (attribute, class, id, src, style, title, type_, width)
+import Html.Attributes.Custom exposing (muted)
+import Html.Events exposing (on, onClick)
+import Html.Events.Custom exposing (MetaDataDetails, onAudioMetaData, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
-import Mouse
+import MediaPlayer exposing (PlayState(Paused, Playing))
 import Svg
 import Svg.Attributes as Svg
-import Time exposing (Time)
 import Types exposing (..)
+import Utils
 
 
-lineHeight : Int
+lineHeight : Float
 lineHeight =
     10
 
 
-lineMargin : Int
+lineMargin : Float
 lineMargin =
     10
 
 
-lineBetween : Int
+lineBetween : Float
 lineBetween =
     20
 
 
-lineHoverExtra : Int
+lineHoverExtra : Float
 lineHoverExtra =
     lineBetween - 4
 
 
-svgHeight : Int
+svgHeight : Float
 svgHeight =
     (lineHeight * 2) + lineBetween
 
@@ -45,29 +46,29 @@ view model =
             model.controlsArea.width
 
         viewBoxString =
-            [ 0, 0, svgWidth, toFloat svgHeight ]
+            [ 0, 0, svgWidth, svgHeight ]
                 |> List.map toString
                 |> String.join " "
 
         ratio =
-            if model.audioDuration == 0 then
+            if model.audio.duration == 0 then
                 1
             else
-                model.videoDuration / model.audioDuration
+                model.video.duration / model.audio.duration
 
         maxLineWidth =
-            max 1 (svgWidth - toFloat lineMargin * 2)
+            max 1 (svgWidth - lineMargin * 2)
 
         ( videoLineWidth, audioLineWidth, scale ) =
             if ratio >= 1 then
                 ( maxLineWidth
                 , maxLineWidth / ratio
-                , model.videoDuration / maxLineWidth
+                , model.video.duration / maxLineWidth
                 )
             else
                 ( maxLineWidth * ratio
                 , maxLineWidth
-                , model.audioDuration / maxLineWidth
+                , model.audio.duration / maxLineWidth
                 )
 
         toScale number =
@@ -83,10 +84,10 @@ view model =
             videoLineY + lineHeight + lineBetween
 
         aspectRatio =
-            if model.videoSize.height == 0 then
+            if model.video.size.height == 0 then
                 1
             else
-                model.videoSize.width / model.videoSize.height
+                model.video.size.width / model.video.size.height
 
         maxWidth =
             model.videoArea.width
@@ -108,21 +109,21 @@ view model =
             [ video
                 ([ src "/sommaren_video.mp4"
                  , width (truncate clampedWidth)
-                 , property "muted" (Encode.bool True)
-                 , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
-                 , on "timeupdate" (decodeCurrentTime VideoCurrentTime)
+                 , muted True
+                 , onVideoMetaData (MetaData Video)
+                 , onTimeUpdate (CurrentTime Video)
                  , id (DomId.toString DomId.Video)
                  ]
-                    ++ playEvents VideoPlayState
+                    ++ playEvents Video
                 )
                 []
             , audio
                 ([ src "/sommaren_audio.aac"
-                 , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
-                 , on "timeupdate" (decodeCurrentTime AudioCurrentTime)
+                 , onAudioMetaData (MetaData Audio)
+                 , onTimeUpdate (CurrentTime Audio)
                  , id (DomId.toString DomId.Audio)
                  ]
-                    ++ playEvents AudioPlayState
+                    ++ playEvents Audio
                 )
                 []
             ]
@@ -132,23 +133,27 @@ view model =
                 [ button
                     [ type_ "button"
                     , title <|
-                        if model.videoPlaying then
-                            "Pause video"
-                        else
-                            "Play video"
-                    , onClick <|
-                        VideoPlayState (not model.videoPlaying)
+                        case model.video.playState of
+                            Playing ->
+                                "Pause video"
+
+                            Paused ->
+                                "Play video"
+                    , togglePlayState Video model.video.playState
                     ]
-                    [ if model.videoPlaying then
-                        fontawesome "pause"
-                      else
-                        fontawesome "play"
+                    [ fontawesome <|
+                        case model.video.playState of
+                            Playing ->
+                                "pause"
+
+                            Paused ->
+                                "play"
                     ]
                 , p []
                     [ text <|
-                        formatDuration model.videoCurrentTime
+                        Utils.formatDuration model.video.currentTime
                             ++ " / "
-                            ++ formatDuration model.videoDuration
+                            ++ Utils.formatDuration model.video.duration
                     ]
                 ]
             , fontawesome "lock"
@@ -180,7 +185,7 @@ view model =
                     , Svg.rect
                         [ Svg.x (toString lineMargin)
                         , Svg.y (toString videoLineY)
-                        , Svg.width (toString (toScale model.videoCurrentTime))
+                        , Svg.width (toString (toScale model.video.currentTime))
                         , Svg.height (toString lineHeight)
                         , Svg.class "Progress-elapsed"
                         ]
@@ -188,14 +193,14 @@ view model =
                     , Svg.rect
                         [ Svg.x (toString lineMargin)
                         , Svg.y (toString audioLineY)
-                        , Svg.width (toString (toScale model.audioCurrentTime))
+                        , Svg.width (toString (toScale model.audio.currentTime))
                         , Svg.height (toString lineHeight)
                         , Svg.class "Progress-elapsed"
                         ]
                         []
                     , Svg.rect
                         [ Svg.x (toString lineMargin)
-                        , Svg.y (toString (videoLineY - lineHoverExtra // 2))
+                        , Svg.y (toString (videoLineY - lineHoverExtra / 2))
                         , Svg.width (toString videoLineWidth)
                         , Svg.height (toString (lineHeight + lineHoverExtra))
                         , Svg.class "Progress-hover"
@@ -203,7 +208,7 @@ view model =
                         , onMouseDown
                             (DragStart
                                 Video
-                                { x = toFloat lineMargin
+                                { x = lineMargin
                                 , width = videoLineWidth
                                 }
                             )
@@ -211,7 +216,7 @@ view model =
                         []
                     , Svg.rect
                         [ Svg.x (toString lineMargin)
-                        , Svg.y (toString (audioLineY - lineHoverExtra // 2))
+                        , Svg.y (toString (audioLineY - lineHoverExtra / 2))
                         , Svg.width (toString audioLineWidth)
                         , Svg.height (toString (lineHeight + lineHoverExtra))
                         , Svg.class "Progress-hover"
@@ -219,7 +224,7 @@ view model =
                         , onMouseDown
                             (DragStart
                                 Audio
-                                { x = toFloat lineMargin
+                                { x = lineMargin
                                 , width = audioLineWidth
                                 }
                             )
@@ -232,23 +237,27 @@ view model =
                 [ button
                     [ type_ "button"
                     , title <|
-                        if model.audioPlaying then
-                            "Pause audio"
-                        else
-                            "Play audio"
-                    , onClick <|
-                        AudioPlayState (not model.audioPlaying)
+                        case model.audio.playState of
+                            Playing ->
+                                "Pause audio"
+
+                            Paused ->
+                                "Play audio"
+                    , togglePlayState Audio model.audio.playState
                     ]
-                    [ if model.audioPlaying then
-                        fontawesome "pause"
-                      else
-                        fontawesome "play"
+                    [ fontawesome <|
+                        case model.audio.playState of
+                            Playing ->
+                                "pause"
+
+                            Paused ->
+                                "play"
                     ]
                 , p []
                     [ text <|
-                        formatDuration model.audioCurrentTime
+                        Utils.formatDuration model.audio.currentTime
                             ++ " / "
-                            ++ formatDuration model.audioDuration
+                            ++ Utils.formatDuration model.audio.duration
                     ]
                 ]
             ]
@@ -264,11 +273,11 @@ fontawesome name =
         []
 
 
-playEvents : (Bool -> value) -> List (Html.Attribute value)
-playEvents msg =
+playEvents : MediaPlayerId -> List (Attribute Msg)
+playEvents id =
     let
         decoder =
-            decodePlayState msg
+            decodePlayState id
     in
     [ on "abort" decoder
     , on "ended" decoder
@@ -281,98 +290,26 @@ playEvents msg =
     ]
 
 
-decodePlayState : (Bool -> msg) -> Decoder msg
-decodePlayState msg =
+decodePlayState : MediaPlayerId -> Decoder Msg
+decodePlayState id =
     Decode.at [ "currentTarget", "paused" ] Decode.bool
-        |> Decode.map (not >> msg)
-
-
-decodeVideoMetaData : (VideoMetaDataDetails -> msg) -> Decoder msg
-decodeVideoMetaData msg =
-    Decode.map3
-        (\duration width height ->
-            msg
-                { duration = duration * Time.second
-                , width = width
-                , height = height
-                }
-        )
-        (Decode.at [ "currentTarget", "duration" ] Decode.float)
-        (Decode.at [ "currentTarget", "videoWidth" ] Decode.float)
-        (Decode.at [ "currentTarget", "videoHeight" ] Decode.float)
-
-
-decodeAudioMetaData : (AudioMetaDataDetails -> msg) -> Decoder msg
-decodeAudioMetaData msg =
-    Decode.at [ "currentTarget", "duration" ] Decode.float
         |> Decode.map
-            (\duration ->
-                msg
-                    { duration = duration * Time.second
-                    }
+            (\paused ->
+                case paused of
+                    True ->
+                        Pause id
+
+                    False ->
+                        Play id
             )
 
 
-decodeCurrentTime : (Time -> msg) -> Decoder msg
-decodeCurrentTime msg =
-    Decode.at [ "currentTarget", "currentTime" ] Decode.float
-        |> Decode.map ((*) Time.second >> msg)
+togglePlayState : MediaPlayerId -> PlayState -> Attribute Msg
+togglePlayState id playState =
+    onClick <|
+        case playState of
+            Playing ->
+                Pause id
 
-
-formatDuration : Time -> String
-formatDuration duration =
-    let
-        ( hours, hoursRest ) =
-            divRem duration Time.hour
-
-        ( minutes, minutesRest ) =
-            divRem hoursRest Time.minute
-
-        ( seconds, secondsRest ) =
-            divRem minutesRest Time.second
-
-        ( milliseconds, millisecondsRest ) =
-            divRem secondsRest Time.millisecond
-
-        pad number numChars =
-            String.padLeft numChars '0' (toString number)
-    in
-    pad hours 2
-        ++ ":"
-        ++ pad minutes 2
-        ++ ":"
-        ++ pad seconds 2
-        ++ "."
-        ++ pad milliseconds 3
-
-
-divRem : Float -> Float -> ( Int, Float )
-divRem numerator divisor =
-    let
-        whole =
-            truncate (numerator / divisor)
-
-        rest =
-            numerator - toFloat whole * divisor
-    in
-    ( whole, rest )
-
-
-onMouseDown : (Mouse.Position -> msg) -> Attribute msg
-onMouseDown msg =
-    onWithOptions
-        "mousedown"
-        { stopPropagation = False, preventDefault = True }
-        (decodeMousePosition |> Decode.map msg)
-
-
-decodeMousePosition : Decoder Mouse.Position
-decodeMousePosition =
-    Decode.map2 Mouse.Position
-        (Decode.field "pageX" Decode.int)
-        (Decode.field "pageY" Decode.int)
-
-
-preventContextMenu : Attribute msg
-preventContextMenu =
-    attribute "oncontextmenu" "return false"
+            Paused ->
+                Play id

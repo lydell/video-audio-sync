@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import DomId exposing (DomId(ControlsArea, VideoArea))
 import Html exposing (Html)
+import MediaPlayer
 import Mouse
 import Ports exposing (Area)
 import Task
@@ -22,17 +23,12 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { windowSize = { width = 0, height = 0 }
+    ( { audio = MediaPlayer.empty
+      , video = MediaPlayer.empty
       , drag = NoDrag
-      , videoSize = { width = 0, height = 0 }
-      , videoDuration = 0
-      , audioDuration = 0
-      , videoCurrentTime = 0
-      , audioCurrentTime = 0
-      , videoPlaying = False
-      , audioPlaying = False
       , videoArea = emptyArea
       , controlsArea = emptyArea
+      , windowSize = { width = 0, height = 0 }
       }
     , Task.perform WindowSize Window.size
     )
@@ -52,13 +48,13 @@ subscriptions model =
     let
         mouseSubscriptions =
             case model.drag of
-                NoDrag ->
-                    []
-
                 Drag _ _ _ ->
                     [ Mouse.moves DragMove
                     , Mouse.ups DragEnd
                     ]
+
+                NoDrag ->
+                    []
     in
     Sub.batch <|
         [ Window.resizes WindowSize
@@ -102,6 +98,90 @@ update msg model =
             in
             ( model, Cmd.none )
 
+        MetaData id metaData ->
+            let
+                newModel =
+                    case id of
+                        Audio ->
+                            { model
+                                | audio =
+                                    MediaPlayer.updateMetaData
+                                        metaData
+                                        model.audio
+                            }
+
+                        Video ->
+                            { model
+                                | video =
+                                    MediaPlayer.updateMetaData
+                                        metaData
+                                        model.video
+                            }
+            in
+            ( newModel, Cmd.none )
+
+        CurrentTime id currentTime ->
+            let
+                newModel =
+                    case id of
+                        Audio ->
+                            { model
+                                | audio =
+                                    MediaPlayer.updateCurrentTime
+                                        currentTime
+                                        model.audio
+                            }
+
+                        Video ->
+                            { model
+                                | video =
+                                    MediaPlayer.updateCurrentTime
+                                        currentTime
+                                        model.video
+                            }
+            in
+            ( newModel, Cmd.none )
+
+        Play id ->
+            case id of
+                Audio ->
+                    ( { model | audio = MediaPlayer.play model.audio }
+                    , Ports.send (Ports.Play DomId.Audio)
+                    )
+
+                Video ->
+                    ( { model | video = MediaPlayer.play model.video }
+                    , Ports.send (Ports.Play DomId.Video)
+                    )
+
+        Pause id ->
+            case id of
+                Audio ->
+                    ( { model | audio = MediaPlayer.pause model.audio }
+                    , Ports.send (Ports.Pause DomId.Audio)
+                    )
+
+                Video ->
+                    ( { model | video = MediaPlayer.pause model.video }
+                    , Ports.send (Ports.Pause DomId.Video)
+                    )
+
+        DragStart id position mousePosition ->
+            drag model id position mousePosition
+
+        DragMove mousePosition ->
+            case model.drag of
+                Drag id position _ ->
+                    drag model id position mousePosition
+
+                NoDrag ->
+                    ( model, Cmd.none )
+
+        DragEnd _ ->
+            ( { model | drag = NoDrag }
+            , Cmd.none
+            )
+
         WindowSize size ->
             ( { model | windowSize = size }
             , Cmd.batch
@@ -110,85 +190,34 @@ update msg model =
                 ]
             )
 
-        VideoMetaData { duration, width, height } ->
-            ( { model
-                | videoDuration = duration
-                , videoSize = { width = width, height = height }
-              }
-            , Cmd.none
-            )
-
-        AudioMetaData { duration } ->
-            ( { model | audioDuration = duration }, Cmd.none )
-
-        VideoCurrentTime currentTime ->
-            ( { model | videoCurrentTime = currentTime }, Cmd.none )
-
-        AudioCurrentTime currentTime ->
-            ( { model | audioCurrentTime = currentTime }, Cmd.none )
-
-        VideoPlayState playing ->
-            ( { model | videoPlaying = playing }
-            , Ports.send <|
-                if playing then
-                    Ports.Play DomId.Video
-                else
-                    Ports.Pause DomId.Video
-            )
-
-        AudioPlayState playing ->
-            ( { model | audioPlaying = playing }
-            , Ports.send <|
-                if playing then
-                    Ports.Play DomId.Audio
-                else
-                    Ports.Pause DomId.Audio
-            )
-
-        DragStart dragElement position mousePosition ->
-            drag model dragElement position mousePosition
-
-        DragMove mousePosition ->
-            case model.drag of
-                NoDrag ->
-                    ( model, Cmd.none )
-
-                Drag dragElement position _ ->
-                    drag model dragElement position mousePosition
-
-        DragEnd _ ->
-            ( { model | drag = NoDrag }
-            , Cmd.none
-            )
-
 
 drag :
     Model
-    -> DragElement
-    -> FooPosition
+    -> MediaPlayerId
+    -> DragBar
     -> Mouse.Position
     -> ( Model, Cmd msg )
-drag model dragElement position mousePosition =
+drag model id dragBar mousePosition =
     let
         offset =
             toFloat mousePosition.x
-                - (model.controlsArea.x + position.x)
+                - (model.controlsArea.x + dragBar.x)
 
         duration =
-            case dragElement of
+            case id of
                 Audio ->
-                    model.audioDuration
+                    model.audio.duration
 
                 Video ->
-                    model.videoDuration
+                    model.video.duration
 
         time =
             clamp 0
                 duration
-                ((offset / position.width) * duration)
+                ((offset / dragBar.width) * duration)
 
         outgoingMessage =
-            case dragElement of
+            case id of
                 Audio ->
                     Ports.Seek DomId.Audio time
 
@@ -196,20 +225,20 @@ drag model dragElement position mousePosition =
                     Ports.Seek DomId.Video time
 
         newDrag =
-            Drag dragElement position mousePosition
+            Drag id dragBar mousePosition
 
         newModel =
-            case dragElement of
+            case id of
                 Audio ->
                     { model
-                        | drag = Drag dragElement position mousePosition
-                        , audioCurrentTime = time
+                        | audio = MediaPlayer.updateCurrentTime time model.audio
+                        , drag = Drag id dragBar mousePosition
                     }
 
                 Video ->
                     { model
-                        | drag = Drag dragElement position mousePosition
-                        , videoCurrentTime = time
+                        | video = MediaPlayer.updateCurrentTime time model.video
+                        , drag = Drag id dragBar mousePosition
                     }
     in
     ( newModel, Ports.send outgoingMessage )
