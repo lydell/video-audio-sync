@@ -14,6 +14,8 @@ type alias TaggedData =
 type OutgoingMessage
     = JsVideoPlayState Bool
     | JsAudioPlayState Bool
+    | VideoSeek Float
+    | AudioSeek Float
     | MeasureArea DomId
 
 
@@ -37,6 +39,12 @@ encode outgoingMessage =
 
         JsAudioPlayState playing ->
             { tag = "JsAudioPlayState", data = Encode.bool playing }
+
+        VideoSeek time ->
+            { tag = "VideoSeek", data = Encode.float time }
+
+        AudioSeek time ->
+            { tag = "AudioSeek", data = Encode.float time }
 
         MeasureArea id ->
             { tag = "MeasureArea", data = Encode.string (DomId.toString id) }

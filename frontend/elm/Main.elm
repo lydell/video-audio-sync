@@ -2,7 +2,8 @@ module Main exposing (..)
 
 import DomId exposing (DomId(IdControlsArea, IdVideoArea))
 import Html exposing (Html)
-import Ports exposing (Area, IncomingMessage(AreaMeasurement), OutgoingMessage(JsAudioPlayState, JsVideoPlayState, MeasureArea))
+import Mouse
+import Ports exposing (Area, IncomingMessage(AreaMeasurement), OutgoingMessage(AudioSeek, JsAudioPlayState, JsVideoPlayState, MeasureArea, VideoSeek))
 import Task
 import Types exposing (..)
 import View
@@ -22,6 +23,7 @@ main =
 init : ( Model, Cmd Msg )
 init =
     ( { windowSize = { width = 0, height = 0 }
+      , drag = NoDrag
       , videoSize = { width = 0, height = 0 }
       , videoDuration = 0
       , audioDuration = 0
@@ -47,10 +49,22 @@ emptyArea =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch
+    let
+        mouseSubscriptions =
+            case model.drag of
+                NoDrag ->
+                    []
+
+                Drag _ _ _ ->
+                    [ Mouse.moves DragMove
+                    , Mouse.ups DragEnd
+                    ]
+    in
+    Sub.batch <|
         [ Window.resizes WindowSize
         , Ports.subscribe JsMessage
         ]
+            ++ mouseSubscriptions
 
 
 view : Model -> Html Msg
@@ -116,3 +130,72 @@ update msg model =
             , Ports.send
                 (JsAudioPlayState playing)
             )
+
+        DragStart dragElement position mousePosition ->
+            drag model dragElement position mousePosition
+
+        DragMove mousePosition ->
+            case model.drag of
+                NoDrag ->
+                    ( model, Cmd.none )
+
+                Drag dragElement position _ ->
+                    drag model dragElement position mousePosition
+
+        DragEnd _ ->
+            ( { model | drag = NoDrag }
+            , Cmd.none
+            )
+
+
+drag :
+    Model
+    -> DragElement
+    -> FooPosition
+    -> Mouse.Position
+    -> ( Model, Cmd msg )
+drag model dragElement position mousePosition =
+    let
+        offset =
+            toFloat mousePosition.x
+                - (model.controlsArea.x + position.x)
+
+        duration =
+            case dragElement of
+                Audio ->
+                    model.audioDuration
+
+                Video ->
+                    model.videoDuration
+
+        time =
+            clamp 0
+                duration
+                ((offset / position.width) * duration)
+
+        outgoingMessage =
+            case dragElement of
+                Audio ->
+                    AudioSeek time
+
+                Video ->
+                    VideoSeek time
+
+        newDrag =
+            Drag dragElement position mousePosition
+
+        newModel =
+            case dragElement of
+                Audio ->
+                    { model
+                        | drag = Drag dragElement position mousePosition
+                        , audioCurrentTime = time
+                    }
+
+                Video ->
+                    { model
+                        | drag = Drag dragElement position mousePosition
+                        , videoCurrentTime = time
+                    }
+    in
+    ( newModel, Ports.send outgoingMessage )

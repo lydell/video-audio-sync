@@ -62,10 +62,49 @@ function start() {
         break;
       }
 
+      case "VideoSeek": {
+        const time = message.data / 1000;
+        const video = document.querySelector("video");
+        if (video) {
+          if (video.seeking) {
+            video.onseeked = seek.bind(null, video, time);
+          } else {
+            seek(video, time);
+          }
+        } else {
+          console.error("Could not find video.");
+        }
+        break;
+      }
+
+      case "AudioSeek": {
+        const time = message.data / 1000;
+        const audio = document.querySelector("audio");
+        if (audio) {
+          if (audio.seeking) {
+            audio.onseeked = seek.bind(null, audio, time);
+          } else {
+            seek(audio, time);
+          }
+        } else {
+          console.error("Could not find audio.");
+        }
+        break;
+      }
+
       default:
         console.error("Unexpected message", message);
     }
   });
+}
+
+function seek(media, time) {
+  if (media.fastSeek) {
+    media.fastSeek(time);
+  } else {
+    media.currentTime = time;
+  }
+  media.onseeked = null;
 }
 
 // Wait for CSS to load in development.

@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Mouse
 import Ports exposing (Area, IncomingMessage)
 import Time exposing (Time)
 import Window
@@ -7,6 +8,7 @@ import Window
 
 type alias Model =
     { windowSize : Window.Size
+    , drag : Drag
     , videoSize : { width : Float, height : Float }
     , videoDuration : Time
     , audioDuration : Time
@@ -16,6 +18,22 @@ type alias Model =
     , audioPlaying : Bool
     , videoArea : Area
     , controlsArea : Area
+    }
+
+
+type Drag
+    = NoDrag
+    | Drag DragElement FooPosition Mouse.Position
+
+
+type DragElement
+    = Audio
+    | Video
+
+
+type alias FooPosition =
+    { x : Float
+    , width : Float
     }
 
 
@@ -41,3 +59,6 @@ type Msg
     | AudioCurrentTime Time
     | VideoPlayState Bool
     | AudioPlayState Bool
+    | DragStart DragElement FooPosition Mouse.Position
+    | DragMove Mouse.Position
+    | DragEnd Mouse.Position

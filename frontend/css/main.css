@@ -80,6 +80,11 @@ p {
   fill: red;
 }
 
+.Progress-hover {
+  fill: transparent;
+  cursor: pointer;
+}
+
 .Toolbar {
   display: flex;
   align-items: center;

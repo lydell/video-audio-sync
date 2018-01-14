@@ -1,11 +1,12 @@
 module View exposing (view)
 
 import DomId exposing (DomId(IdControlsArea, IdVideoArea))
-import Html exposing (Html, audio, button, div, p, span, text, video)
+import Html exposing (Attribute, Html, audio, button, div, p, span, text, video)
 import Html.Attributes exposing (attribute, class, id, property, src, style, title, type_, width)
-import Html.Events exposing (on, onClick)
+import Html.Events exposing (on, onClick, onMouseDown, onWithOptions)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Mouse
 import Svg
 import Svg.Attributes as Svg
 import Time exposing (Time)
@@ -25,6 +26,11 @@ lineMargin =
 lineBetween : Int
 lineBetween =
     20
+
+
+lineHoverExtra : Int
+lineHoverExtra =
+    lineBetween - 4
 
 
 svgHeight : Int
@@ -105,6 +111,7 @@ view model =
                  , property "muted" (Encode.bool True)
                  , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
                  , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
+                 , id "video" -- For easy access in the console.
                  ]
                     ++ playEvents VideoPlayState
                 )
@@ -113,6 +120,7 @@ view model =
                 ([ src "/sommaren_audio.aac"
                  , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
                  , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
+                 , id "audio" -- For easy access in the console.
                  ]
                     ++ playEvents AudioPlayState
                 )
@@ -183,6 +191,38 @@ view model =
                         , Svg.width (toString (toScale model.audioCurrentTime))
                         , Svg.height (toString lineHeight)
                         , Svg.class "Progress-elapsed"
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString (videoLineY - lineHoverExtra // 2))
+                        , Svg.width (toString videoLineWidth)
+                        , Svg.height (toString (lineHeight + lineHoverExtra))
+                        , Svg.class "Progress-hover"
+                        , preventContextMenu
+                        , onMouseDown
+                            (DragStart
+                                Video
+                                { x = toFloat lineMargin
+                                , width = videoLineWidth
+                                }
+                            )
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString (audioLineY - lineHoverExtra // 2))
+                        , Svg.width (toString audioLineWidth)
+                        , Svg.height (toString (lineHeight + lineHoverExtra))
+                        , Svg.class "Progress-hover"
+                        , preventContextMenu
+                        , onMouseDown
+                            (DragStart
+                                Audio
+                                { x = toFloat lineMargin
+                                , width = audioLineWidth
+                                }
+                            )
                         ]
                         []
                     ]
@@ -316,3 +356,23 @@ divRem numerator divisor =
             numerator - toFloat whole * divisor
     in
     ( whole, rest )
+
+
+onMouseDown : (Mouse.Position -> msg) -> Attribute msg
+onMouseDown msg =
+    onWithOptions
+        "mousedown"
+        { stopPropagation = False, preventDefault = True }
+        (decodeMousePosition |> Decode.map msg)
+
+
+decodeMousePosition : Decoder Mouse.Position
+decodeMousePosition =
+    Decode.map2 Mouse.Position
+        (Decode.field "pageX" Decode.int)
+        (Decode.field "pageY" Decode.int)
+
+
+preventContextMenu : Attribute msg
+preventContextMenu =
+    attribute "oncontextmenu" "return false"
