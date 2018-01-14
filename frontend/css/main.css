@@ -88,3 +88,12 @@ p {
 .Toolbar > * + * {
   margin-left: 10px;
 }
+
+.elm-mini-controls {
+  transform: translateY(85%);
+  transition: transform 200ms;
+}
+
+.elm-mini-controls:hover {
+  transform: translateY(0);
+}
