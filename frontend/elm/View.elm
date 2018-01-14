@@ -104,14 +104,14 @@ view model =
                 maxHeight * aspectRatio
     in
     div [ class "Layout" ]
-        [ div [ class "Layout-video", id (DomId.toString DomId.IdVideoArea) ]
+        [ div [ class "Layout-video", id (DomId.toString DomId.VideoArea) ]
             [ video
                 ([ src "/sommaren_video.mp4"
                  , width (truncate clampedWidth)
                  , property "muted" (Encode.bool True)
                  , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
-                 , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
-                 , id (DomId.toString DomId.IdVideo)
+                 , on "timeupdate" (decodeCurrentTime VideoCurrentTime)
+                 , id (DomId.toString DomId.Video)
                  ]
                     ++ playEvents VideoPlayState
                 )
@@ -119,8 +119,8 @@ view model =
             , audio
                 ([ src "/sommaren_audio.aac"
                  , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
-                 , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
-                 , id (DomId.toString DomId.IdAudio)
+                 , on "timeupdate" (decodeCurrentTime AudioCurrentTime)
+                 , id (DomId.toString DomId.Audio)
                  ]
                     ++ playEvents AudioPlayState
                 )
@@ -153,7 +153,7 @@ view model =
                 ]
             , fontawesome "lock"
             , div
-                [ id (DomId.toString DomId.IdControlsArea)
+                [ id (DomId.toString DomId.ControlsArea)
                 , class "Progress"
                 , style [ ( "height", toString svgHeight ++ "px" ) ]
                 ]
@@ -268,7 +268,7 @@ playEvents : (Bool -> value) -> List (Html.Attribute value)
 playEvents msg =
     let
         decoder =
-            decodeMediaPlayState msg
+            decodePlayState msg
     in
     [ on "abort" decoder
     , on "ended" decoder
@@ -281,8 +281,8 @@ playEvents msg =
     ]
 
 
-decodeMediaPlayState : (Bool -> msg) -> Decoder msg
-decodeMediaPlayState msg =
+decodePlayState : (Bool -> msg) -> Decoder msg
+decodePlayState msg =
     Decode.at [ "currentTarget", "paused" ] Decode.bool
         |> Decode.map (not >> msg)
 
@@ -313,8 +313,8 @@ decodeAudioMetaData msg =
             )
 
 
-decodeMediaCurrentTime : (Time -> msg) -> Decoder msg
-decodeMediaCurrentTime msg =
+decodeCurrentTime : (Time -> msg) -> Decoder msg
+decodeCurrentTime msg =
     Decode.at [ "currentTarget", "currentTime" ] Decode.float
         |> Decode.map ((*) Time.second >> msg)
 

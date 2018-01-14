@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import DomId exposing (DomId(IdControlsArea, IdVideoArea))
+import DomId exposing (DomId(ControlsArea, VideoArea))
 import Html exposing (Html)
 import Mouse
 import Ports exposing (Area)
@@ -82,10 +82,10 @@ update msg model =
             case incomingMessage of
                 Ports.AreaMeasurement id area ->
                     case id of
-                        DomId.IdVideoArea ->
+                        DomId.VideoArea ->
                             ( { model | videoArea = area }, Cmd.none )
 
-                        DomId.IdControlsArea ->
+                        DomId.ControlsArea ->
                             ( { model | controlsArea = area }, Cmd.none )
 
                         _ ->
@@ -105,8 +105,8 @@ update msg model =
         WindowSize size ->
             ( { model | windowSize = size }
             , Cmd.batch
-                [ Ports.send (Ports.MeasureArea DomId.IdVideoArea)
-                , Ports.send (Ports.MeasureArea DomId.IdControlsArea)
+                [ Ports.send (Ports.MeasureArea DomId.VideoArea)
+                , Ports.send (Ports.MeasureArea DomId.ControlsArea)
                 ]
             )
 
@@ -131,18 +131,18 @@ update msg model =
             ( { model | videoPlaying = playing }
             , Ports.send <|
                 if playing then
-                    Ports.MediaPlay DomId.IdVideo
+                    Ports.Play DomId.Video
                 else
-                    Ports.MediaPause DomId.IdVideo
+                    Ports.Pause DomId.Video
             )
 
         AudioPlayState playing ->
             ( { model | audioPlaying = playing }
             , Ports.send <|
                 if playing then
-                    Ports.MediaPlay DomId.IdAudio
+                    Ports.Play DomId.Audio
                 else
-                    Ports.MediaPause DomId.IdAudio
+                    Ports.Pause DomId.Audio
             )
 
         DragStart dragElement position mousePosition ->
@@ -190,10 +190,10 @@ drag model dragElement position mousePosition =
         outgoingMessage =
             case dragElement of
                 Audio ->
-                    Ports.MediaSeek DomId.IdAudio time
+                    Ports.Seek DomId.Audio time
 
                 Video ->
-                    Ports.MediaSeek DomId.IdVideo time
+                    Ports.Seek DomId.Video time
 
         newDrag =
             Drag dragElement position mousePosition

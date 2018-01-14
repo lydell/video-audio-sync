@@ -26,7 +26,7 @@ function start() {
         break;
       }
 
-      case "MediaPlay": {
+      case "Play": {
         const id = message.data;
         withElement(id, message, element => {
           element.play();
@@ -34,7 +34,7 @@ function start() {
         break;
       }
 
-      case "MediaPause": {
+      case "Pause": {
         const id = message.data;
         withElement(id, message, element => {
           element.pause();
@@ -42,7 +42,7 @@ function start() {
         break;
       }
 
-      case "MediaSeek": {
+      case "Seek": {
         const { id, time } = message.data;
         withElement(id, message, element => {
           if (element.seeking) {

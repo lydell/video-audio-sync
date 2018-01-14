@@ -13,9 +13,9 @@ type alias TaggedData =
 
 type OutgoingMessage
     = MeasureArea DomId
-    | MediaPlay DomId
-    | MediaPause DomId
-    | MediaSeek DomId Float
+    | Play DomId
+    | Pause DomId
+    | Seek DomId Float
 
 
 type IncomingMessage
@@ -36,14 +36,14 @@ encode outgoingMessage =
         MeasureArea id ->
             { tag = "MeasureArea", data = Encode.string (DomId.toString id) }
 
-        MediaPlay id ->
-            { tag = "MediaPlay", data = Encode.string (DomId.toString id) }
+        Play id ->
+            { tag = "Play", data = Encode.string (DomId.toString id) }
 
-        MediaPause id ->
-            { tag = "MediaPause", data = Encode.string (DomId.toString id) }
+        Pause id ->
+            { tag = "Pause", data = Encode.string (DomId.toString id) }
 
-        MediaSeek id time ->
-            { tag = "MediaSeek"
+        Seek id time ->
+            { tag = "Seek"
             , data =
                 Encode.object
                     [ ( "id", Encode.string (DomId.toString id) )

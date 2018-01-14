@@ -2,25 +2,25 @@ module DomId exposing (DomId(..), fromString, toString)
 
 
 type DomId
-    = IdVideoArea
-    | IdControlsArea
-    | IdVideo
-    | IdAudio
+    = VideoArea
+    | ControlsArea
+    | Video
+    | Audio
 
 
 toString : DomId -> String
 toString id =
     case id of
-        IdVideoArea ->
+        VideoArea ->
             "VideoArea"
 
-        IdControlsArea ->
+        ControlsArea ->
             "ControlsArea"
 
-        IdVideo ->
+        Video ->
             "video"
 
-        IdAudio ->
+        Audio ->
             "audio"
 
 
@@ -28,16 +28,16 @@ fromString : String -> Result String DomId
 fromString string =
     case string of
         "VideoArea" ->
-            Ok IdVideoArea
+            Ok VideoArea
 
         "ControlsArea" ->
-            Ok IdControlsArea
+            Ok ControlsArea
 
         "video" ->
-            Ok IdVideo
+            Ok Video
 
         "audio" ->
-            Ok IdAudio
+            Ok Audio
 
         _ ->
             Err <| "Unknown DOM id: " ++ string
