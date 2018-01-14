@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import DomId exposing (DomId(IdControlsArea, IdVideoArea))
+import DomId
 import Html exposing (Attribute, Html, audio, button, div, p, span, text, video)
 import Html.Attributes exposing (attribute, class, id, property, src, style, title, type_, width)
 import Html.Events exposing (on, onClick, onMouseDown, onWithOptions)
@@ -104,14 +104,14 @@ view model =
                 maxHeight * aspectRatio
     in
     div [ class "Layout" ]
-        [ div [ class "Layout-video", id (DomId.toString IdVideoArea) ]
+        [ div [ class "Layout-video", id (DomId.toString DomId.IdVideoArea) ]
             [ video
                 ([ src "/sommaren_video.mp4"
                  , width (truncate clampedWidth)
                  , property "muted" (Encode.bool True)
                  , on "loadedmetadata" (decodeVideoMetaData VideoMetaData)
                  , on "timeupdate" (decodeMediaCurrentTime VideoCurrentTime)
-                 , id "video" -- For easy access in the console.
+                 , id (DomId.toString DomId.IdVideo)
                  ]
                     ++ playEvents VideoPlayState
                 )
@@ -120,7 +120,7 @@ view model =
                 ([ src "/sommaren_audio.aac"
                  , on "loadedmetadata" (decodeAudioMetaData AudioMetaData)
                  , on "timeupdate" (decodeMediaCurrentTime AudioCurrentTime)
-                 , id "audio" -- For easy access in the console.
+                 , id (DomId.toString DomId.IdAudio)
                  ]
                     ++ playEvents AudioPlayState
                 )
@@ -153,7 +153,7 @@ view model =
                 ]
             , fontawesome "lock"
             , div
-                [ id (DomId.toString IdControlsArea)
+                [ id (DomId.toString DomId.IdControlsArea)
                 , class "Progress"
                 , style [ ( "height", toString svgHeight ++ "px" ) ]
                 ]

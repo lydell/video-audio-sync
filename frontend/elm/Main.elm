@@ -3,7 +3,7 @@ module Main exposing (..)
 import DomId exposing (DomId(IdControlsArea, IdVideoArea))
 import Html exposing (Html)
 import Mouse
-import Ports exposing (Area, IncomingMessage(AreaMeasurement), OutgoingMessage(AudioSeek, JsAudioPlayState, JsVideoPlayState, MeasureArea, VideoSeek))
+import Ports exposing (Area)
 import Task
 import Types exposing (..)
 import View
@@ -80,13 +80,20 @@ update msg model =
 
         JsMessage (Ok incomingMessage) ->
             case incomingMessage of
-                AreaMeasurement id area ->
+                Ports.AreaMeasurement id area ->
                     case id of
-                        IdVideoArea ->
+                        DomId.IdVideoArea ->
                             ( { model | videoArea = area }, Cmd.none )
 
-                        IdControlsArea ->
+                        DomId.IdControlsArea ->
                             ( { model | controlsArea = area }, Cmd.none )
+
+                        _ ->
+                            let
+                                _ =
+                                    Debug.log "unexpected AreaMeasurement" id
+                            in
+                            ( model, Cmd.none )
 
         JsMessage (Err message) ->
             let
@@ -98,8 +105,8 @@ update msg model =
         WindowSize size ->
             ( { model | windowSize = size }
             , Cmd.batch
-                [ Ports.send (MeasureArea IdVideoArea)
-                , Ports.send (MeasureArea IdControlsArea)
+                [ Ports.send (Ports.MeasureArea DomId.IdVideoArea)
+                , Ports.send (Ports.MeasureArea DomId.IdControlsArea)
                 ]
             )
 
@@ -122,13 +129,20 @@ update msg model =
 
         VideoPlayState playing ->
             ( { model | videoPlaying = playing }
-            , Ports.send (JsVideoPlayState playing)
+            , Ports.send <|
+                if playing then
+                    Ports.MediaPlay DomId.IdVideo
+                else
+                    Ports.MediaPause DomId.IdVideo
             )
 
         AudioPlayState playing ->
             ( { model | audioPlaying = playing }
-            , Ports.send
-                (JsAudioPlayState playing)
+            , Ports.send <|
+                if playing then
+                    Ports.MediaPlay DomId.IdAudio
+                else
+                    Ports.MediaPause DomId.IdAudio
             )
 
         DragStart dragElement position mousePosition ->
@@ -176,10 +190,10 @@ drag model dragElement position mousePosition =
         outgoingMessage =
             case dragElement of
                 Audio ->
-                    AudioSeek time
+                    Ports.MediaSeek DomId.IdAudio time
 
                 Video ->
-                    VideoSeek time
+                    Ports.MediaSeek DomId.IdVideo time
 
         newDrag =
             Drag dragElement position mousePosition

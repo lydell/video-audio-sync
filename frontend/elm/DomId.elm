@@ -4,21 +4,40 @@ module DomId exposing (DomId(..), fromString, toString)
 type DomId
     = IdVideoArea
     | IdControlsArea
+    | IdVideo
+    | IdAudio
 
 
 toString : DomId -> String
-toString =
-    Basics.toString
+toString id =
+    case id of
+        IdVideoArea ->
+            "VideoArea"
+
+        IdControlsArea ->
+            "ControlsArea"
+
+        IdVideo ->
+            "video"
+
+        IdAudio ->
+            "audio"
 
 
 fromString : String -> Result String DomId
 fromString string =
     case string of
-        "IdVideoArea" ->
+        "VideoArea" ->
             Ok IdVideoArea
 
-        "IdControlsArea" ->
+        "ControlsArea" ->
             Ok IdControlsArea
 
+        "video" ->
+            Ok IdVideo
+
+        "audio" ->
+            Ok IdAudio
+
         _ ->
-            Err <| "Unknown DOM ID: " ++ string
+            Err <| "Unknown DOM id: " ++ string

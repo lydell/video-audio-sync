@@ -12,11 +12,10 @@ type alias TaggedData =
 
 
 type OutgoingMessage
-    = JsVideoPlayState Bool
-    | JsAudioPlayState Bool
-    | VideoSeek Float
-    | AudioSeek Float
-    | MeasureArea DomId
+    = MeasureArea DomId
+    | MediaPlay DomId
+    | MediaPause DomId
+    | MediaSeek DomId Float
 
 
 type IncomingMessage
@@ -34,20 +33,23 @@ type alias Area =
 encode : OutgoingMessage -> TaggedData
 encode outgoingMessage =
     case outgoingMessage of
-        JsVideoPlayState playing ->
-            { tag = "JsVideoPlayState", data = Encode.bool playing }
-
-        JsAudioPlayState playing ->
-            { tag = "JsAudioPlayState", data = Encode.bool playing }
-
-        VideoSeek time ->
-            { tag = "VideoSeek", data = Encode.float time }
-
-        AudioSeek time ->
-            { tag = "AudioSeek", data = Encode.float time }
-
         MeasureArea id ->
             { tag = "MeasureArea", data = Encode.string (DomId.toString id) }
+
+        MediaPlay id ->
+            { tag = "MediaPlay", data = Encode.string (DomId.toString id) }
+
+        MediaPause id ->
+            { tag = "MediaPause", data = Encode.string (DomId.toString id) }
+
+        MediaSeek id time ->
+            { tag = "MediaSeek"
+            , data =
+                Encode.object
+                    [ ( "id", Encode.string (DomId.toString id) )
+                    , ( "time", Encode.float time )
+                    ]
+            }
 
 
 decoder : String -> Result String (Decoder IncomingMessage)

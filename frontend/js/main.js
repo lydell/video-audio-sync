@@ -8,87 +8,49 @@ function start() {
     switch (message.tag) {
       case "MeasureArea": {
         const id = message.data;
-        const element = document.getElementById(id);
-
-        if (element == null) {
-          console.error("Could not find element with id", id);
-          return;
-        }
-
-        const rect = element.getBoundingClientRect();
-
-        app.ports.jsToElm.send({
-          tag: "AreaMeasurement",
-          data: {
-            id,
-            area: {
-              width: rect.width,
-              height: rect.height,
-              x: rect.left,
-              y: rect.top,
+        withElement(id, message, element => {
+          const rect = element.getBoundingClientRect();
+          app.ports.jsToElm.send({
+            tag: "AreaMeasurement",
+            data: {
+              id,
+              area: {
+                width: rect.width,
+                height: rect.height,
+                x: rect.left,
+                y: rect.top,
+              },
             },
-          },
+          });
         });
         break;
       }
 
-      case "JsVideoPlayState": {
-        const playing = message.data;
-        const video = document.querySelector("video");
-        if (video) {
-          if (playing) {
-            video.play();
-          } else {
-            video.pause();
-          }
-        } else {
-          console.error("Could not find video.");
-        }
+      case "MediaPlay": {
+        const id = message.data;
+        withElement(id, message, element => {
+          element.play();
+        });
         break;
       }
 
-      case "JsAudioPlayState": {
-        const playing = message.data;
-        const audio = document.querySelector("audio");
-        if (audio) {
-          if (playing) {
-            audio.play();
-          } else {
-            audio.pause();
-          }
-        } else {
-          console.error("Could not find audio.");
-        }
+      case "MediaPause": {
+        const id = message.data;
+        withElement(id, message, element => {
+          element.pause();
+        });
         break;
       }
 
-      case "VideoSeek": {
-        const time = message.data / 1000;
-        const video = document.querySelector("video");
-        if (video) {
-          if (video.seeking) {
-            video.onseeked = seek.bind(null, video, time);
+      case "MediaSeek": {
+        const { id, time } = message.data;
+        withElement(id, message, element => {
+          if (element.seeking) {
+            element.onseeked = seek.bind(null, element, time);
           } else {
-            seek(video, time);
+            seek(element, time);
           }
-        } else {
-          console.error("Could not find video.");
-        }
-        break;
-      }
-
-      case "AudioSeek": {
-        const time = message.data / 1000;
-        const audio = document.querySelector("audio");
-        if (audio) {
-          if (audio.seeking) {
-            audio.onseeked = seek.bind(null, audio, time);
-          } else {
-            seek(audio, time);
-          }
-        } else {
-          console.error("Could not find audio.");
-        }
+        });
         break;
       }
 
@@ -98,11 +60,23 @@ function start() {
   });
 }
 
+function withElement(id, message, callback) {
+  const element = document.getElementById(id);
+
+  if (element == null) {
+    console.error("Could not find element with id", id, message);
+    return;
+  }
+
+  callback(element);
+}
+
 function seek(media, time) {
+  const seconds = time / 1000;
   if (media.fastSeek) {
-    media.fastSeek(time);
+    media.fastSeek(seconds);
   } else {
-    media.currentTime = time;
+    media.currentTime = seconds;
   }
   media.onseeked = null;
 }
