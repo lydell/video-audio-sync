@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import DomId exposing (DomId(ControlsArea, VideoArea))
 import Html exposing (Html)
-import MediaPlayer
+import MediaPlayer exposing (MediaPlayer)
 import Mouse
 import Ports exposing (Area)
 import Task
@@ -98,73 +98,28 @@ update msg model =
             in
             ( model, Cmd.none )
 
-        MetaData id metaData ->
-            let
-                newModel =
-                    case id of
-                        Audio ->
-                            { model
-                                | audio =
-                                    MediaPlayer.updateMetaData
-                                        metaData
-                                        model.audio
-                            }
-
-                        Video ->
-                            { model
-                                | video =
-                                    MediaPlayer.updateMetaData
-                                        metaData
-                                        model.video
-                            }
-            in
-            ( newModel, Cmd.none )
+        MetaData id details ->
+            ( updateMediaPlayer (MediaPlayer.updateMetaData details) id model
+            , Cmd.none
+            )
 
         CurrentTime id currentTime ->
-            let
-                newModel =
-                    case id of
-                        Audio ->
-                            { model
-                                | audio =
-                                    MediaPlayer.updateCurrentTime
-                                        currentTime
-                                        model.audio
-                            }
-
-                        Video ->
-                            { model
-                                | video =
-                                    MediaPlayer.updateCurrentTime
-                                        currentTime
-                                        model.video
-                            }
-            in
-            ( newModel, Cmd.none )
+            ( updateMediaPlayer
+                (MediaPlayer.updateCurrentTime currentTime)
+                id
+                model
+            , Cmd.none
+            )
 
         Play id ->
-            case id of
-                Audio ->
-                    ( { model | audio = MediaPlayer.play model.audio }
-                    , Ports.send (Ports.Play DomId.Audio)
-                    )
-
-                Video ->
-                    ( { model | video = MediaPlayer.play model.video }
-                    , Ports.send (Ports.Play DomId.Video)
-                    )
+            ( updateMediaPlayer MediaPlayer.play id model
+            , Ports.send (Ports.Play (domIdFromMediaPlayerId id))
+            )
 
         Pause id ->
-            case id of
-                Audio ->
-                    ( { model | audio = MediaPlayer.pause model.audio }
-                    , Ports.send (Ports.Pause DomId.Audio)
-                    )
-
-                Video ->
-                    ( { model | video = MediaPlayer.pause model.video }
-                    , Ports.send (Ports.Pause DomId.Video)
-                    )
+            ( updateMediaPlayer MediaPlayer.pause id model
+            , Ports.send (Ports.Pause (domIdFromMediaPlayerId id))
+            )
 
         DragStart id position mousePosition ->
             drag model id position mousePosition
@@ -191,6 +146,26 @@ update msg model =
             )
 
 
+updateMediaPlayer : (MediaPlayer -> MediaPlayer) -> MediaPlayerId -> Model -> Model
+updateMediaPlayer update id model =
+    case id of
+        Audio ->
+            { model | audio = update model.audio }
+
+        Video ->
+            { model | video = update model.video }
+
+
+domIdFromMediaPlayerId : MediaPlayerId -> DomId
+domIdFromMediaPlayerId id =
+    case id of
+        Audio ->
+            DomId.Audio
+
+        Video ->
+            DomId.Video
+
+
 drag :
     Model
     -> MediaPlayerId
@@ -200,8 +175,7 @@ drag :
 drag model id dragBar mousePosition =
     let
         offset =
-            toFloat mousePosition.x
-                - (model.controlsArea.x + dragBar.x)
+            toFloat mousePosition.x - (model.controlsArea.x + dragBar.x)
 
         duration =
             case id of
@@ -212,33 +186,11 @@ drag model id dragBar mousePosition =
                     model.video.duration
 
         time =
-            clamp 0
-                duration
-                ((offset / dragBar.width) * duration)
-
-        outgoingMessage =
-            case id of
-                Audio ->
-                    Ports.Seek DomId.Audio time
-
-                Video ->
-                    Ports.Seek DomId.Video time
-
-        newDrag =
-            Drag id dragBar mousePosition
+            clamp 0 duration ((offset / dragBar.width) * duration)
 
         newModel =
-            case id of
-                Audio ->
-                    { model
-                        | audio = MediaPlayer.updateCurrentTime time model.audio
-                        , drag = Drag id dragBar mousePosition
-                    }
-
-                Video ->
-                    { model
-                        | video = MediaPlayer.updateCurrentTime time model.video
-                        , drag = Drag id dragBar mousePosition
-                    }
+            updateMediaPlayer (MediaPlayer.updateCurrentTime time) id model
     in
-    ( newModel, Ports.send outgoingMessage )
+    ( { newModel | drag = Drag id dragBar mousePosition }
+    , Ports.send (Ports.Seek (domIdFromMediaPlayerId id) time)
+    )
