@@ -17,7 +17,7 @@ main =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view
+        , view = View.view
         }
 
 
@@ -61,11 +61,6 @@ subscriptions model =
         , Ports.subscribe JsMessage
         ]
             ++ mouseSubscriptions
-
-
-view : Model -> Html Msg
-view model =
-    View.view model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
