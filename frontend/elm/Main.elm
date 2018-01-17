@@ -108,40 +108,10 @@ update msg model =
             )
 
         Play id ->
-            case model.lockState of
-                Locked ->
-                    ( { model
-                        | audio = MediaPlayer.play model.audio
-                        , video = MediaPlayer.play model.video
-                      }
-                    , Cmd.batch
-                        [ Ports.send (Ports.Play DomId.Audio)
-                        , Ports.send (Ports.Play DomId.Video)
-                        ]
-                    )
-
-                Unlocked ->
-                    ( updateMediaPlayer MediaPlayer.play id model
-                    , Ports.send (Ports.Play (domIdFromMediaPlayerId id))
-                    )
+            updateLockAware model id MediaPlayer.play Ports.Play
 
         Pause id ->
-            case model.lockState of
-                Locked ->
-                    ( { model
-                        | audio = MediaPlayer.pause model.audio
-                        , video = MediaPlayer.pause model.video
-                      }
-                    , Cmd.batch
-                        [ Ports.send (Ports.Pause DomId.Audio)
-                        , Ports.send (Ports.Pause DomId.Video)
-                        ]
-                    )
-
-                Unlocked ->
-                    ( updateMediaPlayer MediaPlayer.pause id model
-                    , Ports.send (Ports.Pause (domIdFromMediaPlayerId id))
-                    )
+            updateLockAware model id MediaPlayer.pause Ports.Pause
 
         DragStart id dragBar mousePosition ->
             let
@@ -213,6 +183,31 @@ domIdFromMediaPlayerId id =
             DomId.Video
 
 
+updateLockAware :
+    Model
+    -> MediaPlayerId
+    -> (MediaPlayer -> MediaPlayer)
+    -> (DomId -> Ports.OutgoingMessage)
+    -> ( Model, Cmd Msg )
+updateLockAware model id update msg =
+    case model.lockState of
+        Locked ->
+            ( { model
+                | audio = update model.audio
+                , video = update model.video
+              }
+            , Cmd.batch
+                [ Ports.send (msg DomId.Audio)
+                , Ports.send (msg DomId.Video)
+                ]
+            )
+
+        Unlocked ->
+            ( updateMediaPlayer update id model
+            , Ports.send (msg (domIdFromMediaPlayerId id))
+            )
+
+
 drag :
     Model
     -> DragDetails
@@ -228,6 +223,12 @@ drag model { id, timeOffset, dragBar } mousePosition =
 
         calculateTime duration =
             clampTime duration ((dragged / dragBar.width) * duration)
+
+        update =
+            MediaPlayer.updateCurrentTime
+
+        msg =
+            Ports.Seek
     in
     case model.lockState of
         Locked ->
@@ -243,7 +244,8 @@ drag model { id, timeOffset, dragBar } mousePosition =
                                     calculateTime model.audio.duration
                             in
                             ( newTime
-                            , clampTime model.video.duration (newTime - timeOffset)
+                            , clampTime model.video.duration
+                                (newTime - timeOffset)
                             )
 
                         Video ->
@@ -254,20 +256,21 @@ drag model { id, timeOffset, dragBar } mousePosition =
                                 newTime =
                                     calculateTime model.video.duration
                             in
-                            ( clampTime model.audio.duration (newTime - timeOffset)
+                            ( clampTime model.audio.duration
+                                (newTime - timeOffset)
                             , newTime
                             )
 
                 newModel =
                     { model
-                        | audio = MediaPlayer.updateCurrentTime audioTime model.audio
-                        , video = MediaPlayer.updateCurrentTime videoTime model.video
+                        | audio = update audioTime model.audio
+                        , video = update videoTime model.video
                     }
             in
             ( newModel
             , Cmd.batch
-                [ Ports.send (Ports.Seek DomId.Audio audioTime)
-                , Ports.send (Ports.Seek DomId.Video videoTime)
+                [ Ports.send (msg DomId.Audio audioTime)
+                , Ports.send (msg DomId.Video videoTime)
                 ]
             )
 
@@ -284,6 +287,6 @@ drag model { id, timeOffset, dragBar } mousePosition =
                 time =
                     calculateTime duration
             in
-            ( updateMediaPlayer (MediaPlayer.updateCurrentTime time) id model
-            , Ports.send (Ports.Seek (domIdFromMediaPlayerId id) time)
+            ( updateMediaPlayer (update time) id model
+            , Ports.send (msg (domIdFromMediaPlayerId id) time)
             )
