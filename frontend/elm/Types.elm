@@ -30,8 +30,15 @@ type LockState
 
 
 type Drag
-    = Drag MediaPlayerId Float DragBar Mouse.Position
+    = Drag DragDetails
     | NoDrag
+
+
+type alias DragDetails =
+    { id : MediaPlayerId
+    , timeOffset : Float
+    , dragBar : DragBar
+    }
 
 
 type alias DragBar =

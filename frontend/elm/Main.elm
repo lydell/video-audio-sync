@@ -49,7 +49,7 @@ subscriptions model =
     let
         mouseSubscriptions =
             case model.drag of
-                Drag _ _ _ _ ->
+                Drag _ ->
                     [ Mouse.moves DragMove
                     , Mouse.ups DragEnd
                     ]
@@ -143,22 +143,28 @@ update msg model =
                     , Ports.send (Ports.Pause (domIdFromMediaPlayerId id))
                     )
 
-        DragStart id position mousePosition ->
+        DragStart id dragBar mousePosition ->
             let
-                offset =
+                timeOffset =
                     case id of
                         Audio ->
                             model.audio.currentTime - model.video.currentTime
 
                         Video ->
                             model.video.currentTime - model.audio.currentTime
+
+                dragDetails =
+                    { id = id
+                    , timeOffset = timeOffset
+                    , dragBar = dragBar
+                    }
             in
-            drag model id offset position mousePosition
+            drag model dragDetails mousePosition
 
         DragMove mousePosition ->
             case model.drag of
-                Drag id offset position _ ->
-                    drag model id offset position mousePosition
+                Drag dragDetails ->
+                    drag model dragDetails mousePosition
 
                 NoDrag ->
                     ( model, Cmd.none )
@@ -209,12 +215,10 @@ domIdFromMediaPlayerId id =
 
 drag :
     Model
-    -> MediaPlayerId
-    -> Float
-    -> DragBar
+    -> DragDetails
     -> Mouse.Position
     -> ( Model, Cmd msg )
-drag model id offset dragBar mousePosition =
+drag model { id, timeOffset, dragBar } mousePosition =
     let
         dragged =
             toFloat mousePosition.x - (model.controlsArea.x + dragBar.x)
@@ -224,9 +228,6 @@ drag model id offset dragBar mousePosition =
 
         calculateTime duration =
             clampTime duration ((dragged / dragBar.width) * duration)
-
-        newDrag =
-            Drag id offset dragBar mousePosition
     in
     case model.lockState of
         Locked ->
@@ -242,7 +243,7 @@ drag model id offset dragBar mousePosition =
                                     calculateTime model.audio.duration
                             in
                             ( newTime
-                            , clampTime model.video.duration (newTime - offset)
+                            , clampTime model.video.duration (newTime - timeOffset)
                             )
 
                         Video ->
@@ -253,7 +254,7 @@ drag model id offset dragBar mousePosition =
                                 newTime =
                                     calculateTime model.video.duration
                             in
-                            ( clampTime model.audio.duration (newTime - offset)
+                            ( clampTime model.audio.duration (newTime - timeOffset)
                             , newTime
                             )
 
@@ -263,7 +264,7 @@ drag model id offset dragBar mousePosition =
                         , video = MediaPlayer.updateCurrentTime videoTime model.video
                     }
             in
-            ( { newModel | drag = newDrag }
+            ( newModel
             , Cmd.batch
                 [ Ports.send (Ports.Seek DomId.Audio audioTime)
                 , Ports.send (Ports.Seek DomId.Video videoTime)
@@ -282,10 +283,7 @@ drag model id offset dragBar mousePosition =
 
                 time =
                     calculateTime duration
-
-                newModel =
-                    updateMediaPlayer (MediaPlayer.updateCurrentTime time) id model
             in
-            ( { newModel | drag = newDrag }
+            ( updateMediaPlayer (MediaPlayer.updateCurrentTime time) id model
             , Ports.send (Ports.Seek (domIdFromMediaPlayerId id) time)
             )
