@@ -156,7 +156,31 @@ view model =
                             ++ Utils.formatDuration model.video.duration
                     ]
                 ]
-            , fontawesome "lock"
+            , button
+                [ type_ "button"
+                , title <|
+                    case model.lockState of
+                        Locked ->
+                            "Video and audio play in sync. Click to unlock."
+
+                        Unlocked ->
+                            "Video and audio play independently. Click to lock."
+                , onClick <|
+                    case model.lockState of
+                        Locked ->
+                            Unlock
+
+                        Unlocked ->
+                            Lock
+                ]
+                [ fontawesome <|
+                    case model.lockState of
+                        Locked ->
+                            "lock"
+
+                        Unlocked ->
+                            "unlock"
+                ]
             , div
                 [ id (DomId.toString DomId.ControlsArea)
                 , class "Progress"

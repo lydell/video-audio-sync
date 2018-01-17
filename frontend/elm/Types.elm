@@ -11,6 +11,7 @@ import Window
 type alias Model =
     { audio : MediaPlayer
     , video : MediaPlayer
+    , lockState : LockState
     , drag : Drag
     , videoArea : Area
     , controlsArea : Area
@@ -23,8 +24,13 @@ type MediaPlayerId
     | Video
 
 
+type LockState
+    = Locked
+    | Unlocked
+
+
 type Drag
-    = Drag MediaPlayerId DragBar Mouse.Position
+    = Drag MediaPlayerId Float DragBar Mouse.Position
     | NoDrag
 
 
@@ -44,4 +50,6 @@ type Msg
     | DragStart MediaPlayerId DragBar Mouse.Position
     | DragMove Mouse.Position
     | DragEnd Mouse.Position
+    | Lock
+    | Unlock
     | WindowSize Window.Size
