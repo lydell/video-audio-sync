@@ -128,8 +128,11 @@ update msg model =
                     , timeOffset = timeOffset
                     , dragBar = dragBar
                     }
+
+                newModel =
+                    { model | drag = Drag dragDetails }
             in
-            drag model dragDetails mousePosition
+            drag newModel dragDetails mousePosition
 
         DragMove mousePosition ->
             case model.drag of
