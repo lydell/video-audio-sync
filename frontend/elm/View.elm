@@ -83,6 +83,23 @@ view model =
         audioLineY =
             videoLineY + lineHeight + lineBetween
 
+        videoWidth =
+            toScale model.video.currentTime
+
+        audioWidth =
+            toScale model.audio.currentTime
+
+        currentTime =
+            { x1 = lineMargin + videoWidth
+            , y1 = videoLineY
+            , x2 = lineMargin + videoWidth
+            , y2 = videoLineY + lineHeight
+            , x3 = lineMargin + audioWidth
+            , y3 = audioLineY
+            , x4 = lineMargin + audioWidth
+            , y4 = audioLineY + lineHeight
+            }
+
         aspectRatio =
             if model.video.size.height == 0 then
                 1
@@ -190,6 +207,7 @@ view model =
                     [ Svg.viewBox viewBoxString
                     , Svg.class "Progress-svg"
                     ]
+                  <|
                     [ Svg.rect
                         [ Svg.x (toString lineMargin)
                         , Svg.y (toString videoLineY)
@@ -209,7 +227,7 @@ view model =
                     , Svg.rect
                         [ Svg.x (toString lineMargin)
                         , Svg.y (toString videoLineY)
-                        , Svg.width (toString (toScale model.video.currentTime))
+                        , Svg.width (toString videoWidth)
                         , Svg.height (toString lineHeight)
                         , Svg.class "Progress-elapsed"
                         ]
@@ -217,44 +235,79 @@ view model =
                     , Svg.rect
                         [ Svg.x (toString lineMargin)
                         , Svg.y (toString audioLineY)
-                        , Svg.width (toString (toScale model.audio.currentTime))
+                        , Svg.width (toString audioWidth)
                         , Svg.height (toString lineHeight)
                         , Svg.class "Progress-elapsed"
                         ]
                         []
-                    , Svg.rect
-                        [ Svg.x (toString lineMargin)
-                        , Svg.y (toString (videoLineY - lineHoverExtra / 2))
-                        , Svg.width (toString videoLineWidth)
-                        , Svg.height (toString (lineHeight + lineHoverExtra))
-                        , Svg.class "Progress-hover"
-                        , preventContextMenu
-                        , onMouseDown
-                            (DragStart
-                                Video
-                                { x = lineMargin
-                                , width = videoLineWidth
-                                }
-                            )
-                        ]
-                        []
-                    , Svg.rect
-                        [ Svg.x (toString lineMargin)
-                        , Svg.y (toString (audioLineY - lineHoverExtra / 2))
-                        , Svg.width (toString audioLineWidth)
-                        , Svg.height (toString (lineHeight + lineHoverExtra))
-                        , Svg.class "Progress-hover"
-                        , preventContextMenu
-                        , onMouseDown
-                            (DragStart
-                                Audio
-                                { x = lineMargin
-                                , width = audioLineWidth
-                                }
-                            )
-                        ]
-                        []
                     ]
+                        ++ (case model.lockState of
+                                Locked ->
+                                    [ Svg.polyline
+                                        [ Svg.points <|
+                                            toPoints
+                                                [ ( currentTime.x1, currentTime.y1 )
+                                                , ( currentTime.x2, currentTime.y2 )
+                                                , ( currentTime.x3, currentTime.y3 )
+                                                , ( currentTime.x4, currentTime.y4 )
+                                                ]
+                                        , Svg.class "Progress-currentTime"
+                                        ]
+                                        []
+                                    ]
+
+                                Unlocked ->
+                                    [ Svg.line
+                                        [ Svg.x1 (toString currentTime.x1)
+                                        , Svg.y1 (toString currentTime.y1)
+                                        , Svg.x2 (toString currentTime.x2)
+                                        , Svg.y2 (toString currentTime.y2)
+                                        , Svg.class "Progress-currentTime"
+                                        ]
+                                        []
+                                    , Svg.line
+                                        [ Svg.x1 (toString currentTime.x3)
+                                        , Svg.y1 (toString currentTime.y3)
+                                        , Svg.x2 (toString currentTime.x4)
+                                        , Svg.y2 (toString currentTime.y4)
+                                        , Svg.class "Progress-currentTime"
+                                        ]
+                                        []
+                                    ]
+                           )
+                        ++ [ Svg.rect
+                                [ Svg.x (toString lineMargin)
+                                , Svg.y (toString (videoLineY - lineHoverExtra / 2))
+                                , Svg.width (toString videoLineWidth)
+                                , Svg.height (toString (lineHeight + lineHoverExtra))
+                                , Svg.class "Progress-hover"
+                                , preventContextMenu
+                                , onMouseDown
+                                    (DragStart
+                                        Video
+                                        { x = lineMargin
+                                        , width = videoLineWidth
+                                        }
+                                    )
+                                ]
+                                []
+                           , Svg.rect
+                                [ Svg.x (toString lineMargin)
+                                , Svg.y (toString (audioLineY - lineHoverExtra / 2))
+                                , Svg.width (toString audioLineWidth)
+                                , Svg.height (toString (lineHeight + lineHoverExtra))
+                                , Svg.class "Progress-hover"
+                                , preventContextMenu
+                                , onMouseDown
+                                    (DragStart
+                                        Audio
+                                        { x = lineMargin
+                                        , width = audioLineWidth
+                                        }
+                                    )
+                                ]
+                                []
+                           ]
                 ]
             , fontawesome "volume-up"
             , div [ class "Toolbar" ]
@@ -337,3 +390,10 @@ togglePlayState id playState =
 
             Paused ->
                 Play id
+
+
+toPoints : List ( number, number ) -> String
+toPoints coords =
+    coords
+        |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
+        |> String.join " "
