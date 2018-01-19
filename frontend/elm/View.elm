@@ -83,11 +83,17 @@ view model =
         audioLineY =
             videoLineY + lineHeight + lineBetween
 
-        videoWidth =
-            toScale model.video.currentTime
+        ( videoWidth, audioWidth ) =
+            case model.loopState of
+                Normal ->
+                    ( toScale model.video.currentTime
+                    , toScale model.audio.currentTime
+                    )
 
-        audioWidth =
-            toScale model.audio.currentTime
+                Looping audioTime videoTime ->
+                    ( toScale videoTime
+                    , toScale audioTime
+                    )
 
         currentTime =
             { x1 = lineMargin + videoWidth
@@ -335,6 +341,34 @@ view model =
                         Utils.formatDuration model.audio.currentTime
                             ++ " / "
                             ++ Utils.formatDuration model.audio.duration
+                    ]
+                ]
+            , div [] []
+            , div [ class "Toolbar" ]
+                [ button
+                    [ type_ "button"
+                    , title <|
+                        case model.loopState of
+                            Normal ->
+                                "Video and audio play in normally. Click to loop."
+
+                            Looping _ _ ->
+                                "Video and audio play loop around their current positions. Click to play normally."
+                    , onClick <|
+                        case model.loopState of
+                            Normal ->
+                                GoLooping
+
+                            Looping _ _ ->
+                                GoNormal
+                    ]
+                    [ fontawesome <|
+                        case model.loopState of
+                            Normal ->
+                                "repeat"
+
+                            Looping _ _ ->
+                                "refresh"
                     ]
                 ]
             ]

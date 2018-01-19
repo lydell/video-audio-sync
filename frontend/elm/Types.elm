@@ -12,6 +12,7 @@ type alias Model =
     { audio : MediaPlayer
     , video : MediaPlayer
     , lockState : LockState
+    , loopState : LoopState
     , drag : Drag
     , videoArea : Area
     , controlsArea : Area
@@ -27,6 +28,11 @@ type MediaPlayerId
 type LockState
     = Locked
     | Unlocked
+
+
+type LoopState
+    = Normal
+    | Looping Time Time
 
 
 type Drag
@@ -59,4 +65,6 @@ type Msg
     | DragEnd Mouse.Position
     | Lock
     | Unlock
+    | GoNormal
+    | GoLooping
     | WindowSize Window.Size

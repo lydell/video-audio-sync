@@ -6,9 +6,15 @@ import MediaPlayer exposing (MediaPlayer)
 import Mouse
 import Ports exposing (Area)
 import Task
+import Time exposing (Time)
 import Types exposing (..)
 import View
 import Window
+
+
+loopRadius : Time
+loopRadius =
+    3 * Time.second
 
 
 main : Program Never Model Msg
@@ -26,6 +32,7 @@ init =
     ( { audio = MediaPlayer.empty
       , video = MediaPlayer.empty
       , lockState = Unlocked
+      , loopState = Normal
       , drag = NoDrag
       , videoArea = emptyArea
       , controlsArea = emptyArea
@@ -100,11 +107,47 @@ update msg model =
             )
 
         CurrentTime id currentTime ->
+            let
+                cmd =
+                    case model.loopState of
+                        Normal ->
+                            Cmd.none
+
+                        Looping audioTime videoTime ->
+                            let
+                                audioStartTime =
+                                    max 0 (audioTime - loopRadius)
+
+                                videoStartTime =
+                                    max 0 (videoTime - loopRadius)
+
+                                audioEndTime =
+                                    min model.audio.duration (audioTime + loopRadius)
+
+                                videoEndTime =
+                                    min model.video.duration (videoTime + loopRadius)
+
+                                audioPassed =
+                                    model.audio.currentTime >= audioEndTime
+
+                                videoPassed =
+                                    model.video.currentTime >= videoEndTime
+                            in
+                            if audioPassed || videoPassed then
+                                Cmd.batch
+                                    [ Ports.send
+                                        (Ports.Seek DomId.Audio audioStartTime)
+                                    , Ports.send
+                                        (Ports.Seek DomId.Video videoStartTime)
+                                    ]
+                            else
+                                Cmd.none
+            in
             ( updateMediaPlayer
                 (MediaPlayer.updateCurrentTime currentTime)
                 id
                 model
-            , Cmd.none
+            , cmd
             )
 
         Play id ->
@@ -154,6 +197,21 @@ update msg model =
 
         Unlock ->
             ( { model | lockState = Unlocked }
+            , Cmd.none
+            )
+
+        GoNormal ->
+            ( { model | loopState = Normal }
+            , Cmd.none
+            )
+
+        GoLooping ->
+            ( { model
+                | loopState =
+                    Looping
+                        model.audio.currentTime
+                        model.video.currentTime
+              }
             , Cmd.none
             )
 
@@ -258,8 +316,18 @@ drag model { id, timeOffset, dragBar } mousePosition =
                         | audio = update audioTime model.audio
                         , video = update videoTime model.video
                     }
+
+                newLoopState =
+                    case model.loopState of
+                        Normal ->
+                            Normal
+
+                        Looping time time2 ->
+                            Looping
+                                newModel.audio.currentTime
+                                newModel.video.currentTime
             in
-            ( newModel
+            ( { newModel | loopState = newLoopState }
             , Cmd.batch
                 [ Ports.send (msg DomId.Audio audioTime)
                 , Ports.send (msg DomId.Video videoTime)
