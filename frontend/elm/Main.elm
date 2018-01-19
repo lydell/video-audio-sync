@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import DomId exposing (DomId(ControlsArea, VideoArea))
 import Html exposing (Html)
+import Html.Events.Custom exposing (MouseButton(Left, Right))
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
 import Ports exposing (Area)
@@ -31,7 +32,6 @@ init : ( Model, Cmd Msg )
 init =
     ( { audio = MediaPlayer.empty
       , video = MediaPlayer.empty
-      , lockState = Unlocked
       , loopState = Normal
       , drag = NoDrag
       , videoArea = emptyArea
@@ -150,13 +150,19 @@ update msg model =
             , cmd
             )
 
-        Play id ->
-            updateLockAware model id MediaPlayer.play Ports.Play
+        ExternalPlay id ->
+            play Unlocked id model
 
-        Pause id ->
-            updateLockAware model id MediaPlayer.pause Ports.Pause
+        ExternalPause id ->
+            pause Unlocked id model
 
-        DragStart id dragBar mousePosition ->
+        Play id mouseButton ->
+            play (lockStateFromMouseButton mouseButton) id model
+
+        Pause id mouseButton ->
+            pause (lockStateFromMouseButton mouseButton) id model
+
+        DragStart id dragBar mouseDownDetails ->
             let
                 timeOffset =
                     case id of
@@ -170,12 +176,13 @@ update msg model =
                     { id = id
                     , timeOffset = timeOffset
                     , dragBar = dragBar
+                    , lockState = lockStateFromMouseButton mouseDownDetails.button
                     }
 
                 newModel =
                     { model | drag = Drag dragDetails }
             in
-            drag newModel dragDetails mousePosition
+            drag newModel dragDetails mouseDownDetails.position
 
         DragMove mousePosition ->
             case model.drag of
@@ -187,16 +194,6 @@ update msg model =
 
         DragEnd _ ->
             ( { model | drag = NoDrag }
-            , Cmd.none
-            )
-
-        Lock ->
-            ( { model | lockState = Locked }
-            , Cmd.none
-            )
-
-        Unlock ->
-            ( { model | lockState = Unlocked }
             , Cmd.none
             )
 
@@ -244,14 +241,25 @@ domIdFromMediaPlayerId id =
             DomId.Video
 
 
+lockStateFromMouseButton : MouseButton -> LockState
+lockStateFromMouseButton mouseButton =
+    case mouseButton of
+        Left ->
+            Unlocked
+
+        Right ->
+            Locked
+
+
 updateLockAware :
-    Model
+    LockState
+    -> Model
     -> MediaPlayerId
     -> (MediaPlayer -> MediaPlayer)
     -> (DomId -> Ports.OutgoingMessage)
     -> ( Model, Cmd Msg )
-updateLockAware model id update msg =
-    case model.lockState of
+updateLockAware lockState model id update msg =
+    case lockState of
         Locked ->
             ( { model
                 | audio = update model.audio
@@ -269,12 +277,42 @@ updateLockAware model id update msg =
             )
 
 
+play : LockState -> MediaPlayerId -> Model -> ( Model, Cmd Msg )
+play =
+    pausePlayHelper MediaPlayer.play Ports.Play
+
+
+pause : LockState -> MediaPlayerId -> Model -> ( Model, Cmd Msg )
+pause =
+    pausePlayHelper MediaPlayer.pause Ports.Pause
+
+
+pausePlayHelper :
+    (MediaPlayer -> MediaPlayer)
+    -> (DomId -> Ports.OutgoingMessage)
+    -> LockState
+    -> MediaPlayerId
+    -> Model
+    -> ( Model, Cmd Msg )
+pausePlayHelper update msg lockState id model =
+    let
+        newLockState =
+            case model.loopState of
+                Normal ->
+                    lockState
+
+                Looping _ _ ->
+                    Locked
+    in
+    updateLockAware newLockState model id update msg
+
+
 drag :
     Model
     -> DragDetails
     -> Mouse.Position
     -> ( Model, Cmd msg )
-drag model { id, timeOffset, dragBar } mousePosition =
+drag model { id, timeOffset, dragBar, lockState } mousePosition =
     let
         dragged =
             toFloat mousePosition.x - (model.controlsArea.x + dragBar.x)
@@ -288,7 +326,7 @@ drag model { id, timeOffset, dragBar } mousePosition =
         msg =
             Ports.Seek
     in
-    case model.lockState of
+    case lockState of
         Locked ->
             let
                 ( audioTime, videoTime ) =

@@ -5,7 +5,7 @@ import Html exposing (Attribute, Html, audio, button, div, p, span, text, video)
 import Html.Attributes exposing (attribute, class, id, src, style, title, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Events exposing (on, onClick)
-import Html.Events.Custom exposing (MetaDataDetails, onAudioMetaData, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
+import Html.Events.Custom exposing (MetaDataDetails, onAudioMetaData, onClickWithButton, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (PlayState(Paused, Playing))
 import Svg
@@ -150,7 +150,7 @@ view model =
                 )
                 []
             ]
-        , div [ class "Layout-controls" ]
+        , div [ class "Layout-controls", preventContextMenu ]
             [ fontawesome "video-camera"
             , div [ class "Toolbar" ]
                 [ button
@@ -163,6 +163,7 @@ view model =
                             Paused ->
                                 "Play video"
                     , togglePlayState Video model.video.playState
+                    , on "contextmenu" (Decode.succeed NoOp)
                     ]
                     [ fontawesome <|
                         case model.video.playState of
@@ -179,31 +180,7 @@ view model =
                             ++ Utils.formatDuration model.video.duration
                     ]
                 ]
-            , button
-                [ type_ "button"
-                , title <|
-                    case model.lockState of
-                        Locked ->
-                            "Video and audio play in sync. Click to unlock."
-
-                        Unlocked ->
-                            "Video and audio play independently. Click to lock."
-                , onClick <|
-                    case model.lockState of
-                        Locked ->
-                            Unlock
-
-                        Unlocked ->
-                            Lock
-                ]
-                [ fontawesome <|
-                    case model.lockState of
-                        Locked ->
-                            "lock"
-
-                        Unlocked ->
-                            "unlock"
-                ]
+            , div [] []
             , div
                 [ id (DomId.toString DomId.ControlsArea)
                 , class "Progress"
@@ -213,7 +190,6 @@ view model =
                     [ Svg.viewBox viewBoxString
                     , Svg.class "Progress-svg"
                     ]
-                  <|
                     [ Svg.rect
                         [ Svg.x (toString lineMargin)
                         , Svg.y (toString videoLineY)
@@ -246,74 +222,53 @@ view model =
                         , Svg.class "Progress-elapsed"
                         ]
                         []
+                    , Svg.line
+                        [ Svg.x1 (toString currentTime.x1)
+                        , Svg.y1 (toString currentTime.y1)
+                        , Svg.x2 (toString currentTime.x2)
+                        , Svg.y2 (toString currentTime.y2)
+                        , Svg.class "Progress-currentTime"
+                        ]
+                        []
+                    , Svg.line
+                        [ Svg.x1 (toString currentTime.x3)
+                        , Svg.y1 (toString currentTime.y3)
+                        , Svg.x2 (toString currentTime.x4)
+                        , Svg.y2 (toString currentTime.y4)
+                        , Svg.class "Progress-currentTime"
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString (videoLineY - lineHoverExtra / 2))
+                        , Svg.width (toString videoLineWidth)
+                        , Svg.height (toString (lineHeight + lineHoverExtra))
+                        , Svg.class "Progress-hover"
+                        , onMouseDown
+                            (DragStart
+                                Video
+                                { x = lineMargin
+                                , width = videoLineWidth
+                                }
+                            )
+                        ]
+                        []
+                    , Svg.rect
+                        [ Svg.x (toString lineMargin)
+                        , Svg.y (toString (audioLineY - lineHoverExtra / 2))
+                        , Svg.width (toString audioLineWidth)
+                        , Svg.height (toString (lineHeight + lineHoverExtra))
+                        , Svg.class "Progress-hover"
+                        , onMouseDown
+                            (DragStart
+                                Audio
+                                { x = lineMargin
+                                , width = audioLineWidth
+                                }
+                            )
+                        ]
+                        []
                     ]
-                        ++ (case model.lockState of
-                                Locked ->
-                                    [ Svg.polyline
-                                        [ Svg.points <|
-                                            toPoints
-                                                [ ( currentTime.x1, currentTime.y1 )
-                                                , ( currentTime.x2, currentTime.y2 )
-                                                , ( currentTime.x3, currentTime.y3 )
-                                                , ( currentTime.x4, currentTime.y4 )
-                                                ]
-                                        , Svg.class "Progress-currentTime"
-                                        ]
-                                        []
-                                    ]
-
-                                Unlocked ->
-                                    [ Svg.line
-                                        [ Svg.x1 (toString currentTime.x1)
-                                        , Svg.y1 (toString currentTime.y1)
-                                        , Svg.x2 (toString currentTime.x2)
-                                        , Svg.y2 (toString currentTime.y2)
-                                        , Svg.class "Progress-currentTime"
-                                        ]
-                                        []
-                                    , Svg.line
-                                        [ Svg.x1 (toString currentTime.x3)
-                                        , Svg.y1 (toString currentTime.y3)
-                                        , Svg.x2 (toString currentTime.x4)
-                                        , Svg.y2 (toString currentTime.y4)
-                                        , Svg.class "Progress-currentTime"
-                                        ]
-                                        []
-                                    ]
-                           )
-                        ++ [ Svg.rect
-                                [ Svg.x (toString lineMargin)
-                                , Svg.y (toString (videoLineY - lineHoverExtra / 2))
-                                , Svg.width (toString videoLineWidth)
-                                , Svg.height (toString (lineHeight + lineHoverExtra))
-                                , Svg.class "Progress-hover"
-                                , preventContextMenu
-                                , onMouseDown
-                                    (DragStart
-                                        Video
-                                        { x = lineMargin
-                                        , width = videoLineWidth
-                                        }
-                                    )
-                                ]
-                                []
-                           , Svg.rect
-                                [ Svg.x (toString lineMargin)
-                                , Svg.y (toString (audioLineY - lineHoverExtra / 2))
-                                , Svg.width (toString audioLineWidth)
-                                , Svg.height (toString (lineHeight + lineHoverExtra))
-                                , Svg.class "Progress-hover"
-                                , preventContextMenu
-                                , onMouseDown
-                                    (DragStart
-                                        Audio
-                                        { x = lineMargin
-                                        , width = audioLineWidth
-                                        }
-                                    )
-                                ]
-                                []
-                           ]
                 ]
             , fontawesome "volume-up"
             , div [ class "Toolbar" ]
@@ -408,16 +363,16 @@ decodePlayState id =
             (\paused ->
                 case paused of
                     True ->
-                        Pause id
+                        ExternalPause id
 
                     False ->
-                        Play id
+                        ExternalPlay id
             )
 
 
 togglePlayState : MediaPlayerId -> PlayState -> Attribute Msg
 togglePlayState id playState =
-    onClick <|
+    onClickWithButton <|
         case playState of
             Playing ->
                 Pause id

@@ -1,6 +1,6 @@
 module Types exposing (..)
 
-import Html.Events.Custom exposing (MetaDataDetails)
+import Html.Events.Custom exposing (MetaDataDetails, MouseButton, MouseDownDetails)
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
 import Ports exposing (Area, IncomingMessage)
@@ -11,7 +11,6 @@ import Window
 type alias Model =
     { audio : MediaPlayer
     , video : MediaPlayer
-    , lockState : LockState
     , loopState : LoopState
     , drag : Drag
     , videoArea : Area
@@ -44,6 +43,7 @@ type alias DragDetails =
     { id : MediaPlayerId
     , timeOffset : Float
     , dragBar : DragBar
+    , lockState : LockState
     }
 
 
@@ -58,13 +58,13 @@ type Msg
     | JsMessage (Result String IncomingMessage)
     | MetaData MediaPlayerId MetaDataDetails
     | CurrentTime MediaPlayerId Time
-    | Play MediaPlayerId
-    | Pause MediaPlayerId
-    | DragStart MediaPlayerId DragBar Mouse.Position
+    | ExternalPlay MediaPlayerId
+    | ExternalPause MediaPlayerId
+    | Play MediaPlayerId MouseButton
+    | Pause MediaPlayerId MouseButton
+    | DragStart MediaPlayerId DragBar MouseDownDetails
     | DragMove Mouse.Position
     | DragEnd Mouse.Position
-    | Lock
-    | Unlock
     | GoNormal
     | GoLooping
     | WindowSize Window.Size

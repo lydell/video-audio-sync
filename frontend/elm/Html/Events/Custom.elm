@@ -1,4 +1,4 @@
-module Html.Events.Custom exposing (MetaDataDetails, onAudioMetaData, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
+module Html.Events.Custom exposing (MetaDataDetails, MouseButton(..), MouseDownDetails, onAudioMetaData, onClickWithButton, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
@@ -15,12 +15,35 @@ type alias MetaDataDetails =
     }
 
 
-onMouseDown : (Mouse.Position -> msg) -> Attribute msg
+type alias MouseDownDetails =
+    { position : Mouse.Position
+    , button : MouseButton
+    }
+
+
+type MouseButton
+    = Left
+    | Right
+
+
+onClickWithButton : (MouseButton -> msg) -> Attribute msg
+onClickWithButton msg =
+    on "mousedown" (decodeMouseButton |> Decode.map msg)
+
+
+onMouseDown : (MouseDownDetails -> msg) -> Attribute msg
 onMouseDown msg =
     onWithOptions
         "mousedown"
         { stopPropagation = False, preventDefault = True }
-        (decodeMousePosition |> Decode.map msg)
+        (decodeMouseDownDetails |> Decode.map msg)
+
+
+decodeMouseDownDetails : Decoder MouseDownDetails
+decodeMouseDownDetails =
+    Decode.map2 MouseDownDetails
+        decodeMousePosition
+        decodeMouseButton
 
 
 decodeMousePosition : Decoder Mouse.Position
@@ -28,6 +51,23 @@ decodeMousePosition =
     Decode.map2 Mouse.Position
         (Decode.field "pageX" Decode.int)
         (Decode.field "pageY" Decode.int)
+
+
+decodeMouseButton : Decoder MouseButton
+decodeMouseButton =
+    Decode.field "button" Decode.int
+        |> Decode.andThen
+            (\number ->
+                case number of
+                    0 ->
+                        Decode.succeed Left
+
+                    2 ->
+                        Decode.succeed Right
+
+                    _ ->
+                        Decode.fail <| "Ignored mouse button: " ++ toString number
+            )
 
 
 preventContextMenu : Attribute msg
