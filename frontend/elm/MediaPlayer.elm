@@ -36,7 +36,7 @@ updateMetaData { duration, width, height } mediaPlayer =
 
 updateCurrentTime : Time -> MediaPlayer -> MediaPlayer
 updateCurrentTime currentTime mediaPlayer =
-    { mediaPlayer | currentTime = currentTime }
+    { mediaPlayer | currentTime = clamp 0 mediaPlayer.duration currentTime }
 
 
 play : MediaPlayer -> MediaPlayer

@@ -221,11 +221,8 @@ drag model { id, timeOffset, dragBar } mousePosition =
         dragged =
             toFloat mousePosition.x - (model.controlsArea.x + dragBar.x)
 
-        clampTime duration time =
-            clamp 0 duration time
-
         calculateTime duration =
-            clampTime duration ((dragged / dragBar.width) * duration)
+            (dragged / dragBar.width) * duration
 
         update =
             MediaPlayer.updateCurrentTime
@@ -240,27 +237,19 @@ drag model { id, timeOffset, dragBar } mousePosition =
                     case id of
                         Audio ->
                             let
-                                oldTime =
-                                    model.audio.currentTime
-
                                 newTime =
                                     calculateTime model.audio.duration
                             in
                             ( newTime
-                            , clampTime model.video.duration
-                                (newTime - timeOffset)
+                            , newTime - timeOffset
                             )
 
                         Video ->
                             let
-                                oldTime =
-                                    model.video.currentTime
-
                                 newTime =
                                     calculateTime model.video.duration
                             in
-                            ( clampTime model.audio.duration
-                                (newTime - timeOffset)
+                            ( newTime - timeOffset
                             , newTime
                             )
 
