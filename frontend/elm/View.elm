@@ -240,15 +240,15 @@ mediaPlayerToolbar id mediaPlayer loopState =
         ( name, icon ) =
             case id of
                 Audio ->
-                    ( "audio", "volume-up" )
+                    ( "Audio", "volume-up" )
 
                 Video ->
-                    ( "video", "video-camera" )
+                    ( "Video", "video-camera" )
 
         ( playPauseTitle, playPauseIcon ) =
             case ( mediaPlayer.playState, loopState ) of
                 ( Playing, Normal ) ->
-                    ( "Playing " ++ name ++ ". Click to pause."
+                    ( name ++ " is playing. Click to pause."
                     , "pause"
                     )
 
@@ -258,12 +258,12 @@ mediaPlayerToolbar id mediaPlayer loopState =
                     )
 
                 ( Paused, Normal ) ->
-                    ( "Paused " ++ name ++ ". Click to play."
+                    ( name ++ " is paused. Click to play."
                     , "play"
                     )
 
                 ( Paused, Looping _ ) ->
-                    ( "Paused. Click to play."
+                    ( "Paused. Click to loop."
                     , "play-circle-o"
                     )
     in
@@ -313,10 +313,10 @@ generalToolbar model =
               , title =
                     case model.loopState of
                         Normal ->
-                            "Video and audio play in normally. Click to loop."
+                            "Video and audio play normally. Click to loop."
 
                         Looping _ ->
-                            "Video and audio play loop around their current positions. Click to play normally."
+                            "Video and audio loop around their current positions. Click to play normally."
               , pressed =
                     case model.loopState of
                         Normal ->
