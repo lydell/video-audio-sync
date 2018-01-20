@@ -513,21 +513,3 @@ decodePlayState id =
                     False ->
                         ExternalPlay id
             )
-
-
-togglePlayState : MediaPlayerId -> PlayState -> Attribute Msg
-togglePlayState id playState =
-    onClickWithButton <|
-        case playState of
-            Playing ->
-                Pause id
-
-            Paused ->
-                Play id
-
-
-toPoints : List ( number, number ) -> String
-toPoints coords =
-    coords
-        |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
-        |> String.join " "
