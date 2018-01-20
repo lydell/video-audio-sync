@@ -316,14 +316,13 @@ mediaPlayerToolbar id mediaPlayer loopState =
                         Paused ->
                             False
               , attributes =
-                    [ onClickWithButton <|
+                    onClickWithButton <|
                         case mediaPlayer.playState of
                             Playing ->
                                 Pause id
 
                             Paused ->
                                 Play id
-                    ]
               }
             ]
         , buttonGroup <|
@@ -348,8 +347,7 @@ buttonDetailsFromJumpAction id jumpAction =
             , label = NoLabel
             , pressed = False
             , attributes =
-                [ onClickWithButton (Jump id jumpAction.timeOffset)
-                ]
+                onClickWithButton (Jump id jumpAction.timeOffset)
             }
     in
     if jumpAction.timeOffset < 0 then

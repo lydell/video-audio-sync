@@ -2,7 +2,7 @@ module Html.Events.Custom exposing (MetaDataDetails, MouseButton(..), MouseDownD
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
-import Html.Events exposing (on, onWithOptions)
+import Html.Events exposing (on, onClick, onWithOptions)
 import Json.Decode as Decode exposing (Decoder)
 import Mouse
 import Time exposing (Time)
@@ -26,9 +26,14 @@ type MouseButton
     | Right
 
 
-onClickWithButton : (MouseButton -> msg) -> Attribute msg
+onClickWithButton : (MouseButton -> msg) -> List (Attribute msg)
 onClickWithButton msg =
-    on "mousedown" (decodeMouseButton |> Decode.map msg)
+    [ onClick (msg Left)
+    , onWithOptions
+        "contextmenu"
+        { stopPropagation = False, preventDefault = True }
+        (Decode.succeed (msg Right))
+    ]
 
 
 onMouseDown : (MouseDownDetails -> msg) -> Attribute msg
