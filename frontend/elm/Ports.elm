@@ -35,19 +35,19 @@ encode : OutgoingMessage -> TaggedData
 encode outgoingMessage =
     case outgoingMessage of
         MeasureArea id ->
-            { tag = "MeasureArea", data = Encode.string (DomId.toString id) }
+            { tag = "MeasureArea", data = DomId.encode id }
 
         Play id ->
-            { tag = "Play", data = Encode.string (DomId.toString id) }
+            { tag = "Play", data = DomId.encode id }
 
         Pause id ->
-            { tag = "Pause", data = Encode.string (DomId.toString id) }
+            { tag = "Pause", data = DomId.encode id }
 
         Seek id time ->
             { tag = "Seek"
             , data =
                 Encode.object
-                    [ ( "id", Encode.string (DomId.toString id) )
+                    [ ( "id", DomId.encode id )
                     , ( "time", Encode.float time )
                     ]
             }

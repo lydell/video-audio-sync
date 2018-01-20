@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import DomId exposing (DomId(ControlsArea, VideoArea))
+import DomId exposing (DomId(GraphicsArea, VideoArea))
 import Html exposing (Html)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import MediaPlayer exposing (MediaPlayer)
@@ -84,7 +84,7 @@ update msg model =
                         DomId.VideoArea ->
                             ( { model | videoArea = area }, Cmd.none )
 
-                        DomId.ControlsArea ->
+                        DomId.GraphicsArea ->
                             ( { model | controlsArea = area }, Cmd.none )
 
                         _ ->
@@ -216,7 +216,7 @@ update msg model =
             ( { model | windowSize = size }
             , Cmd.batch
                 [ Ports.send (Ports.MeasureArea DomId.VideoArea)
-                , Ports.send (Ports.MeasureArea DomId.ControlsArea)
+                , Ports.send (Ports.MeasureArea DomId.GraphicsArea)
                 ]
             )
 

@@ -1,6 +1,20 @@
 @import "~font-awesome/css/font-awesome.css";
 
+:root {
+  --blue: #229dff;
+  --grey-leia: #e9ecef;
+  --grey-luke: #ced4da;
+  --spacing: 15px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  background-repeat: no-repeat;
+}
+
 html {
+  background-color: white;
+  color: black;
   font: menu;
   font-size: 16px;
 }
@@ -9,27 +23,42 @@ body {
   margin: 0;
 }
 
-video {
-  display: block;
-  margin: auto;
+p {
+  margin: 0;
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
 }
 
 button {
-  margin: 0;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 0;
-  background: none;
   cursor: pointer;
 }
 
-button:hover,
-button:focus {
-  background-color: #eee;
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
 }
 
-p {
+textarea {
+  width: 100%;
+}
+
+*::placeholder {
+  color: inherit;
+  opacity: 0.5;
+}
+
+label {
   margin: 0;
+  font-weight: inherit;
 }
 
 .Layout {
@@ -38,13 +67,13 @@ p {
   height: 100vh;
 }
 
-.Layout-video {
+.Layout-videoWrapper {
   flex: 1;
   background-color: black;
   position: relative;
 }
 
-.Layout-video video {
+.Layout-video {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -52,18 +81,18 @@ p {
 }
 
 .Layout-controls {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  grid-gap: 10px;
-  padding: 6px 12px;
+  padding: var(--spacing);
 }
 
-.Progress {
+.Layout-controls > * + * {
+  margin-top: var(--spacing);
+}
+
+.Graphics {
   position: relative;
 }
 
-.Progress-svg {
+.Graphics-svg {
   position: absolute;
   top: 0;
   left: 0;
@@ -72,21 +101,21 @@ p {
   overflow: visible;
 }
 
-.Progress-line {
-  fill: #eee;
+.ProgressBar {
+  fill: var(--grey-leia);
 }
 
-.Progress-elapsed {
-  fill: rgba(255, 0, 0, 0.5);
+.ProgressBar-progress {
+  fill: var(--blue);
 }
 
-.Progress-currentTime {
+.ProgressBar-current {
   fill: none;
-  stroke: red;
+  stroke: black;
   stroke-width: 2px;
 }
 
-.Progress-hover {
+.ProgressBar-mouseArea {
   fill: transparent;
   cursor: pointer;
 }
@@ -97,14 +126,46 @@ p {
 }
 
 .Toolbar > * + * {
-  margin-left: 10px;
+  margin-left: var(--spacing);
 }
 
-.elm-mini-controls {
-  transform: translateY(85%);
-  transition: transform 200ms;
+.ButtonGroup {
+  display: flex;
 }
 
-.elm-mini-controls:hover {
-  transform: translateY(0);
+.ButtonGroup-button {
+  --border-width: 1px;
+  --border-radius: 4px;
+
+  margin: 0;
+  padding: 5px;
+  border: var(--border-width) solid var(--grey-luke);
+  border-radius: 0;
+  background: var(--grey-leia);
+}
+
+.ButtonGroup-button:first-child {
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+.ButtonGroup-button:last-child {
+  border-top-right-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+.ButtonGroup-button:not(:first-child) {
+  margin-left: calc(-1 * var(--border-radius));
+}
+
+.ButtonGroup-button:hover,
+.ButtonGroup-button:focus,
+.ButtonGroup-button:active {
+  outline: none;
+  border-color: var(--blue);
+  position: relative;
+}
+
+.ButtonGroup-button.is-pressed {
+  background-color: var(--grey-luke);
 }

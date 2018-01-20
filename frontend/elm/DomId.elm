@@ -1,9 +1,13 @@
-module DomId exposing (DomId(..), fromString, toString)
+module DomId exposing (DomId(..), fromString, toHtml, encode, toString)
+
+import Html
+import Html.Attributes
+import Json.Encode as Encode
 
 
 type DomId
     = VideoArea
-    | ControlsArea
+    | GraphicsArea
     | Video
     | Audio
 
@@ -14,8 +18,8 @@ toString id =
         VideoArea ->
             "VideoArea"
 
-        ControlsArea ->
-            "ControlsArea"
+        GraphicsArea ->
+            "GraphicsArea"
 
         Video ->
             "video"
@@ -24,14 +28,24 @@ toString id =
             "audio"
 
 
+toHtml : DomId -> Html.Attribute msg
+toHtml id =
+    Html.Attributes.id (toString id)
+
+
+encode : DomId -> Encode.Value
+encode id =
+    Encode.string (toString id)
+
+
 fromString : String -> Result String DomId
 fromString string =
     case string of
         "VideoArea" ->
             Ok VideoArea
 
-        "ControlsArea" ->
-            Ok ControlsArea
+        "GraphicsArea" ->
+            Ok GraphicsArea
 
         "video" ->
             Ok Video
