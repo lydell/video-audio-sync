@@ -387,20 +387,8 @@ drag model { id, timeOffset, dragBar, lockState } mousePosition =
                         | audio = update audioTime model.audio
                         , video = update videoTime model.video
                     }
-
-                newLoopState =
-                    case model.loopState of
-                        Normal ->
-                            Normal
-
-                        Looping _ ->
-                            Looping
-                                { audioTime = newModel.audio.currentTime
-                                , videoTime = newModel.video.currentTime
-                                , restarting = False
-                                }
             in
-            ( { newModel | loopState = newLoopState }
+            ( updateLoopTimes newModel
             , Cmd.batch
                 [ Ports.send (msg DomId.Audio audioTime)
                 , Ports.send (msg DomId.Video videoTime)
@@ -420,6 +408,24 @@ drag model { id, timeOffset, dragBar, lockState } mousePosition =
                 time =
                     calculateTime duration
             in
-            ( updateMediaPlayer (update time) id model
+            ( updateMediaPlayer (update time) id model |> updateLoopTimes
             , Ports.send (msg (domIdFromMediaPlayerId id) time)
             )
+
+
+updateLoopTimes : Model -> Model
+updateLoopTimes model =
+    let
+        newLoopState =
+            case model.loopState of
+                Normal ->
+                    Normal
+
+                Looping loopDetails ->
+                    Looping
+                        { loopDetails
+                            | audioTime = model.audio.currentTime
+                            , videoTime = model.video.currentTime
+                        }
+    in
+    { model | loopState = newLoopState }
