@@ -4,6 +4,7 @@ import DomId exposing (DomId)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Custom
 import Json.Encode as Encode
+import Time exposing (Time)
 
 
 type alias TaggedData =
@@ -16,7 +17,8 @@ type OutgoingMessage
     = MeasureArea DomId
     | Play DomId
     | Pause DomId
-    | Seek DomId Float
+    | Seek DomId Time
+    | RestartLoop { audioTime : Time, videoTime : Time }
 
 
 type IncomingMessage
@@ -52,6 +54,15 @@ encode outgoingMessage =
                     ]
             }
 
+        RestartLoop { audioTime, videoTime } ->
+            { tag = "RestartLoop"
+            , data =
+                Encode.object
+                    [ ( "audio", encodeLoopMedia DomId.Audio audioTime )
+                    , ( "video", encodeLoopMedia DomId.Video videoTime )
+                    ]
+            }
+
 
 decoder : String -> Result String (Decoder IncomingMessage)
 decoder tag =
@@ -81,6 +92,14 @@ port elmToJs : TaggedData -> Cmd msg
 
 
 port jsToElm : (TaggedData -> msg) -> Sub msg
+
+
+encodeLoopMedia : DomId -> Time -> Encode.Value
+encodeLoopMedia id time =
+    Encode.object
+        [ ( "id", DomId.encode id )
+        , ( "time", Encode.float time )
+        ]
 
 
 areaMeasurementDecoder : Decoder IncomingMessage

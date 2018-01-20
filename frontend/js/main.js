@@ -45,11 +45,43 @@ function start() {
       case "Seek": {
         const { id, time } = message.data;
         withElement(id, message, element => {
+          // Pass `null` as callback to clear previously queued seeks.
           if (element.seeking) {
-            element.onseeked = seek.bind(null, element, time);
+            element.onseeked = seek.bind(null, element, time, null);
           } else {
-            seek(element, time);
+            seek(element, time, null);
           }
+        });
+        break;
+      }
+
+      case "RestartLoop": {
+        const { audio, video } = message.data;
+
+        withElement(audio.id, message, audioElement => {
+          withElement(video.id, message, videoElement => {
+            if (audioElement.seeking || videoElement.seeking) {
+              console.warn("Aborting RestartLoop attempt due to seeking", {
+                audioSeeking: audioElement.seeking,
+                videoSeeking: videoElement.seeking,
+                message,
+              });
+              return;
+            }
+
+            audioElement.pause();
+            videoElement.pause();
+
+            function callback() {
+              if (!audioElement.seeking && !videoElement.seeking) {
+                audioElement.play();
+                videoElement.play();
+              }
+            }
+
+            seek(audioElement, audio.time, callback);
+            seek(videoElement, video.time, callback);
+          });
         });
         break;
       }
@@ -71,14 +103,14 @@ function withElement(id, message, callback) {
   callback(element);
 }
 
-function seek(media, time) {
+function seek(media, time, callback) {
+  media.onseeked = callback;
   const seconds = time / 1000;
   if (media.fastSeek) {
     media.fastSeek(seconds);
   } else {
     media.currentTime = seconds;
   }
-  media.onseeked = null;
 }
 
 // Wait for CSS to load in development.
