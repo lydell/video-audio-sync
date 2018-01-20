@@ -106,11 +106,7 @@ function withElement(id, message, callback) {
 function seek(media, time, callback) {
   media.onseeked = callback;
   const seconds = time / 1000;
-  if (media.fastSeek) {
-    media.fastSeek(seconds);
-  } else {
-    media.currentTime = seconds;
-  }
+  media.currentTime = seconds;
 }
 
 // Wait for CSS to load in development.
