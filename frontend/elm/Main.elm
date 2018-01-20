@@ -107,67 +107,7 @@ update msg model =
             )
 
         CurrentTime id currentTime ->
-            let
-                ( cmd, newLoopState ) =
-                    case model.loopState of
-                        Normal ->
-                            ( Cmd.none, model.loopState )
-
-                        Looping { audioTime, videoTime, restarting } ->
-                            let
-                                startMovement =
-                                    min loopRadius (min audioTime videoTime)
-
-                                endMovement =
-                                    min loopRadius <|
-                                        min
-                                            (model.audio.duration - audioTime)
-                                            (model.video.duration - videoTime)
-
-                                audioStartTime =
-                                    audioTime - startMovement
-
-                                videoStartTime =
-                                    videoTime - startMovement
-
-                                audioEndTime =
-                                    audioTime + endMovement
-
-                                videoEndTime =
-                                    videoTime + endMovement
-
-                                shouldRestart =
-                                    (model.audio.currentTime >= audioEndTime)
-                                        || (model.video.currentTime >= videoEndTime)
-                            in
-                            if shouldRestart && not restarting then
-                                ( Ports.send
-                                    (Ports.RestartLoop
-                                        { audioTime = audioStartTime
-                                        , videoTime = videoStartTime
-                                        }
-                                    )
-                                , Looping
-                                    { audioTime = audioTime
-                                    , videoTime = videoTime
-                                    , restarting = True
-                                    }
-                                )
-                            else
-                                ( Cmd.none
-                                , Looping
-                                    { audioTime = audioTime
-                                    , videoTime = videoTime
-                                    , restarting = shouldRestart
-                                    }
-                                )
-            in
-            ( updateMediaPlayer
-                (MediaPlayer.updateCurrentTime currentTime)
-                id
-                { model | loopState = newLoopState }
-            , cmd
-            )
+            updateCurrentTime id currentTime model
 
         ExternalPlay id ->
             play Unlocked id model
@@ -341,6 +281,63 @@ pausePlayHelper update msg lockState id model =
                     Locked
     in
     updateLockAware newLockState model id update msg
+
+
+updateCurrentTime : MediaPlayerId -> Time -> Model -> ( Model, Cmd Msg )
+updateCurrentTime id currentTime model =
+    let
+        ( cmd, newLoopState ) =
+            case model.loopState of
+                Normal ->
+                    ( Cmd.none, model.loopState )
+
+                Looping ({ audioTime, videoTime, restarting } as loopDetails) ->
+                    let
+                        startMovement =
+                            min loopRadius (min audioTime videoTime)
+
+                        endMovement =
+                            min loopRadius <|
+                                min
+                                    (model.audio.duration - audioTime)
+                                    (model.video.duration - videoTime)
+
+                        audioStartTime =
+                            audioTime - startMovement
+
+                        videoStartTime =
+                            videoTime - startMovement
+
+                        audioEndTime =
+                            audioTime + endMovement
+
+                        videoEndTime =
+                            videoTime + endMovement
+
+                        shouldRestart =
+                            (model.audio.currentTime >= audioEndTime)
+                                || (model.video.currentTime >= videoEndTime)
+                    in
+                    if shouldRestart && not restarting then
+                        ( Ports.send
+                            (Ports.RestartLoop
+                                { audioTime = audioStartTime
+                                , videoTime = videoStartTime
+                                }
+                            )
+                        , Looping { loopDetails | restarting = True }
+                        )
+                    else
+                        ( Cmd.none
+                        , Looping { loopDetails | restarting = shouldRestart }
+                        )
+    in
+    ( updateMediaPlayer
+        (MediaPlayer.updateCurrentTime currentTime)
+        id
+        { model | loopState = newLoopState }
+    , cmd
+    )
 
 
 drag :
