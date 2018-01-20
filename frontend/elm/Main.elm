@@ -113,7 +113,7 @@ update msg model =
                         Normal ->
                             Cmd.none
 
-                        Looping audioTime videoTime ->
+                        Looping { audioTime, videoTime } ->
                             let
                                 audioStartTime =
                                     max 0 (audioTime - loopRadius)
@@ -206,8 +206,9 @@ update msg model =
             ( { model
                 | loopState =
                     Looping
-                        model.audio.currentTime
-                        model.video.currentTime
+                        { audioTime = model.audio.currentTime
+                        , videoTime = model.video.currentTime
+                        }
               }
             , Cmd.none
             )
@@ -301,7 +302,7 @@ pausePlayHelper update msg lockState id model =
                 Normal ->
                     lockState
 
-                Looping _ _ ->
+                Looping _ ->
                     Locked
     in
     updateLockAware newLockState model id update msg
@@ -360,10 +361,11 @@ drag model { id, timeOffset, dragBar, lockState } mousePosition =
                         Normal ->
                             Normal
 
-                        Looping time time2 ->
+                        Looping _ ->
                             Looping
-                                newModel.audio.currentTime
-                                newModel.video.currentTime
+                                { audioTime = newModel.audio.currentTime
+                                , videoTime = newModel.video.currentTime
+                                }
             in
             ( { newModel | loopState = newLoopState }
             , Cmd.batch

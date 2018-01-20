@@ -143,7 +143,7 @@ viewGraphics model =
                     , model.audio.currentTime
                     )
 
-                Looping audioTime videoTime ->
+                Looping { audioTime, videoTime } ->
                     ( videoTime
                     , audioTime
                     )
@@ -252,7 +252,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
                     , "pause"
                     )
 
-                ( Playing, Looping _ _ ) ->
+                ( Playing, Looping _ ) ->
                     ( "Looping. Click to pause."
                     , "pause-circle-o"
                     )
@@ -262,7 +262,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
                     , "play"
                     )
 
-                ( Paused, Looping _ _ ) ->
+                ( Paused, Looping _ ) ->
                     ( "Paused. Click to play."
                     , "play-circle-o"
                     )
@@ -315,14 +315,14 @@ generalToolbar model =
                         Normal ->
                             "Video and audio play in normally. Click to loop."
 
-                        Looping _ _ ->
+                        Looping _ ->
                             "Video and audio play loop around their current positions. Click to play normally."
               , pressed =
                     case model.loopState of
                         Normal ->
                             False
 
-                        Looping _ _ ->
+                        Looping _ ->
                             True
               , attributes =
                     [ onClick <|
@@ -330,7 +330,7 @@ generalToolbar model =
                             Normal ->
                                 GoLooping
 
-                            Looping _ _ ->
+                            Looping _ ->
                                 GoNormal
                     ]
               }

@@ -31,7 +31,7 @@ type LockState
 
 type LoopState
     = Normal
-    | Looping Time Time
+    | Looping { audioTime : Time, videoTime : Time }
 
 
 type Drag
