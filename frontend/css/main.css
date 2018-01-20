@@ -134,9 +134,12 @@ label {
 }
 
 .ButtonGroup-button {
+  --size: 32px;
   --border-width: 1px;
   --border-radius: 4px;
 
+  min-width: var(--size);
+  height: var(--size);
   margin: 0;
   padding: 5px;
   border: var(--border-width) solid var(--grey-luke);
@@ -155,7 +158,7 @@ label {
 }
 
 .ButtonGroup-button:not(:first-child) {
-  margin-left: calc(-1 * var(--border-radius));
+  margin-left: calc(-1 * var(--border-width));
 }
 
 .ButtonGroup-button:hover,
@@ -168,4 +171,20 @@ label {
 
 .ButtonGroup-button.is-pressed {
   background-color: var(--grey-luke);
+}
+
+.ButtonGroup-buttonInner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ButtonGroup-buttonInner > * + * {
+  margin-left: 5px;
+}
+
+.ButtonGroup-buttonLabel {
+  font-size: 0.75em;
 }

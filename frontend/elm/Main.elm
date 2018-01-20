@@ -133,6 +133,9 @@ update msg model =
         Pause id mouseButton ->
             pause (lockStateFromMouseButton mouseButton) id model
 
+        Jump id timeOffset mouseButton ->
+            jump (lockStateFromMouseButton mouseButton) id timeOffset model
+
         DragStart id dragBar mouseDownDetails ->
             let
                 timeOffset =
@@ -280,13 +283,117 @@ pausePlayHelper update msg lockState id model =
     updateLockAware newLockState model id update msg
 
 
+jump : LockState -> MediaPlayerId -> Time -> Model -> ( Model, Cmd msg )
+jump lockState id timeOffset model =
+    let
+        msg =
+            Ports.Seek
+
+        clampAudio time =
+            clamp 0 model.audio.duration time
+
+        clampVideo time =
+            clamp 0 model.video.duration time
+    in
+    case lockState of
+        Locked ->
+            let
+                newLoopState =
+                    case model.loopState of
+                        Normal ->
+                            Normal
+
+                        Looping { audioTime, videoTime } ->
+                            Looping
+                                { audioTime = clampAudio (audioTime + timeOffset)
+                                , videoTime = clampVideo (videoTime + timeOffset)
+                                , restarting = False
+                                }
+
+                newModel =
+                    { model
+                        | audio =
+                            MediaPlayer.updateCurrentTime
+                                (model.audio.currentTime + timeOffset)
+                                model.audio
+                        , video =
+                            MediaPlayer.updateCurrentTime
+                                (model.video.currentTime + timeOffset)
+                                model.video
+                        , loopState = newLoopState
+                    }
+            in
+            ( newModel
+            , Cmd.batch
+                [ Ports.send (msg DomId.Audio newModel.audio.currentTime)
+                , Ports.send (msg DomId.Video newModel.video.currentTime)
+                ]
+            )
+
+        Unlocked ->
+            let
+                newLoopState =
+                    case model.loopState of
+                        Normal ->
+                            Normal
+
+                        Looping { audioTime, videoTime } ->
+                            case id of
+                                Audio ->
+                                    Looping
+                                        { audioTime =
+                                            clampAudio (audioTime + timeOffset)
+                                        , videoTime = videoTime
+                                        , restarting = False
+                                        }
+
+                                Video ->
+                                    Looping
+                                        { audioTime = audioTime
+                                        , videoTime =
+                                            clampVideo (videoTime + timeOffset)
+                                        , restarting = False
+                                        }
+            in
+            case id of
+                Audio ->
+                    let
+                        newModel =
+                            { model
+                                | audio =
+                                    MediaPlayer.updateCurrentTime
+                                        (model.audio.currentTime + timeOffset)
+                                        model.audio
+                                , loopState = newLoopState
+                            }
+                    in
+                    ( newModel
+                    , Ports.send (msg DomId.Audio newModel.audio.currentTime)
+                    )
+
+                Video ->
+                    let
+                        newModel =
+                            { model
+                                | video =
+                                    MediaPlayer.updateCurrentTime
+                                        (model.video.currentTime + timeOffset)
+                                        model.video
+                                , loopState = newLoopState
+                            }
+                    in
+                    ( newModel
+                    , Ports.send (msg DomId.Video newModel.video.currentTime)
+                    )
+
+
 updateCurrentTime : MediaPlayerId -> Time -> Model -> ( Model, Cmd Msg )
 updateCurrentTime id currentTime model =
     let
         ( cmd, newLoopState ) =
             case model.loopState of
                 Normal ->
-                    ( Cmd.none, model.loopState )
+                    ( Cmd.none, Normal )
 
                 Looping ({ audioTime, videoTime, restarting } as loopDetails) ->
                     let

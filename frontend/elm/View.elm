@@ -10,6 +10,7 @@ import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Svg
 import Svg.Attributes as Svg
+import Time
 import Types exposing (..)
 import Utils
 
@@ -32,6 +33,33 @@ progressBarMouseAreaExtra =
 svgHeight : Float
 svgHeight =
     (progressBarHeight * 2) + progressBarSpacing
+
+
+jumpActionsForward : List JumpAction
+jumpActionsForward =
+    [ { timeOffset = 100 * Time.millisecond
+      , label = "0.1s"
+      }
+    , { timeOffset = 1 * Time.second
+      , label = "1s"
+      }
+    , { timeOffset = 1 * Time.minute
+      , label = "1m"
+      }
+    , { timeOffset = 10 * Time.minute
+      , label = "10m"
+      }
+    ]
+
+
+jumpActionsBackward : List JumpAction
+jumpActionsBackward =
+    jumpActionsForward
+        |> List.reverse
+        |> List.map
+            (\jumpAction ->
+                { jumpAction | timeOffset = negate jumpAction.timeOffset }
+            )
 
 
 view : Model -> Html Msg
@@ -240,37 +268,38 @@ mediaPlayerToolbar id mediaPlayer loopState =
         ( name, icon ) =
             case id of
                 Audio ->
-                    ( "Audio", "volume-up" )
+                    ( "Audio", Icon "volume-up" )
 
                 Video ->
-                    ( "Video", "video-camera" )
+                    ( "Video", Icon "video-camera" )
 
         ( playPauseTitle, playPauseIcon ) =
             case ( mediaPlayer.playState, loopState ) of
                 ( Playing, Normal ) ->
                     ( name ++ " is playing. Click to pause."
-                    , "pause"
+                    , Icon "pause"
                     )
 
                 ( Playing, Looping _ ) ->
                     ( "Looping. Click to pause."
-                    , "pause-circle-o"
+                    , CustomIcon "pause-circle-o" "fa-lg"
                     )
 
                 ( Paused, Normal ) ->
                     ( name ++ " is paused. Click to play."
-                    , "play"
+                    , Icon "play"
                     )
 
                 ( Paused, Looping _ ) ->
                     ( "Paused. Click to loop."
-                    , "play-circle-o"
+                    , CustomIcon "play-circle-o" "fa-lg"
                     )
     in
     toolbar
         [ buttonGroup
             [ { icon = icon
               , title = "TODO"
+              , label = NoLabel
               , pressed = False
               , attributes = []
               }
@@ -278,6 +307,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
         , buttonGroup
             [ { icon = playPauseIcon
               , title = playPauseTitle
+              , label = NoLabel
               , pressed =
                     case mediaPlayer.playState of
                         Playing ->
@@ -296,6 +326,10 @@ mediaPlayerToolbar id mediaPlayer loopState =
                     ]
               }
             ]
+        , buttonGroup <|
+            List.map (buttonDetailsFromJumpAction id) jumpActionsBackward
+        , buttonGroup <|
+            List.map (buttonDetailsFromJumpAction id) jumpActionsForward
         , p []
             [ text <|
                 Utils.formatDuration mediaPlayer.currentTime
@@ -305,11 +339,38 @@ mediaPlayerToolbar id mediaPlayer loopState =
         ]
 
 
+buttonDetailsFromJumpAction : MediaPlayerId -> JumpAction -> ButtonDetails Msg
+buttonDetailsFromJumpAction id jumpAction =
+    let
+        base =
+            { icon = Icon ""
+            , title = ""
+            , label = NoLabel
+            , pressed = False
+            , attributes =
+                [ onClickWithButton (Jump id jumpAction.timeOffset)
+                ]
+            }
+    in
+    if jumpAction.timeOffset < 0 then
+        { base
+            | icon = Icon "backward"
+            , title = "Jump backward: " ++ jumpAction.label
+            , label = RightLabel jumpAction.label
+        }
+    else
+        { base
+            | icon = Icon "forward"
+            , title = "Jump forward: " ++ jumpAction.label
+            , label = LeftLabel jumpAction.label
+        }
+
+
 generalToolbar : Model -> Html Msg
 generalToolbar model =
     toolbar
         [ buttonGroup
-            [ { icon = "repeat"
+            [ { icon = Icon "repeat"
               , title =
                     case model.loopState of
                         Normal ->
@@ -317,6 +378,7 @@ generalToolbar model =
 
                         Looping _ ->
                             "Video and audio loop around their current positions. Click to play normally."
+              , label = NoLabel
               , pressed =
                     case model.loopState of
                         Normal ->
@@ -344,11 +406,18 @@ toolbar children =
 
 
 type alias ButtonDetails msg =
-    { icon : String
+    { icon : Icon
     , title : String
+    , label : ButtonLabel
     , pressed : Bool
     , attributes : List (Attribute msg)
     }
+
+
+type ButtonLabel
+    = NoLabel
+    | LeftLabel String
+    | RightLabel String
 
 
 buttonGroup : List (ButtonDetails msg) -> Html msg
@@ -358,6 +427,17 @@ buttonGroup buttons =
 
 buttonGroupButton : ButtonDetails msg -> Html msg
 buttonGroupButton buttonDetails =
+    let
+        label labelText =
+            span
+                [ attribute "aria-hidden" "true"
+                , class "ButtonGroup-buttonLabel"
+                ]
+                [ text labelText ]
+
+        icon =
+            fontawesome buttonDetails.icon
+    in
     button
         ([ type_ "button"
          , title buttonDetails.title
@@ -368,14 +448,38 @@ buttonGroupButton buttonDetails =
          ]
             ++ buttonDetails.attributes
         )
-        [ fontawesome buttonDetails.icon ]
+        [ div [ class "ButtonGroup-buttonInner" ] <|
+            case buttonDetails.label of
+                NoLabel ->
+                    [ icon ]
+
+                LeftLabel labelText ->
+                    [ label labelText, icon ]
+
+                RightLabel labelText ->
+                    [ icon, label labelText ]
+        ]
 
 
-fontawesome : String -> Html msg
-fontawesome name =
+type Icon
+    = Icon String
+    | CustomIcon String String
+
+
+fontawesome : Icon -> Html msg
+fontawesome icon =
+    let
+        ( name, extraClass ) =
+            case icon of
+                Icon name ->
+                    ( name, "" )
+
+                CustomIcon name extraClass ->
+                    ( name, extraClass )
+    in
     span
         [ attribute "aria-hidden" "true"
-        , class ("fa fa-fw fa-" ++ name)
+        , class ("fa fa-" ++ name ++ " " ++ extraClass)
         ]
         []
 

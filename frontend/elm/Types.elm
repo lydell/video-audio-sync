@@ -53,6 +53,12 @@ type alias DragBar =
     }
 
 
+type alias JumpAction =
+    { timeOffset : Time
+    , label : String
+    }
+
+
 type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
@@ -62,6 +68,7 @@ type Msg
     | ExternalPause MediaPlayerId
     | Play MediaPlayerId MouseButton
     | Pause MediaPlayerId MouseButton
+    | Jump MediaPlayerId Time MouseButton
     | DragStart MediaPlayerId DragBar MouseDownDetails
     | DragMove Mouse.Position
     | DragEnd Mouse.Position
