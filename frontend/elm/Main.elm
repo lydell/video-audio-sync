@@ -113,7 +113,19 @@ update msg model =
             play Unlocked id model
 
         ExternalPause id ->
-            pause Unlocked id model
+            case model.loopState of
+                Normal ->
+                    pause Unlocked id model
+
+                Looping { restarting } ->
+                    -- When restarting a loop, the audio and video are
+                    -- temporarily paused. Skip updating the state in this case
+                    -- to avoid the play/pause buttons flashing between paused
+                    -- and playing.
+                    if restarting then
+                        ( model, Cmd.none )
+                    else
+                        pause Unlocked id model
 
         Play id mouseButton ->
             play (lockStateFromMouseButton mouseButton) id model
@@ -245,22 +257,7 @@ play lockState id model =
 
 pause : LockState -> MediaPlayerId -> Model -> ( Model, Cmd Msg )
 pause lockState id model =
-    let
-        result =
-            pausePlayHelper MediaPlayer.pause Ports.Pause lockState id model
-    in
-    case model.loopState of
-        Normal ->
-            result
-
-        Looping { restarting } ->
-            -- When restarting a loop, the audio and video are temporarily
-            -- paused. Skip updating the state in this case to avoid the
-            -- play/pause buttons flashing between paused and playing.
-            if restarting then
-                ( model, Cmd.none )
-            else
-                result
+    pausePlayHelper MediaPlayer.pause Ports.Pause lockState id model
 
 
 pausePlayHelper :
