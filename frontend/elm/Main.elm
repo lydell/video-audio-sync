@@ -421,11 +421,11 @@ updateLoopTimes model =
                 Normal ->
                     Normal
 
-                Looping loopDetails ->
+                Looping _ ->
                     Looping
-                        { loopDetails
-                            | audioTime = model.audio.currentTime
-                            , videoTime = model.video.currentTime
+                        { audioTime = model.audio.currentTime
+                        , videoTime = model.video.currentTime
+                        , restarting = False
                         }
     in
     { model | loopState = newLoopState }
