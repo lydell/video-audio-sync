@@ -82,4 +82,5 @@ type Msg
     | GoNormal
     | GoLooping
     | AddPoint Point
+    | RemovePoint Point
     | WindowSize Window.Size

@@ -10,7 +10,7 @@ import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Svg
 import Svg.Attributes as Svg
-import Time
+import Time exposing (Time)
 import Types exposing (..)
 import Utils
 
@@ -60,6 +60,19 @@ jumpActionsBackward =
             (\jumpAction ->
                 { jumpAction | timeOffset = negate jumpAction.timeOffset }
             )
+
+
+maxPointOffset : Float
+maxPointOffset =
+    let
+        minOffset =
+            Time.second
+    in
+    jumpActionsForward
+        |> List.map .timeOffset
+        |> List.minimum
+        |> Maybe.withDefault minOffset
+        |> min minOffset
 
 
 view : Model -> Html Msg
@@ -164,17 +177,8 @@ viewGraphics model =
         audioY =
             videoY + progressBarHeight + progressBarSpacing
 
-        ( videoCurrentTime, audioCurrentTime ) =
-            case model.loopState of
-                Normal ->
-                    ( model.video.currentTime
-                    , model.audio.currentTime
-                    )
-
-                Looping { audioTime, videoTime } ->
-                    ( videoTime
-                    , audioTime
-                    )
+        ( audioCurrentTime, videoCurrentTime ) =
+            getCurrentTimes model
 
         videoProgressBarDetails =
             { maxValue = toScale model.video.duration
@@ -416,6 +420,19 @@ buttonDetailsFromJumpAction id jumpAction =
 
 generalToolbar : Model -> Html Msg
 generalToolbar model =
+    let
+        ( audioCurrentTime, videoCurrentTime ) =
+            getCurrentTimes model
+
+        selectedPoint =
+            model.points
+                |> List.filter
+                    (\point ->
+                        (abs (point.audioTime - audioCurrentTime) < maxPointOffset)
+                            && (abs (point.videoTime - videoCurrentTime) < maxPointOffset)
+                    )
+                |> List.head
+    in
     toolbar
         [ buttonGroup
             [ { icon = Icon "repeat"
@@ -446,19 +463,31 @@ generalToolbar model =
               }
             ]
         , buttonGroup
-            [ { icon = Icon "plus"
-              , title = "Add point"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
-                    [ onClick
-                        (AddPoint
-                            { audioTime = model.audio.currentTime
-                            , videoTime = model.video.currentTime
-                            }
-                        )
-                    ]
-              }
+            [ case selectedPoint of
+                Just point ->
+                    { icon = Icon "trash"
+                    , title = "Remove point"
+                    , label = NoLabel
+                    , pressed = False
+                    , attributes =
+                        [ onClick (RemovePoint point)
+                        ]
+                    }
+
+                Nothing ->
+                    { icon = Icon "plus"
+                    , title = "Add point"
+                    , label = NoLabel
+                    , pressed = False
+                    , attributes =
+                        [ onClick
+                            (AddPoint
+                                { audioTime = audioCurrentTime
+                                , videoTime = videoCurrentTime
+                                }
+                            )
+                        ]
+                    }
             ]
         ]
 
@@ -583,3 +612,17 @@ toPoints coords =
     coords
         |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
         |> String.join " "
+
+
+getCurrentTimes : Model -> ( Time, Time )
+getCurrentTimes model =
+    case model.loopState of
+        Normal ->
+            ( model.audio.currentTime
+            , model.video.currentTime
+            )
+
+        Looping { audioTime, videoTime } ->
+            ( audioTime
+            , videoTime
+            )

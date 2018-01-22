@@ -192,6 +192,13 @@ update msg model =
         AddPoint point ->
             ( { model | points = point :: model.points }, Cmd.none )
 
+        RemovePoint point ->
+            let
+                newPoints =
+                    List.filter ((/=) point) model.points
+            in
+            ( { model | points = newPoints }, Cmd.none )
+
         WindowSize size ->
             ( { model | windowSize = size }
             , Cmd.batch
