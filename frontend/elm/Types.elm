@@ -16,6 +16,7 @@ type alias Model =
     , videoArea : Area
     , controlsArea : Area
     , windowSize : Window.Size
+    , points : List Point
     }
 
 
@@ -53,6 +54,12 @@ type alias DragBar =
     }
 
 
+type alias Point =
+    { audioTime : Time
+    , videoTime : Time
+    }
+
+
 type alias JumpAction =
     { timeOffset : Time
     , label : String
@@ -74,4 +81,5 @@ type Msg
     | DragEnd Mouse.Position
     | GoNormal
     | GoLooping
+    | AddPoint Point
     | WindowSize Window.Size

@@ -175,6 +175,36 @@ viewGraphics model =
                     ( videoTime
                     , audioTime
                     )
+
+        videoProgressBarDetails =
+            { maxValue = toScale model.video.duration
+            , currentValue = toScale videoCurrentTime
+            , x = progressBarX
+            , y = videoY
+            , onDragStart = DragStart Video
+            }
+
+        audioProgressBarDetails =
+            { maxValue = toScale model.audio.duration
+            , currentValue = toScale audioCurrentTime
+            , x = progressBarX
+            , y = audioY
+            , onDragStart = DragStart Audio
+            }
+
+        points =
+            model.points
+                |> List.filter
+                    (\{ audioTime, videoTime } ->
+                        (audioTime >= 0 && audioTime <= model.audio.duration)
+                            && (videoTime >= 0 && videoTime <= model.video.duration)
+                    )
+                |> List.map
+                    (\{ audioTime, videoTime } ->
+                        { x1 = toScale videoTime
+                        , x2 = toScale audioTime
+                        }
+                    )
     in
     div
         [ DomId.toHtml DomId.GraphicsArea
@@ -185,20 +215,27 @@ viewGraphics model =
             [ Svg.viewBox viewBoxString
             , Svg.class "Graphics-svg"
             ]
-            [ progressBar
-                { maxValue = toScale model.video.duration
-                , currentValue = toScale videoCurrentTime
-                , x = progressBarX
-                , y = videoY
-                , onDragStart = DragStart Video
-                }
-            , progressBar
-                { maxValue = toScale model.audio.duration
-                , currentValue = toScale audioCurrentTime
-                , x = progressBarX
-                , y = audioY
-                , onDragStart = DragStart Audio
-                }
+            [ progressBarBackground videoProgressBarDetails
+            , progressBarBackground audioProgressBarDetails
+            , Svg.g [] <|
+                List.map
+                    (\{ x1, x2 } ->
+                        Svg.polyline
+                            [ Svg.points
+                                (toPoints
+                                    [ ( x1, videoY )
+                                    , ( x1, videoY + progressBarHeight )
+                                    , ( x2, audioY )
+                                    , ( x2, audioY + progressBarHeight )
+                                    ]
+                                )
+                            , Svg.class "Point"
+                            ]
+                            []
+                    )
+                    points
+            , progressBar videoProgressBarDetails
+            , progressBar audioProgressBarDetails
             ]
         ]
 
@@ -212,6 +249,22 @@ type alias ProgressBarDetails msg =
     }
 
 
+progressBarBackground : ProgressBarDetails msg -> Html msg
+progressBarBackground { maxValue, x, y } =
+    let
+        width =
+            maxValue
+    in
+    Svg.rect
+        [ Svg.x (toString x)
+        , Svg.y (toString y)
+        , Svg.width (toString width)
+        , Svg.height (toString progressBarHeight)
+        , Svg.class "ProgressBarBackground"
+        ]
+        []
+
+
 progressBar : ProgressBarDetails msg -> Html msg
 progressBar { maxValue, currentValue, x, y, onDragStart } =
     let
@@ -221,16 +274,8 @@ progressBar { maxValue, currentValue, x, y, onDragStart } =
         progressWidth =
             currentValue
     in
-    Svg.g []
+    Svg.g [ Svg.class "ProgressBar" ]
         [ Svg.rect
-            [ Svg.x (toString x)
-            , Svg.y (toString y)
-            , Svg.width (toString width)
-            , Svg.height (toString progressBarHeight)
-            , Svg.class "ProgressBar"
-            ]
-            []
-        , Svg.rect
             [ Svg.x (toString x)
             , Svg.y (toString y)
             , Svg.width (toString progressWidth)
@@ -395,6 +440,21 @@ generalToolbar model =
                     ]
               }
             ]
+        , buttonGroup
+            [ { icon = Icon "plus"
+              , title = "Add point"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick
+                        (AddPoint
+                            { audioTime = model.audio.currentTime
+                            , videoTime = model.video.currentTime
+                            }
+                        )
+                    ]
+              }
+            ]
         ]
 
 
@@ -511,3 +571,10 @@ decodePlayState id =
                     False ->
                         ExternalPlay id
             )
+
+
+toPoints : List ( number, number ) -> String
+toPoints coords =
+    coords
+        |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
+        |> String.join " "

@@ -37,6 +37,7 @@ init =
       , videoArea = emptyArea
       , controlsArea = emptyArea
       , windowSize = { width = 0, height = 0 }
+      , points = []
       }
     , Task.perform WindowSize Window.size
     )
@@ -187,6 +188,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        AddPoint point ->
+            ( { model | points = point :: model.points }, Cmd.none )
 
         WindowSize size ->
             ( { model | windowSize = size }

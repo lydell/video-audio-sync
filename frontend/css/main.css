@@ -101,9 +101,11 @@ label {
   overflow: visible;
 }
 
-.ProgressBar {
+.ProgressBarBackground {
   fill: var(--grey-leia);
 }
+
+/* .ProgressBar {} */
 
 .ProgressBar-progress {
   fill: var(--blue);
@@ -118,6 +120,12 @@ label {
 .ProgressBar-mouseArea {
   fill: transparent;
   cursor: pointer;
+}
+
+.Point {
+  fill: none;
+  stroke: var(--grey-luke);
+  stroke-width: 2px;
 }
 
 .Toolbar {
