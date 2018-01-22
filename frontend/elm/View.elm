@@ -234,8 +234,8 @@ viewGraphics model =
                             []
                     )
                     points
-            , progressBar videoProgressBarDetails
-            , progressBar audioProgressBarDetails
+            , progressBarForeground videoProgressBarDetails
+            , progressBarForeground audioProgressBarDetails
             ]
         ]
 
@@ -250,23 +250,7 @@ type alias ProgressBarDetails msg =
 
 
 progressBarBackground : ProgressBarDetails msg -> Html msg
-progressBarBackground { maxValue, x, y } =
-    let
-        width =
-            maxValue
-    in
-    Svg.rect
-        [ Svg.x (toString x)
-        , Svg.y (toString y)
-        , Svg.width (toString width)
-        , Svg.height (toString progressBarHeight)
-        , Svg.class "ProgressBarBackground"
-        ]
-        []
-
-
-progressBar : ProgressBarDetails msg -> Html msg
-progressBar { maxValue, currentValue, x, y, onDragStart } =
+progressBarBackground { maxValue, currentValue, x, y } =
     let
         width =
             maxValue
@@ -274,21 +258,42 @@ progressBar { maxValue, currentValue, x, y, onDragStart } =
         progressWidth =
             currentValue
     in
-    Svg.g [ Svg.class "ProgressBar" ]
+    Svg.g [ Svg.class "ProgressBarBackground" ]
         [ Svg.rect
+            [ Svg.x (toString x)
+            , Svg.y (toString y)
+            , Svg.width (toString width)
+            , Svg.height (toString progressBarHeight)
+            , Svg.class "ProgressBarBackground-background"
+            ]
+            []
+        , Svg.rect
             [ Svg.x (toString x)
             , Svg.y (toString y)
             , Svg.width (toString progressWidth)
             , Svg.height (toString progressBarHeight)
-            , Svg.class "ProgressBar-progress"
+            , Svg.class "ProgressBarBackground-progress"
             ]
             []
-        , Svg.line
+        ]
+
+
+progressBarForeground : ProgressBarDetails msg -> Html msg
+progressBarForeground { maxValue, currentValue, x, y, onDragStart } =
+    let
+        width =
+            maxValue
+
+        progressWidth =
+            currentValue
+    in
+    Svg.g [ Svg.class "ProgressBarForeground" ]
+        [ Svg.line
             [ Svg.x1 (toString progressWidth)
             , Svg.y1 (toString y)
             , Svg.x2 (toString progressWidth)
             , Svg.y2 (toString (y + progressBarHeight))
-            , Svg.class "ProgressBar-current"
+            , Svg.class "ProgressBarForeground-current"
             ]
             []
         , Svg.rect
@@ -296,7 +301,7 @@ progressBar { maxValue, currentValue, x, y, onDragStart } =
             , Svg.y (toString (y - progressBarMouseAreaExtra / 2))
             , Svg.width (toString width)
             , Svg.height (toString (progressBarHeight + progressBarMouseAreaExtra))
-            , Svg.class "ProgressBar-mouseArea"
+            , Svg.class "ProgressBarForeground-mouseArea"
             , onMouseDown <|
                 onDragStart
                     { x = x

@@ -101,23 +101,25 @@ label {
   overflow: visible;
 }
 
-.ProgressBarBackground {
+/* .ProgressBarBackground {} */
+
+.ProgressBarBackground-background {
   fill: var(--grey-leia);
 }
 
-/* .ProgressBar {} */
-
-.ProgressBar-progress {
+.ProgressBarBackground-progress {
   fill: var(--blue);
 }
 
-.ProgressBar-current {
+/* .ProgressBarForeground {} */
+
+.ProgressBarForeground-current {
   fill: none;
   stroke: black;
   stroke-width: 2px;
 }
 
-.ProgressBar-mouseArea {
+.ProgressBarForeground-mouseArea {
   fill: transparent;
   cursor: pointer;
 }
