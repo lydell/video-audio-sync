@@ -9,6 +9,7 @@ import Ports exposing (Area)
 import Task
 import Time exposing (Time)
 import Types exposing (..)
+import Utils
 import View
 import Window
 
@@ -134,8 +135,11 @@ update msg model =
         Pause id mouseButton ->
             pause (lockStateFromMouseButton mouseButton) id model
 
-        Jump id timeOffset mouseButton ->
-            jump (lockStateFromMouseButton mouseButton) id timeOffset model
+        JumpByTime id timeOffset mouseButton ->
+            jumpByTime (lockStateFromMouseButton mouseButton) id timeOffset model
+
+        JumpByPoint id direction mouseButton ->
+            jumpByPoint (lockStateFromMouseButton mouseButton) id direction model
 
         DragStart id dragBar mouseDownDetails ->
             let
@@ -310,8 +314,8 @@ pausePlayHelper update msg lockState id model =
     updateLockAware newLockState model id update (always msg)
 
 
-jump : LockState -> MediaPlayerId -> Time -> Model -> ( Model, Cmd Msg )
-jump lockState id timeOffset model =
+jumpByTime : LockState -> MediaPlayerId -> Time -> Model -> ( Model, Cmd Msg )
+jumpByTime lockState id timeOffset model =
     let
         update mediaPlayer =
             MediaPlayer.updateCurrentTime
@@ -355,6 +359,67 @@ jump lockState id timeOffset model =
         id
         update
         msg
+
+
+jumpByPoint : LockState -> MediaPlayerId -> Direction -> Model -> ( Model, Cmd Msg )
+jumpByPoint lockState id direction model =
+    let
+        ( audioCurrentTime, videoCurrentTime ) =
+            Utils.getCurrentTimes model
+
+        calculateTime getTime currentTime mediaPlayer =
+            Utils.getClosestPoint getTime direction currentTime model.points
+                |> Maybe.map getTime
+                |> Maybe.withDefault
+                    (case direction of
+                        Forward ->
+                            mediaPlayer.duration
+
+                        Backward ->
+                            0
+                    )
+
+        audioTime =
+            calculateTime .audioTime audioCurrentTime model.audio
+
+        videoTime =
+            calculateTime .videoTime videoCurrentTime model.video
+
+        update =
+            MediaPlayer.updateCurrentTime
+
+        msg =
+            Ports.Seek
+    in
+    case lockState of
+        Locked ->
+            let
+                newModel =
+                    { model
+                        | audio = update audioTime model.audio
+                        , video = update videoTime model.video
+                    }
+            in
+            ( updateLoopTimes newModel
+            , Cmd.batch
+                [ Ports.send (msg DomId.Audio audioTime)
+                , Ports.send (msg DomId.Video videoTime)
+                ]
+            )
+
+        Unlocked ->
+            let
+                time =
+                    case id of
+                        Audio ->
+                            audioTime
+
+                        Video ->
+                            videoTime
+            in
+            ( updateMediaPlayer (update time) id model |> updateLoopTimes
+            , Ports.send (msg (domIdFromMediaPlayerId id) time)
+            )
 
 
 updateCurrentTime : MediaPlayerId -> Time -> Model -> ( Model, Cmd Msg )

@@ -62,19 +62,6 @@ jumpActionsBackward =
             )
 
 
-maxPointOffset : Float
-maxPointOffset =
-    let
-        minOffset =
-            Time.second
-    in
-    jumpActionsForward
-        |> List.map .timeOffset
-        |> List.minimum
-        |> Maybe.withDefault minOffset
-        |> min minOffset
-
-
 view : Model -> Html Msg
 view model =
     div [ class "Layout" ]
@@ -178,7 +165,7 @@ viewGraphics model =
             videoY + progressBarHeight + progressBarSpacing
 
         ( audioCurrentTime, videoCurrentTime ) =
-            getCurrentTimes model
+            Utils.getCurrentTimes model
 
         videoProgressBarDetails =
             { maxValue = toScale model.video.duration
@@ -383,6 +370,22 @@ mediaPlayerToolbar id mediaPlayer loopState =
             List.map (buttonDetailsFromJumpAction id) jumpActionsBackward
         , buttonGroup <|
             List.map (buttonDetailsFromJumpAction id) jumpActionsForward
+        , buttonGroup
+            [ { icon = Icon "step-backward"
+              , title = "Previous point"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    onClickWithButton (JumpByPoint id Backward)
+              }
+            , { icon = Icon "step-forward"
+              , title = "Next point"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    onClickWithButton (JumpByPoint id Forward)
+              }
+            ]
         , p []
             [ text <|
                 Utils.formatDuration mediaPlayer.currentTime
@@ -401,7 +404,7 @@ buttonDetailsFromJumpAction id jumpAction =
             , label = NoLabel
             , pressed = False
             , attributes =
-                onClickWithButton (Jump id jumpAction.timeOffset)
+                onClickWithButton (JumpByTime id jumpAction.timeOffset)
             }
     in
     if jumpAction.timeOffset < 0 then
@@ -422,16 +425,14 @@ generalToolbar : Model -> Html Msg
 generalToolbar model =
     let
         ( audioCurrentTime, videoCurrentTime ) =
-            getCurrentTimes model
+            Utils.getCurrentTimes model
 
         selectedPoint =
-            model.points
-                |> List.filter
-                    (\point ->
-                        (abs (point.audioTime - audioCurrentTime) < maxPointOffset)
-                            && (abs (point.videoTime - videoCurrentTime) < maxPointOffset)
-                    )
-                |> List.head
+            Utils.getSelectedPoint
+                { audioTime = audioCurrentTime
+                , videoTime = videoCurrentTime
+                }
+                model.points
     in
     toolbar
         [ buttonGroup
@@ -612,17 +613,3 @@ toPoints coords =
     coords
         |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
         |> String.join " "
-
-
-getCurrentTimes : Model -> ( Time, Time )
-getCurrentTimes model =
-    case model.loopState of
-        Normal ->
-            ( model.audio.currentTime
-            , model.video.currentTime
-            )
-
-        Looping { audioTime, videoTime } ->
-            ( audioTime
-            , videoTime
-            )
