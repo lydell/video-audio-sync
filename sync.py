@@ -93,7 +93,7 @@ def main(argv):
 
     raw_points = (json_data or {}).get('points')
 
-    if not raw_points:
+    if not raw_points or not isinstance(raw_points, list):
         yield json_parse_error(
             'Expected for example `{example}` (at least one point) but got:\n'
             '{actual}'
@@ -103,8 +103,6 @@ def main(argv):
             )
         )
         return
-
-    seen_point_times = set()
 
     for index, point in enumerate(raw_points):
         is_valid = (
@@ -126,9 +124,9 @@ def main(argv):
             )
             return
 
-        if not (point[0] >= 0):
+        if not (point[0] > 0):
             yield json_parse_error(
-                'Expected point {num} to have a time >= 0 but got:\n'
+                'Expected point {num} to have a duration > 0 but got:\n'
                 '{actual}'
                 .format(
                     num=index + 1,
@@ -148,19 +146,8 @@ def main(argv):
             )
             return
 
-        if point[0] in seen_point_times:
-            yield json_parse_error(
-                'Point {num1} has the same time as another point: {num2}'
-                .format(
-                    num1=index + 1,
-                    num2=point[0],
-                )
-            )
-            return
-
-        seen_point_times.add(point[0])
-
-    points = [(point[0], point[1]) for point in raw_points]
+    # Add a special point at the end that goes on to the end of the audio.
+    points = [(point[0], point[1]) for point in raw_points] + [(0, 1)]
 
     yield banner('Cutting audio')
 
@@ -168,43 +155,37 @@ def main(argv):
         shutil.rmtree(dir, ignore_errors=True)
     os.makedirs(dir)
 
-    sorted_points_raw = sorted(points, key=lambda point: point[0])
-    sorted_points = (
-        sorted_points_raw
-        if sorted_points_raw[0][0] == 0
-        else [[0, 1]] + sorted_points_raw
-    )
-    max_index = len(sorted_points) - 1
+    elapsed = 0
 
-    for index, (seconds, tempo) in enumerate(sorted_points):
-        is_last = index == max_index
-        next_point = None if is_last else sorted_points[index + 1]
-        point_length = None if is_last else next_point[0] - seconds
+    for index, (duration, tempo) in enumerate(points):
+        # Handle the special “end” point mentioned above.
+        end = duration == 0
         subprocess.run(filter(None, [
             'ffmpeg',
             '-i',
             audio_file_path,
             '-ss',
-            str(seconds),
-            None if is_last else '-t',
-            None if is_last else str(point_length),
+            str(to_seconds(elapsed)),
+            None if end else '-t',
+            None if end else str(to_seconds(duration)),
             '-acodec',
             'copy',
             '-strict',
             'experimental',
             part_name(dir, index, audio_extension),
         ]))
+        elapsed += duration
 
     yield banner('Changing tempo')
 
-    for index, (seconds, tempo) in enumerate(sorted_points):
+    for index, (duration, tempo) in enumerate(points):
         input = part_name(dir, index, audio_extension)
         output = part_name(dir, index, audio_extension, suffix=TEMPO_SUFFIX)
 
         if tempo == 1:
             shutil.copyfile(input, output)
         else:
-            subprocess.run(filter(None, [
+            subprocess.run([
                 'ffmpeg',
                 '-i',
                 input,
@@ -213,7 +194,7 @@ def main(argv):
                 '-strict',
                 'experimental',
                 output,
-            ]))
+            ])
 
     yield banner('Concatenating audio')
 
@@ -222,7 +203,7 @@ def main(argv):
         "file '{file}'".format(
             file=part_name('.', index, audio_extension, suffix=TEMPO_SUFFIX),
         )
-        for index in range(len(sorted_points))
+        for index in range(len(points))
     ])
 
     with open(input_file_path, 'w') as input_file:
@@ -289,6 +270,10 @@ def banner(message, start_with_newlines=True):
 
 def is_number(x):
     return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def to_seconds(milliseconds):
+    return milliseconds / 1000
 
 
 if __name__ == '__main__':
