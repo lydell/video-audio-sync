@@ -1,3 +1,4 @@
+import FileSaver from "file-saver";
 import { Main } from "../elm/Main.elm";
 import "../css/main.css";
 
@@ -83,6 +84,15 @@ function start() {
             seek(videoElement, video.time, callback);
           });
         });
+        break;
+      }
+
+      case "Save": {
+        const { filename, content, mimeType } = message.data;
+        const blob = new window.Blob([content], {
+          type: `${mimeType};charset=utf-8`,
+        });
+        FileSaver.saveAs(blob, filename);
         break;
       }
 

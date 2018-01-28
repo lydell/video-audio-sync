@@ -490,6 +490,16 @@ generalToolbar model =
                         ]
                     }
             ]
+        , buttonGroup
+            [ { icon = Icon "download"
+              , title = "Save"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick Save
+                    ]
+              }
+            ]
         ]
 
 

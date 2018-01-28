@@ -1,4 +1,4 @@
-port module Ports exposing (Area, IncomingMessage(..), OutgoingMessage(..), send, subscribe)
+port module Ports exposing (Area, File, IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
 import DomId exposing (DomId)
 import Json.Decode as Decode exposing (Decoder)
@@ -19,6 +19,7 @@ type OutgoingMessage
     | Pause DomId
     | Seek DomId Time
     | RestartLoop { audioTime : Time, videoTime : Time }
+    | Save File
 
 
 type IncomingMessage
@@ -30,6 +31,13 @@ type alias Area =
     , height : Float
     , x : Float
     , y : Float
+    }
+
+
+type alias File =
+    { filename : String
+    , content : String
+    , mimeType : String
     }
 
 
@@ -60,6 +68,16 @@ encode outgoingMessage =
                 Encode.object
                     [ ( "audio", encodeLoopMedia DomId.Audio audioTime )
                     , ( "video", encodeLoopMedia DomId.Video videoTime )
+                    ]
+            }
+
+        Save { filename, content, mimeType } ->
+            { tag = "Save"
+            , data =
+                Encode.object
+                    [ ( "filename", Encode.string filename )
+                    , ( "content", Encode.string content )
+                    , ( "mimeType", Encode.string mimeType )
                     ]
             }
 

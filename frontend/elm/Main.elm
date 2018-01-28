@@ -3,8 +3,10 @@ module Main exposing (..)
 import DomId exposing (DomId(GraphicsArea, VideoArea))
 import Html exposing (Html)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
+import Json.Encode as Encode
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
+import Points
 import Ports exposing (Area)
 import Task
 import Time exposing (Time)
@@ -17,6 +19,14 @@ import Window
 loopRadius : Time
 loopRadius =
     3 * Time.second
+
+
+saveFile : Ports.File
+saveFile =
+    { filename = "points.json"
+    , content = ""
+    , mimeType = "application/json"
+    }
 
 
 main : Program Never Model Msg
@@ -202,6 +212,18 @@ update msg model =
                     List.filter ((/=) point) model.points
             in
             ( { model | points = newPoints }, Cmd.none )
+
+        Save ->
+            let
+                encoded =
+                    Points.encode model.points
+
+                content =
+                    model.points
+                        |> Points.encode
+                        |> Encode.encode 0
+            in
+            ( model, Ports.send (Ports.Save { saveFile | content = content }) )
 
         WindowSize size ->
             ( { model | windowSize = size }
