@@ -49,6 +49,7 @@ init =
       , controlsArea = emptyArea
       , windowSize = { width = 0, height = 0 }
       , points = []
+      , isDraggingFile = False
       }
     , Task.perform WindowSize Window.size
     )
@@ -105,6 +106,33 @@ update msg model =
                                     Debug.log "unexpected AreaMeasurement" id
                             in
                             ( model, Cmd.none )
+
+                Ports.OpenedFile { name, fileType, content } ->
+                    let
+                        _ =
+                            Debug.log "OpenedFile" ( name, fileType, content )
+                    in
+                    ( model, Cmd.none )
+
+                Ports.InvalidOpenedFile { name, expectedFileTypes } ->
+                    let
+                        _ =
+                            Debug.log "InvalidOpenedFile" ( name, expectedFileTypes )
+                    in
+                    ( model, Cmd.none )
+
+                Ports.ErroredFile { name, fileType } ->
+                    let
+                        _ =
+                            Debug.log "ErroredFile" ( name, fileType )
+                    in
+                    ( model, Cmd.none )
+
+                Ports.DragEnter ->
+                    ( { model | isDraggingFile = True }, Cmd.none )
+
+                Ports.DragLeave ->
+                    ( { model | isDraggingFile = False }, Cmd.none )
 
         JsMessage (Err message) ->
             let
@@ -223,7 +251,31 @@ update msg model =
                         |> Points.encode
                         |> Encode.encode 0
             in
-            ( model, Ports.send (Ports.Save { saveFile | content = content }) )
+            ( model, Ports.send (Ports.SaveFile { saveFile | content = content }) )
+
+        OpenMedia id ->
+            let
+                fileType =
+                    case id of
+                        Audio ->
+                            Ports.AudioFile
+
+                        Video ->
+                            Ports.VideoFile
+            in
+            ( model
+            , Ports.send (Ports.OpenFile fileType)
+            )
+
+        OpenPoints ->
+            ( model
+            , Ports.send (Ports.OpenFile Ports.JsonFile)
+            )
+
+        OpenMultiple ->
+            ( model
+            , Ports.send Ports.OpenMultipleFiles
+            )
 
         WindowSize size ->
             ( { model | windowSize = size }

@@ -1,4 +1,4 @@
-port module Ports exposing (Area, File, IncomingMessage(..), OutgoingMessage(..), send, subscribe)
+port module Ports exposing (Area, File, FileType(..), IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
 import DomId exposing (DomId)
 import Json.Decode as Decode exposing (Decoder)
@@ -19,11 +19,18 @@ type OutgoingMessage
     | Pause DomId
     | Seek DomId Time
     | RestartLoop { audioTime : Time, videoTime : Time }
-    | Save File
+    | SaveFile File
+    | OpenFile FileType
+    | OpenMultipleFiles
 
 
 type IncomingMessage
     = AreaMeasurement DomId Area
+    | OpenedFile { name : String, fileType : FileType, content : String }
+    | InvalidOpenedFile { name : String, expectedFileTypes : List FileType }
+    | ErroredFile { name : String, fileType : FileType }
+    | DragEnter
+    | DragLeave
 
 
 type alias Area =
@@ -39,6 +46,12 @@ type alias File =
     , content : String
     , mimeType : String
     }
+
+
+type FileType
+    = AudioFile
+    | VideoFile
+    | JsonFile
 
 
 encode : OutgoingMessage -> TaggedData
@@ -71,7 +84,7 @@ encode outgoingMessage =
                     ]
             }
 
-        Save { filename, content, mimeType } ->
+        SaveFile { filename, content, mimeType } ->
             { tag = "Save"
             , data =
                 Encode.object
@@ -81,12 +94,34 @@ encode outgoingMessage =
                     ]
             }
 
+        OpenFile fileType ->
+            { tag = "OpenFile"
+            , data =
+                Encode.object
+                    [ ( "fileType", Encode.string (toString fileType) )
+                    ]
+            }
+
+        OpenMultipleFiles ->
+            { tag = "OpenMultipleFiles"
+            , data = Encode.null
+            }
+
 
 decoder : String -> Result String (Decoder IncomingMessage)
 decoder tag =
     case tag of
         "AreaMeasurement" ->
-            Ok <| areaMeasurementDecoder
+            Ok areaMeasurementDecoder
+
+        "OpenedFile" ->
+            Ok openedFileDecoder
+
+        "DragEnter" ->
+            Ok <| Decode.succeed DragEnter
+
+        "DragLeave" ->
+            Ok <| Decode.succeed DragLeave
 
         _ ->
             Err <| "Unknown message tag: " ++ tag
@@ -139,3 +174,40 @@ areaDecoder =
         (Decode.field "height" Decode.float)
         (Decode.field "x" Decode.float)
         (Decode.field "y" Decode.float)
+
+
+openedFileDecoder : Decoder IncomingMessage
+openedFileDecoder =
+    Decode.map3
+        (\name fileType content ->
+            OpenedFile
+                { name = name
+                , fileType = fileType
+                , content =
+                    content
+                }
+        )
+        (Decode.field "name" Decode.string)
+        (Decode.field
+            "fileType"
+            (Decode.string
+                |> Decode.andThen (stringToFileType >> Json.Decode.Custom.fromResult)
+            )
+        )
+        (Decode.field "content" Decode.string)
+
+
+stringToFileType : String -> Result String FileType
+stringToFileType string =
+    case string of
+        "AudioFile" ->
+            Ok AudioFile
+
+        "VideoFile" ->
+            Ok VideoFile
+
+        "JsonFile" ->
+            Ok JsonFile
+
+        _ ->
+            Err ("Unknown fileType: " ++ string)

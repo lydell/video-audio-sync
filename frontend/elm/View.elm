@@ -4,6 +4,7 @@ import DomId
 import Html exposing (Attribute, Html, audio, button, div, p, span, text, video)
 import Html.Attributes exposing (attribute, class, classList, src, style, title, type_, width)
 import Html.Attributes.Custom exposing (muted)
+import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
 import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
@@ -67,6 +68,10 @@ view model =
     div [ class "Layout" ]
         [ viewMedia model
         , viewControls model
+        , if model.isDraggingFile then
+            fileDragOverlay
+          else
+            none
         ]
 
 
@@ -339,10 +344,12 @@ mediaPlayerToolbar id mediaPlayer loopState =
     toolbar
         [ buttonGroup
             [ { icon = icon
-              , title = "TODO"
+              , title = "Open " ++ String.toLower name
               , label = NoLabel
               , pressed = False
-              , attributes = []
+              , attributes =
+                    [ onClick (OpenMedia id)
+                    ]
               }
             ]
         , buttonGroup
@@ -491,12 +498,28 @@ generalToolbar model =
                     }
             ]
         , buttonGroup
-            [ { icon = Icon "download"
-              , title = "Save"
+            [ { icon = Icon "floppy-o"
+              , title = "Save points"
               , label = NoLabel
               , pressed = False
               , attributes =
                     [ onClick Save
+                    ]
+              }
+            , { icon = Icon "folder-open-o"
+              , title = "Open points"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick OpenPoints
+                    ]
+              }
+            , { icon = Icon "upload"
+              , title = "Open multiple files in one go"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick OpenMultiple
                     ]
               }
             ]
@@ -585,6 +608,15 @@ fontawesome icon =
         , class ("fa fa-" ++ name ++ " " ++ extraClass)
         ]
         []
+
+
+fileDragOverlay : Html msg
+fileDragOverlay =
+    div [ class "FileDragOverlay" ]
+        [ fontawesome (CustomIcon "upload" "fa-4x")
+        , p []
+            [ text "Drop video, audio and/or points" ]
+        ]
 
 
 playEvents : MediaPlayerId -> List (Attribute Msg)

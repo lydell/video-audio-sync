@@ -17,6 +17,7 @@ type alias Model =
     , controlsArea : Area
     , windowSize : Window.Size
     , points : List Point
+    , isDraggingFile : Bool
     }
 
 
@@ -90,4 +91,7 @@ type Msg
     | AddPoint Point
     | RemovePoint Point
     | Save
+    | OpenMedia MediaPlayerId
+    | OpenPoints
+    | OpenMultiple
     | WindowSize Window.Size

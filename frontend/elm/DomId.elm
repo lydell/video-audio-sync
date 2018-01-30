@@ -1,4 +1,4 @@
-module DomId exposing (DomId(..), fromString, toHtml, encode, toString)
+module DomId exposing (DomId(..), encode, fromString, toHtml, toString)
 
 import Html
 import Html.Attributes
@@ -8,8 +8,8 @@ import Json.Encode as Encode
 type DomId
     = VideoArea
     | GraphicsArea
-    | Video
     | Audio
+    | Video
 
 
 toString : DomId -> String
@@ -21,11 +21,13 @@ toString id =
         GraphicsArea ->
             "GraphicsArea"
 
-        Video ->
-            "video"
-
+        -- Tip: This means you can use the `audio` variable in the console!
         Audio ->
             "audio"
+
+        -- Tip: This means you can use the `video` variable in the console!
+        Video ->
+            "video"
 
 
 toHtml : DomId -> Html.Attribute msg
