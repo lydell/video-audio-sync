@@ -119,13 +119,14 @@ function start() {
       case "OpenFile": {
         const { fileType } = message.data;
         const info = FILE_TYPES[fileType];
+        const expectedFileTypes = [fileType];
 
         if (info == null) {
           console.error("Unknown fileType", fileType, message);
           break;
         }
 
-        openFile({ accept: info.accept, app });
+        openFile({ accept: info.accept, expectedFileTypes, app });
         break;
       }
 
@@ -133,7 +134,8 @@ function start() {
         const accept = Object.values(FILE_TYPES)
           .map(info => info.accept)
           .join(",");
-        openFile({ accept, multiple: true, app });
+        const expectedFileTypes = Object.keys(FILE_TYPES);
+        openFile({ accept, multiple: true, expectedFileTypes, app });
         break;
       }
 
@@ -220,7 +222,7 @@ function getFileType(file) {
   return null;
 }
 
-function openFile({ accept, multiple = false, app }) {
+function openFile({ accept, multiple = false, expectedFileTypes, app }) {
   const fileInput = document.createElement("input");
   fileInput.type = "file";
 
@@ -231,14 +233,14 @@ function openFile({ accept, multiple = false, app }) {
     fileInput.onchange = null;
 
     for (const file of fileInput.files) {
-      if (matchesAccept(file, fileInput.accept)) {
+      if (matchesAccept(file, accept)) {
         reportOpenedFile(file, app);
       } else {
         app.ports.jsToElm.send({
-          tag: "InvalidOpenedFile",
+          tag: "InvalidFile",
           data: {
             name: file.name,
-            expectedFileTypes: [fileInput.id],
+            expectedFileTypes,
           },
         });
         return;
@@ -255,7 +257,7 @@ function reportOpenedFile(file, app) {
 
   if (fileType == null) {
     app.ports.jsToElm.send({
-      tag: "InvalidOpenedFile",
+      tag: "InvalidFile",
       data: {
         name: file.name,
         expectedFileTypes: Object.keys(FILE_TYPES),

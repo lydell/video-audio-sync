@@ -114,10 +114,10 @@ update msg model =
                     in
                     ( model, Cmd.none )
 
-                Ports.InvalidOpenedFile { name, expectedFileTypes } ->
+                Ports.InvalidFile { name, expectedFileTypes } ->
                     let
                         _ =
-                            Debug.log "InvalidOpenedFile" ( name, expectedFileTypes )
+                            Debug.log "InvalidFile" ( name, expectedFileTypes )
                     in
                     ( model, Cmd.none )
 

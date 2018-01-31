@@ -27,7 +27,7 @@ type OutgoingMessage
 type IncomingMessage
     = AreaMeasurement DomId Area
     | OpenedFile { name : String, fileType : FileType, content : String }
-    | InvalidOpenedFile { name : String, expectedFileTypes : List FileType }
+    | InvalidFile { name : String, expectedFileTypes : List FileType }
     | ErroredFile { name : String, fileType : FileType }
     | DragEnter
     | DragLeave
@@ -117,6 +117,12 @@ decoder tag =
         "OpenedFile" ->
             Ok openedFileDecoder
 
+        "InvalidFile" ->
+            Ok invalidFileDecoder
+
+        "ErroredFile" ->
+            Ok erroredFileDecoder
+
         "DragEnter" ->
             Ok <| Decode.succeed DragEnter
 
@@ -158,13 +164,15 @@ encodeLoopMedia id time =
 areaMeasurementDecoder : Decoder IncomingMessage
 areaMeasurementDecoder =
     Decode.map2 AreaMeasurement
-        (Decode.field "id"
-            (Decode.string
-                |> Decode.andThen
-                    (DomId.fromString >> Json.Decode.Custom.fromResult)
-            )
-        )
+        (Decode.field "id" domIdDecoder)
         (Decode.field "area" areaDecoder)
+
+
+domIdDecoder : Decoder DomId
+domIdDecoder =
+    Decode.string
+        |> Decode.andThen
+            (DomId.fromString >> Json.Decode.Custom.fromResult)
 
 
 areaDecoder : Decoder Area
@@ -183,18 +191,44 @@ openedFileDecoder =
             OpenedFile
                 { name = name
                 , fileType = fileType
-                , content =
-                    content
+                , content = content
                 }
         )
         (Decode.field "name" Decode.string)
-        (Decode.field
-            "fileType"
-            (Decode.string
-                |> Decode.andThen (stringToFileType >> Json.Decode.Custom.fromResult)
-            )
-        )
+        (Decode.field "fileType" fileTypeDecoder)
         (Decode.field "content" Decode.string)
+
+
+invalidFileDecoder : Decoder IncomingMessage
+invalidFileDecoder =
+    Decode.map2
+        (\name expectedFileTypes ->
+            InvalidFile
+                { name = name
+                , expectedFileTypes = expectedFileTypes
+                }
+        )
+        (Decode.field "name" Decode.string)
+        (Decode.field "expectedFileTypes" (Decode.list fileTypeDecoder))
+
+
+erroredFileDecoder : Decoder IncomingMessage
+erroredFileDecoder =
+    Decode.map2
+        (\name fileType ->
+            ErroredFile
+                { name = name
+                , fileType = fileType
+                }
+        )
+        (Decode.field "name" Decode.string)
+        (Decode.field "fileType" fileTypeDecoder)
+
+
+fileTypeDecoder : Decoder FileType
+fileTypeDecoder =
+    Decode.string
+        |> Decode.andThen (stringToFileType >> Json.Decode.Custom.fromResult)
 
 
 stringToFileType : String -> Result String FileType
