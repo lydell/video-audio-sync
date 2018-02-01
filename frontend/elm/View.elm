@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import DomId
-import Html exposing (Attribute, Html, audio, button, div, p, span, text, video)
+import Html exposing (Attribute, Html, audio, button, code, div, li, p, span, text, ul, video)
 import Html.Attributes exposing (attribute, class, classList, src, style, title, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
@@ -9,6 +9,7 @@ import Html.Events exposing (on, onClick)
 import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
+import Ports
 import Svg
 import Svg.Attributes as Svg
 import Time exposing (Time)
@@ -68,6 +69,14 @@ view model =
     div [ class "Layout" ]
         [ viewMedia model
         , viewControls model
+        , case model.errors of
+            [] ->
+                none
+
+            errors ->
+                alertModal CloseErrorModal
+                    [ ul [] (List.map viewError errors)
+                    ]
         , if model.isDraggingFile then
             fileDragOverlay
           else
@@ -104,7 +113,7 @@ viewMedia model =
             ([ src "/sommaren_video.mp4"
              , width (truncate clampedWidth)
              , muted True
-             , onError (MediaError Video)
+             , onError (MediaErrorMsg Video)
              , onVideoMetaData (MetaData Video)
              , onTimeUpdate (CurrentTime Video)
              , DomId.toHtml DomId.Video
@@ -115,7 +124,7 @@ viewMedia model =
             []
         , audio
             ([ src "/sommaren_audio.aac"
-             , onError (MediaError Audio)
+             , onError (MediaErrorMsg Audio)
              , onAudioMetaData (MetaData Audio)
              , onTimeUpdate (CurrentTime Audio)
              , DomId.toHtml DomId.Audio
@@ -621,6 +630,52 @@ fileDragOverlay =
         ]
 
 
+alertModal : msg -> List (Html msg) -> Html msg
+alertModal msg children =
+    div [ class "Modal" ]
+        [ div [ class "Modal-backdrop", onClick msg ] []
+        , div [ class "Modal-content" ]
+            [ div [] children
+            , button [ type_ "button", class "Modal-button", onClick msg ]
+                [ text "Close"
+                ]
+            ]
+        ]
+
+
+viewError : Error -> Html msg
+viewError error =
+    case error of
+        InvalidFileError { name, expectedFileTypes } ->
+            let
+                expected =
+                    case expectedFileTypes of
+                        [] ->
+                            "nothing"
+
+                        _ ->
+                            humanList "or" (List.map fileTypeToString expectedFileTypes)
+            in
+            p []
+                [ code [] [ text name ]
+                , text <| " is invalid. Expected " ++ expected ++ "."
+                ]
+
+        ErroredFileError { name, fileType } ->
+            p []
+                [ text "Failed to read "
+                , code [] [ text name ]
+                , text <| " as " ++ fileTypeToString fileType ++ "."
+                ]
+
+        MediaError { name, fileType } ->
+            p []
+                [ text "Failed to play "
+                , code [] [ text name ]
+                , text <| " as " ++ fileTypeToString fileType ++ ". The file is either unsupported, broken or invalid."
+                ]
+
+
 playEvents : MediaPlayerId -> List (Attribute Msg)
 playEvents id =
     let
@@ -656,3 +711,35 @@ toPoints coords =
     coords
         |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
         |> String.join " "
+
+
+humanList : String -> List String -> String
+humanList joinWord strings =
+    case List.reverse strings of
+        [] ->
+            ""
+
+        [ string ] ->
+            string
+
+        last :: rest ->
+            let
+                start =
+                    rest
+                        |> List.reverse
+                        |> String.join ", "
+            in
+            start ++ " " ++ joinWord ++ " " ++ last
+
+
+fileTypeToString : Ports.FileType -> String
+fileTypeToString fileType =
+    case fileType of
+        Ports.AudioFile ->
+            "audio"
+
+        Ports.VideoFile ->
+            "video"
+
+        Ports.JsonFile ->
+            "JSON"

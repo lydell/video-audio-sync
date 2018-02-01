@@ -50,6 +50,7 @@ init =
       , windowSize = { width = 0, height = 0 }
       , points = []
       , isDraggingFile = False
+      , errors = []
       }
     , Task.perform WindowSize Window.size
     )
@@ -114,19 +115,11 @@ update msg model =
                     in
                     ( model, Cmd.none )
 
-                Ports.InvalidFile { name, expectedFileTypes } ->
-                    let
-                        _ =
-                            Debug.log "InvalidFile" ( name, expectedFileTypes )
-                    in
-                    ( model, Cmd.none )
+                Ports.InvalidFile details ->
+                    ( addError (InvalidFileError details) model, Cmd.none )
 
-                Ports.ErroredFile { name, fileType } ->
-                    let
-                        _ =
-                            Debug.log "ErroredFile" ( name, fileType )
-                    in
-                    ( model, Cmd.none )
+                Ports.ErroredFile details ->
+                    ( addError (ErroredFileError details) model, Cmd.none )
 
                 Ports.DragEnter ->
                     ( { model | isDraggingFile = True }, Cmd.none )
@@ -141,13 +134,22 @@ update msg model =
             in
             ( model, Cmd.none )
 
-        MediaError id ->
+        MediaErrorMsg id ->
             let
-                _ =
-                    Debug.log "MediaError" id
+                name =
+                    case id of
+                        Audio ->
+                            { name = "TODO: audio.file"
+                            , fileType = Ports.AudioFile
+                            }
+
+                        Video ->
+                            { name = "TODO: video.file"
+                            , fileType = Ports.VideoFile
+                            }
             in
-            -- TODO: Reset mediaPlayer, show modal
-            ( model, Cmd.none )
+            -- TODO: Reset mediaPlayer
+            ( addError (MediaError name) model, Cmd.none )
 
         MetaData id details ->
             ( updateMediaPlayer (MediaPlayer.updateMetaData details) id model
@@ -284,6 +286,9 @@ update msg model =
             ( model
             , Ports.send Ports.OpenMultipleFiles
             )
+
+        CloseErrorModal ->
+            ( { model | errors = [] }, Cmd.none )
 
         WindowSize size ->
             ( { model | windowSize = size }
@@ -650,3 +655,8 @@ updateLoopTimes model =
                         }
     in
     { model | loopState = newLoopState }
+
+
+addError : Error -> Model -> Model
+addError error model =
+    { model | errors = error :: model.errors }

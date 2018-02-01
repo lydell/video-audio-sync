@@ -27,6 +27,15 @@ p {
   margin: 0;
 }
 
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul > li {
+  list-style: none;
+}
+
 input,
 button,
 select,
@@ -197,6 +206,35 @@ label {
 
 .ButtonGroup-buttonLabel {
   font-size: 0.75em;
+}
+
+.Modal {
+  position: fixed;
+  z-index: 8000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.Modal-backdrop {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.Modal-content {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 30px;
+  background-color: white;
 }
 
 .FileDragOverlay {

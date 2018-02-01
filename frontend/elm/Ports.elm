@@ -1,4 +1,4 @@
-port module Ports exposing (Area, File, FileType(..), IncomingMessage(..), OutgoingMessage(..), send, subscribe)
+port module Ports exposing (Area, ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), send, subscribe)
 
 import DomId exposing (DomId)
 import Json.Decode as Decode exposing (Decoder)
@@ -26,9 +26,9 @@ type OutgoingMessage
 
 type IncomingMessage
     = AreaMeasurement DomId Area
-    | OpenedFile { name : String, fileType : FileType, content : String }
-    | InvalidFile { name : String, expectedFileTypes : List FileType }
-    | ErroredFile { name : String, fileType : FileType }
+    | OpenedFile OpenedFileDetails
+    | InvalidFile InvalidFileDetails
+    | ErroredFile ErroredFileDetails
     | DragEnter
     | DragLeave
 
@@ -52,6 +52,25 @@ type FileType
     = AudioFile
     | VideoFile
     | JsonFile
+
+
+type alias OpenedFileDetails =
+    { name : String
+    , fileType : FileType
+    , content : String
+    }
+
+
+type alias InvalidFileDetails =
+    { name : String
+    , expectedFileTypes : List FileType
+    }
+
+
+type alias ErroredFileDetails =
+    { name : String
+    , fileType : FileType
+    }
 
 
 encode : OutgoingMessage -> TaggedData
@@ -186,43 +205,27 @@ areaDecoder =
 
 openedFileDecoder : Decoder IncomingMessage
 openedFileDecoder =
-    Decode.map3
-        (\name fileType content ->
-            OpenedFile
-                { name = name
-                , fileType = fileType
-                , content = content
-                }
-        )
+    Decode.map3 OpenedFileDetails
         (Decode.field "name" Decode.string)
         (Decode.field "fileType" fileTypeDecoder)
         (Decode.field "content" Decode.string)
+        |> Decode.map OpenedFile
 
 
 invalidFileDecoder : Decoder IncomingMessage
 invalidFileDecoder =
-    Decode.map2
-        (\name expectedFileTypes ->
-            InvalidFile
-                { name = name
-                , expectedFileTypes = expectedFileTypes
-                }
-        )
+    Decode.map2 InvalidFileDetails
         (Decode.field "name" Decode.string)
         (Decode.field "expectedFileTypes" (Decode.list fileTypeDecoder))
+        |> Decode.map InvalidFile
 
 
 erroredFileDecoder : Decoder IncomingMessage
 erroredFileDecoder =
-    Decode.map2
-        (\name fileType ->
-            ErroredFile
-                { name = name
-                , fileType = fileType
-                }
-        )
+    Decode.map2 ErroredFileDetails
         (Decode.field "name" Decode.string)
         (Decode.field "fileType" fileTypeDecoder)
+        |> Decode.map ErroredFile
 
 
 fileTypeDecoder : Decoder FileType

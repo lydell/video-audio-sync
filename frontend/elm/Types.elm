@@ -3,7 +3,7 @@ module Types exposing (..)
 import Html.Events.Custom exposing (MetaDataDetails, MouseButton, MouseDownDetails)
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
-import Ports exposing (Area, IncomingMessage)
+import Ports exposing (Area, ErroredFileDetails, IncomingMessage, InvalidFileDetails, OpenedFileDetails)
 import Time exposing (Time)
 import Window
 
@@ -18,6 +18,7 @@ type alias Model =
     , windowSize : Window.Size
     , points : List Point
     , isDraggingFile : Bool
+    , errors : List Error
     }
 
 
@@ -72,10 +73,16 @@ type Direction
     | Backward
 
 
+type Error
+    = InvalidFileError InvalidFileDetails
+    | ErroredFileError ErroredFileDetails
+    | MediaError ErroredFileDetails
+
+
 type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
-    | MediaError MediaPlayerId
+    | MediaErrorMsg MediaPlayerId
     | MetaData MediaPlayerId MetaDataDetails
     | CurrentTime MediaPlayerId Time
     | ExternalPlay MediaPlayerId
@@ -95,4 +102,5 @@ type Msg
     | OpenMedia MediaPlayerId
     | OpenPoints
     | OpenMultiple
+    | CloseErrorModal
     | WindowSize Window.Size
