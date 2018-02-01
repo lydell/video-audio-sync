@@ -141,6 +141,14 @@ update msg model =
             in
             ( model, Cmd.none )
 
+        MediaError id ->
+            let
+                _ =
+                    Debug.log "MediaError" id
+            in
+            -- TODO: Reset mediaPlayer, show modal
+            ( model, Cmd.none )
+
         MetaData id details ->
             ( updateMediaPlayer (MediaPlayer.updateMetaData details) id model
             , Cmd.none

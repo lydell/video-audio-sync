@@ -1,4 +1,4 @@
-module Html.Events.Custom exposing (MetaDataDetails, MouseButton(..), MouseDownDetails, onAudioMetaData, onClickWithButton, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
+module Html.Events.Custom exposing (MetaDataDetails, MouseButton(..), MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 
 import Html exposing (Attribute)
 import Html.Attributes exposing (attribute)
@@ -78,6 +78,11 @@ decodeMouseButton =
 preventContextMenu : Attribute msg
 preventContextMenu =
     attribute "oncontextmenu" "return false"
+
+
+onError : msg -> Attribute msg
+onError msg =
+    on "error" (Decode.succeed msg)
 
 
 onAudioMetaData : (MetaDataDetails -> msg) -> Attribute msg

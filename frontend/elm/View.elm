@@ -6,7 +6,7 @@ import Html.Attributes exposing (attribute, class, classList, src, style, title,
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
-import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
+import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Svg
@@ -104,6 +104,7 @@ viewMedia model =
             ([ src "/sommaren_video.mp4"
              , width (truncate clampedWidth)
              , muted True
+             , onError (MediaError Video)
              , onVideoMetaData (MetaData Video)
              , onTimeUpdate (CurrentTime Video)
              , DomId.toHtml DomId.Video
@@ -114,6 +115,7 @@ viewMedia model =
             []
         , audio
             ([ src "/sommaren_audio.aac"
+             , onError (MediaError Audio)
              , onAudioMetaData (MetaData Audio)
              , onTimeUpdate (CurrentTime Audio)
              , DomId.toHtml DomId.Audio
@@ -627,7 +629,6 @@ playEvents id =
     in
     [ on "abort" decoder
     , on "ended" decoder
-    , on "error" decoder
     , on "pause" decoder
     , on "play" decoder
     , on "playing" decoder

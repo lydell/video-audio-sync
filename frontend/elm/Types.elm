@@ -75,6 +75,7 @@ type Direction
 type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
+    | MediaError MediaPlayerId
     | MetaData MediaPlayerId MetaDataDetails
     | CurrentTime MediaPlayerId Time
     | ExternalPlay MediaPlayerId
