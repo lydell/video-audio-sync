@@ -163,13 +163,18 @@ update msg model =
                                     in
                                     case decoded of
                                         Ok points ->
-                                            { model
-                                                | confirmOpenPoints =
-                                                    Just
-                                                        { name = name
-                                                        , points = points
-                                                        }
-                                            }
+                                            case model.points of
+                                                [] ->
+                                                    { model | points = points }
+
+                                                _ ->
+                                                    { model
+                                                        | confirmOpenPoints =
+                                                            Just
+                                                                { name = name
+                                                                , points = points
+                                                                }
+                                                    }
 
                                         Err message ->
                                             addError
