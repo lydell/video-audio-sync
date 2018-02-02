@@ -34,7 +34,7 @@ main : Program Flags Model Msg
 main =
     Html.programWithFlags
         { init = init
-        , update = update
+        , update = updateWithCmds
         , subscriptions = subscriptions
         , view = View.view
         }
@@ -104,6 +104,28 @@ subscriptions model =
         , Ports.subscribe JsMessage
         ]
             ++ mouseSubscriptions
+
+
+updateWithCmds : Msg -> Model -> ( Model, Cmd Msg )
+updateWithCmds msg model =
+    let
+        ( newModel, cmd ) =
+            update msg model
+
+        warnOnCloseMessage =
+            case newModel.points of
+                [] ->
+                    Nothing
+
+                _ ->
+                    Just "Make sure you have saved your points before leaving. They will be lost otherwise."
+    in
+    ( newModel
+    , Cmd.batch
+        [ cmd
+        , Ports.send (Ports.WarnOnClose warnOnCloseMessage)
+        ]
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

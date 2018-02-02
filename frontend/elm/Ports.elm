@@ -22,6 +22,7 @@ type OutgoingMessage
     | SaveFile File
     | OpenFile FileType
     | OpenMultipleFiles
+    | WarnOnClose (Maybe String)
 
 
 type IncomingMessage
@@ -124,6 +125,17 @@ encode outgoingMessage =
         OpenMultipleFiles ->
             { tag = "OpenMultipleFiles"
             , data = Encode.null
+            }
+
+        WarnOnClose maybeMessage ->
+            { tag = "WarnOnClose"
+            , data =
+                case maybeMessage of
+                    Just message ->
+                        Encode.string message
+
+                    Nothing ->
+                        Encode.null
             }
 
 

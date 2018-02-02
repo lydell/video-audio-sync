@@ -27,6 +27,8 @@ function start() {
     DEBUG ? window.location.search : "",
   );
 
+  const warnOnClose = !DEBUG || Boolean(params.get("warn_on_close"));
+
   const app = Main.embed(document.getElementById("app"), {
     audio: params.get("audio"),
     video: params.get("video"),
@@ -145,6 +147,23 @@ function start() {
           .join(",");
         const expectedFileTypes = Object.keys(FILE_TYPES);
         openFile({ accept, multiple: true, expectedFileTypes, app });
+        break;
+      }
+
+      case "WarnOnClose": {
+        const maybeMessage = message.data;
+
+        if (!warnOnClose) {
+          return;
+        }
+
+        window.onbeforeunload =
+          maybeMessage == null
+            ? null
+            : event => {
+                event.returnValue = maybeMessage;
+                return maybeMessage;
+              };
         break;
       }
 
