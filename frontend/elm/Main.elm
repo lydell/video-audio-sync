@@ -70,6 +70,7 @@ init flags =
       , points = []
       , isDraggingFile = False
       , confirmRemoveAllPointsModalOpen = False
+      , confirmOpenPoints = Nothing
       , errors = []
       }
     , Task.perform WindowSize Window.size
@@ -162,7 +163,13 @@ update msg model =
                                     in
                                     case decoded of
                                         Ok points ->
-                                            { model | points = points }
+                                            { model
+                                                | confirmOpenPoints =
+                                                    Just
+                                                        { name = name
+                                                        , points = points
+                                                        }
+                                            }
 
                                         Err message ->
                                             addError
@@ -358,6 +365,14 @@ update msg model =
             ( model
             , Ports.send (Ports.OpenFile Ports.JsonFile)
             )
+
+        OpenConfirmedPoints points ->
+            ( { model | points = points, confirmOpenPoints = Nothing }
+            , Cmd.none
+            )
+
+        CloseOpenPoints ->
+            ( { model | confirmOpenPoints = Nothing }, Cmd.none )
 
         OpenMultiple ->
             ( model

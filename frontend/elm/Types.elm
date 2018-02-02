@@ -19,6 +19,7 @@ type alias Model =
     , points : List Point
     , isDraggingFile : Bool
     , confirmRemoveAllPointsModalOpen : Bool
+    , confirmOpenPoints : Maybe { name : String, points : List Point }
     , errors : List Error
     }
 
@@ -112,6 +113,8 @@ type Msg
     | Save
     | OpenMedia MediaPlayerId
     | OpenPoints
+    | OpenConfirmedPoints (List Point)
+    | CloseOpenPoints
     | OpenMultiple
     | CloseErrorModal
     | WindowSize Window.Size

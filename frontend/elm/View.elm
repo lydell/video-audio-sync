@@ -695,6 +695,21 @@ viewModals model =
                 ]
           else
             none
+        , case model.confirmOpenPoints of
+            Just { name, points } ->
+                confirmModal
+                    { cancel = ( CloseOpenPoints, "No, keep my current points!" )
+                    , confirm = ( OpenConfirmedPoints points, "Yes, replace them!" )
+                    }
+                    [ p []
+                        [ text "This replaces all points you have added with the ones in "
+                        , code [] [ text name ]
+                        , text ". Are you sure?"
+                        ]
+                    ]
+
+            Nothing ->
+                none
         , case model.errors of
             [] ->
                 none
