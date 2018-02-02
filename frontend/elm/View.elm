@@ -335,10 +335,10 @@ mediaPlayerToolbar id mediaPlayer loopState =
         ( name, icon ) =
             case id of
                 Audio ->
-                    ( "Audio", Icon "volume-up" )
+                    ( "Audio", Icon "file-audio-o" )
 
                 Video ->
-                    ( "Video", Icon "video-camera" )
+                    ( "Video", Icon "file-video-o" )
 
         ( playPauseTitle, playPauseIcon ) =
             case ( mediaPlayer.playState, loopState ) of
@@ -464,6 +464,16 @@ generalToolbar model =
     in
     toolbar
         [ buttonGroup
+            [ { icon = Icon "file-text-o"
+              , title = "Open points"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick OpenPoints
+                    ]
+              }
+            ]
+        , buttonGroup
             [ { icon = Icon "repeat"
               , title =
                     case model.loopState of
@@ -494,7 +504,7 @@ generalToolbar model =
         , buttonGroup
             [ case selectedPoint of
                 Just point ->
-                    { icon = Icon "trash"
+                    { icon = Icon "minus"
                     , title = "Remove point"
                     , label = NoLabel
                     , pressed = False
@@ -517,9 +527,7 @@ generalToolbar model =
                             )
                         ]
                     }
-            ]
-        , buttonGroup
-            [ { icon = Icon "floppy-o"
+            , { icon = Icon "floppy-o"
               , title = "Save points"
               , label = NoLabel
               , pressed = False
@@ -527,15 +535,9 @@ generalToolbar model =
                     [ onClick Save
                     ]
               }
-            , { icon = Icon "folder-open-o"
-              , title = "Open points"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
-                    [ onClick OpenPoints
-                    ]
-              }
-            , { icon = Icon "upload"
+            ]
+        , buttonGroup
+            [ { icon = Icon "files-o"
               , title = "Open multiple files in one go"
               , label = NoLabel
               , pressed = False
@@ -634,7 +636,7 @@ fontawesome icon =
 fileDragOverlay : Html msg
 fileDragOverlay =
     div [ class "FileDragOverlay" ]
-        [ fontawesome (CustomIcon "upload" "fa-4x")
+        [ fontawesome (CustomIcon "files-o" "fa-4x")
         , p []
             [ text "Drop video, audio and/or points" ]
         ]
