@@ -3,10 +3,6 @@ import FileSaver from "file-saver";
 import { Main } from "../elm/Main.elm";
 import "../css/main.css";
 
-// `window.URL.createObjectURL(file)` is only needed for a short while before
-// `window.URL.revokeObjectURL(url)` can be called.
-const REVOKE_OBJECT_URL_TIMEOUT = 1000; // ms
-
 const FILE_TYPES = {
   AudioFile: {
     // Chrome oddly didn't show .aac files in the upload dialog for me, so I
@@ -23,6 +19,8 @@ const FILE_TYPES = {
     openAsUrl: false,
   },
 };
+
+const objectUrls = new Map();
 
 function start() {
   const app = Main.embed(document.getElementById("app"));
@@ -292,11 +290,15 @@ function reportOpenedFile(file, app) {
   }
 
   if (info.openAsUrl) {
+    const previousUrl = objectUrls.get(fileType);
+
+    if (previousUrl != null) {
+      window.URL.revokeObjectURL(previousUrl);
+    }
+
     const url = window.URL.createObjectURL(file);
+    objectUrls.set(fileType, url);
     success(url);
-    window.setTimeout(() => {
-      window.URL.revokeObjectURL(url);
-    }, REVOKE_OBJECT_URL_TIMEOUT);
     return;
   }
 
