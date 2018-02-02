@@ -187,13 +187,12 @@ viewGraphics model =
             Utils.getCurrentTimes model
 
         videoProgressBarDetails =
-            Debug.log "video"
-                { maxValue = toScale model.video.duration
-                , currentValue = toScale videoCurrentTime
-                , x = progressBarX
-                , y = videoY
-                , onDragStart = DragStart Video
-                }
+            { maxValue = toScale model.video.duration
+            , currentValue = toScale videoCurrentTime
+            , x = progressBarX
+            , y = videoY
+            , onDragStart = DragStart Video
+            }
 
         audioProgressBarDetails =
             { maxValue = toScale model.audio.duration
