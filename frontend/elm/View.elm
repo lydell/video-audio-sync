@@ -429,12 +429,15 @@ mediaPlayerToolbar id mediaPlayer loopState =
                         ++ onClickWithButton (JumpByPoint id Forward)
               }
             ]
-        , p []
-            [ text <|
-                Utils.formatDuration mediaPlayer.currentTime
-                    ++ " / "
-                    ++ Utils.formatDuration mediaPlayer.duration
-            ]
+        , if mediaPlayer.duration > 0 then
+            p []
+                [ text <|
+                    Utils.formatDuration mediaPlayer.currentTime
+                        ++ " / "
+                        ++ Utils.formatDuration mediaPlayer.duration
+                ]
+          else
+            none
         ]
 
 
