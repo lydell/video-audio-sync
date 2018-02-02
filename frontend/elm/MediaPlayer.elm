@@ -1,4 +1,4 @@
-module MediaPlayer exposing (MediaPlayer, PlayState(..), empty, pause, play, updateCurrentTime, updateMetaData)
+module MediaPlayer exposing (MediaPlayer, PlayState(..), empty, hasMedia, pause, play, updateCurrentTime, updateMetaData)
 
 import Html.Events.Custom exposing (MetaDataDetails)
 import Time exposing (Time)
@@ -51,3 +51,13 @@ play mediaPlayer =
 pause : MediaPlayer -> MediaPlayer
 pause mediaPlayer =
     { mediaPlayer | playState = Paused }
+
+
+hasMedia : MediaPlayer -> Bool
+hasMedia mediaPlayer =
+    case mediaPlayer.url of
+        Just _ ->
+            True
+
+        Nothing ->
+            False

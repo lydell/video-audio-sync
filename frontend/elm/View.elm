@@ -2,7 +2,7 @@ module View exposing (view)
 
 import DomId
 import Html exposing (Attribute, Html, audio, button, code, div, li, p, span, text, ul, video)
-import Html.Attributes exposing (attribute, class, classList, src, style, title, type_, width)
+import Html.Attributes exposing (attribute, class, classList, disabled, src, style, title, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
@@ -119,7 +119,7 @@ viewMedia model =
                     []
 
             Nothing ->
-                none
+                p [ class "Layout-videoMessage" ] [ text "Drag and drop files or use the buttons below to open a video file, the corresponding audio file, and optionally a points file." ]
         , case model.audio.url of
             Just url ->
                 audio
@@ -329,6 +329,15 @@ progressBarForeground { maxValue, currentValue, x, y, onDragStart } =
 mediaPlayerToolbar : MediaPlayerId -> MediaPlayer -> LoopState -> Html Msg
 mediaPlayerToolbar id mediaPlayer loopState =
     let
+        hasMedia =
+            MediaPlayer.hasMedia mediaPlayer
+
+        backwardEnabled =
+            hasMedia && mediaPlayer.currentTime > 0
+
+        forwardEnabled =
+            hasMedia && mediaPlayer.currentTime < mediaPlayer.duration
+
         ( name, icon ) =
             case id of
                 Audio ->
@@ -367,6 +376,12 @@ mediaPlayerToolbar id mediaPlayer loopState =
               , pressed = False
               , attributes =
                     [ onClick (OpenMedia id)
+                    , class
+                        (if hasMedia then
+                            ""
+                         else
+                            "is-animated"
+                        )
                     ]
               }
             ]
@@ -382,33 +397,37 @@ mediaPlayerToolbar id mediaPlayer loopState =
                         Paused ->
                             False
               , attributes =
-                    onClickWithButton <|
-                        case mediaPlayer.playState of
-                            Playing ->
-                                Pause id
+                    [ disabled (not hasMedia) ]
+                        ++ (onClickWithButton <|
+                                case mediaPlayer.playState of
+                                    Playing ->
+                                        Pause id
 
-                            Paused ->
-                                Play id
+                                    Paused ->
+                                        Play id
+                           )
               }
             ]
         , buttonGroup <|
-            List.map (buttonDetailsFromJumpAction id) jumpActionsBackward
+            List.map (buttonDetailsFromJumpAction id backwardEnabled) jumpActionsBackward
         , buttonGroup <|
-            List.map (buttonDetailsFromJumpAction id) jumpActionsForward
+            List.map (buttonDetailsFromJumpAction id forwardEnabled) jumpActionsForward
         , buttonGroup
             [ { icon = Icon "step-backward"
               , title = "Previous point"
               , label = NoLabel
               , pressed = False
               , attributes =
-                    onClickWithButton (JumpByPoint id Backward)
+                    [ disabled (not backwardEnabled) ]
+                        ++ onClickWithButton (JumpByPoint id Backward)
               }
             , { icon = Icon "step-forward"
               , title = "Next point"
               , label = NoLabel
               , pressed = False
               , attributes =
-                    onClickWithButton (JumpByPoint id Forward)
+                    [ disabled (not forwardEnabled) ]
+                        ++ onClickWithButton (JumpByPoint id Forward)
               }
             ]
         , p []
@@ -420,8 +439,12 @@ mediaPlayerToolbar id mediaPlayer loopState =
         ]
 
 
-buttonDetailsFromJumpAction : MediaPlayerId -> JumpAction -> ButtonDetails Msg
-buttonDetailsFromJumpAction id jumpAction =
+buttonDetailsFromJumpAction :
+    MediaPlayerId
+    -> Bool
+    -> JumpAction
+    -> ButtonDetails Msg
+buttonDetailsFromJumpAction id enabled jumpAction =
     let
         base =
             { icon = Icon ""
@@ -429,7 +452,8 @@ buttonDetailsFromJumpAction id jumpAction =
             , label = NoLabel
             , pressed = False
             , attributes =
-                onClickWithButton (JumpByTime id jumpAction.timeOffset)
+                [ disabled (not enabled) ]
+                    ++ onClickWithButton (JumpByTime id jumpAction.timeOffset)
             }
     in
     if jumpAction.timeOffset < 0 then
@@ -449,6 +473,12 @@ buttonDetailsFromJumpAction id jumpAction =
 generalToolbar : Model -> Html Msg
 generalToolbar model =
     let
+        hasAudio =
+            MediaPlayer.hasMedia model.audio
+
+        hasVideo =
+            MediaPlayer.hasMedia model.video
+
         ( audioCurrentTime, videoCurrentTime ) =
             Utils.getCurrentTimes model
 
@@ -467,6 +497,12 @@ generalToolbar model =
               , pressed = False
               , attributes =
                     [ onClick OpenPoints
+                    , class
+                        (if hasAudio || hasVideo then
+                            ""
+                         else
+                            "is-animated"
+                        )
                     ]
               }
             ]
@@ -495,6 +531,7 @@ generalToolbar model =
 
                             Looping _ ->
                                 GoNormal
+                    , disabled (not (hasAudio && hasVideo))
                     ]
               }
             ]
@@ -507,6 +544,7 @@ generalToolbar model =
                     , pressed = False
                     , attributes =
                         [ onClick (RemovePoint point)
+                        , disabled (not (hasAudio && hasVideo))
                         ]
                     }
 
@@ -522,24 +560,18 @@ generalToolbar model =
                                 , videoTime = videoCurrentTime
                                 }
                             )
+                        , disabled (not (hasAudio && hasVideo))
                         ]
                     }
-            , { icon = Icon "floppy-o"
+            ]
+        , buttonGroup
+            [ { icon = Icon "floppy-o"
               , title = "Save points"
               , label = NoLabel
               , pressed = False
               , attributes =
                     [ onClick Save
-                    ]
-              }
-            ]
-        , buttonGroup
-            [ { icon = Icon "files-o"
-              , title = "Open multiple files in one go"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
-                    [ onClick OpenMultiple
+                    , disabled (model.points == [])
                     ]
               }
             , { icon = Icon "trash-o"
@@ -548,6 +580,21 @@ generalToolbar model =
               , pressed = False
               , attributes =
                     [ onClick ConfirmRemoveAllPoints
+                    , disabled (model.points == [])
+                    ]
+              }
+            , { icon = Icon "files-o"
+              , title = "Open multiple files in one go"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick OpenMultiple
+                    , class
+                        (if hasAudio || hasVideo then
+                            ""
+                         else
+                            "is-animated"
+                        )
                     ]
               }
             ]
