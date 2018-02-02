@@ -77,6 +77,13 @@ type Error
     = InvalidFileError InvalidFileDetails
     | ErroredFileError ErroredFileDetails
     | MediaError ErroredFileDetails
+    | InvalidPointsError InvalidPointsDetails
+
+
+type alias InvalidPointsDetails =
+    { name : String
+    , message : String
+    }
 
 
 type Msg

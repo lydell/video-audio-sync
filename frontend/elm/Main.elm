@@ -3,6 +3,7 @@ module Main exposing (..)
 import DomId exposing (DomId(GraphicsArea, VideoArea))
 import Html exposing (Html)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
+import Json.Decode as Decode
 import Json.Encode as Encode
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
@@ -153,10 +154,23 @@ update msg model =
 
                                 Ports.JsonFile ->
                                     let
-                                        _ =
-                                            Debug.log "Opened JSON file" content
+                                        decoded =
+                                            Decode.decodeString
+                                                Points.decoder
+                                                content
                                     in
-                                    model
+                                    case decoded of
+                                        Ok points ->
+                                            { model | points = points }
+
+                                        Err message ->
+                                            addError
+                                                (InvalidPointsError
+                                                    { name = name
+                                                    , message = message
+                                                    }
+                                                )
+                                                model
                     in
                     ( newModel, Cmd.none )
 

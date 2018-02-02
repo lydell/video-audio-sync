@@ -682,7 +682,18 @@ viewError error =
             p []
                 [ text "Failed to play "
                 , code [] [ text name ]
-                , text <| " as " ++ fileTypeToString fileType ++ ". The file is either unsupported, broken or invalid."
+                , text <|
+                    " as "
+                        ++ fileTypeToString fileType
+                        ++ ". The file is either unsupported, broken or invalid."
+                ]
+
+        Types.InvalidPointsError { name, message } ->
+            p []
+                [ text "Failed to parse "
+                , code [] [ text name ]
+                , text <| " as " ++ fileTypeToString Ports.JsonFile ++ ". "
+                , code [] [ text message ]
                 ]
 
 
