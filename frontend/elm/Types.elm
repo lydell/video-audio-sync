@@ -105,6 +105,7 @@ type Msg
     | GoLooping
     | AddPoint Point
     | RemovePoint Point
+    | RemoveAllPoints
     | Save
     | OpenMedia MediaPlayerId
     | OpenPoints

@@ -316,6 +316,9 @@ update msg model =
             in
             ( { model | points = newPoints }, Cmd.none )
 
+        RemoveAllPoints ->
+            ( { model | points = [] }, Cmd.none )
+
         Save ->
             let
                 encoded =

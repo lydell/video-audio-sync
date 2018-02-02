@@ -545,6 +545,14 @@ generalToolbar model =
                     [ onClick OpenMultiple
                     ]
               }
+            , { icon = Icon "trash-o"
+              , title = "Remove all points"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick RemoveAllPoints
+                    ]
+              }
             ]
         ]
 
