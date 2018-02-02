@@ -173,7 +173,7 @@ viewGraphics model =
 
         toScale number =
             if scale == 0 then
-                1
+                0
             else
                 number / scale
 
@@ -187,12 +187,13 @@ viewGraphics model =
             Utils.getCurrentTimes model
 
         videoProgressBarDetails =
-            { maxValue = toScale model.video.duration
-            , currentValue = toScale videoCurrentTime
-            , x = progressBarX
-            , y = videoY
-            , onDragStart = DragStart Video
-            }
+            Debug.log "video"
+                { maxValue = toScale model.video.duration
+                , currentValue = toScale videoCurrentTime
+                , x = progressBarX
+                , y = videoY
+                , onDragStart = DragStart Video
+                }
 
         audioProgressBarDetails =
             { maxValue = toScale model.audio.duration
@@ -297,29 +298,32 @@ progressBarForeground { maxValue, currentValue, x, y, onDragStart } =
         progressWidth =
             currentValue
     in
-    Svg.g [ Svg.class "ProgressBarForeground" ]
-        [ Svg.line
-            [ Svg.x1 (toString progressWidth)
-            , Svg.y1 (toString y)
-            , Svg.x2 (toString progressWidth)
-            , Svg.y2 (toString (y + progressBarHeight))
-            , Svg.class "ProgressBarForeground-current"
+    if width <= 0 then
+        none
+    else
+        Svg.g [ Svg.class "ProgressBarForeground" ]
+            [ Svg.line
+                [ Svg.x1 (toString progressWidth)
+                , Svg.y1 (toString y)
+                , Svg.x2 (toString progressWidth)
+                , Svg.y2 (toString (y + progressBarHeight))
+                , Svg.class "ProgressBarForeground-current"
+                ]
+                []
+            , Svg.rect
+                [ Svg.x (toString x)
+                , Svg.y (toString (y - progressBarMouseAreaExtra / 2))
+                , Svg.width (toString width)
+                , Svg.height (toString (progressBarHeight + progressBarMouseAreaExtra))
+                , Svg.class "ProgressBarForeground-mouseArea"
+                , onMouseDown <|
+                    onDragStart
+                        { x = x
+                        , width = width
+                        }
+                ]
+                []
             ]
-            []
-        , Svg.rect
-            [ Svg.x (toString x)
-            , Svg.y (toString (y - progressBarMouseAreaExtra / 2))
-            , Svg.width (toString width)
-            , Svg.height (toString (progressBarHeight + progressBarMouseAreaExtra))
-            , Svg.class "ProgressBarForeground-mouseArea"
-            , onMouseDown <|
-                onDragStart
-                    { x = x
-                    , width = width
-                    }
-            ]
-            []
-        ]
 
 
 mediaPlayerToolbar : MediaPlayerId -> MediaPlayer -> LoopState -> Html Msg
