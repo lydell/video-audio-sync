@@ -69,14 +69,7 @@ view model =
     div [ class "Layout" ]
         [ viewMedia model
         , viewControls model
-        , case model.errors of
-            [] ->
-                none
-
-            errors ->
-                alertModal CloseErrorModal
-                    [ ul [] (List.map viewError errors)
-                    ]
+        , viewModals model
         , if model.isDraggingFile then
             fileDragOverlay
           else
@@ -550,7 +543,7 @@ generalToolbar model =
               , label = NoLabel
               , pressed = False
               , attributes =
-                    [ onClick RemoveAllPoints
+                    [ onClick ConfirmRemoveAllPoints
                     ]
               }
             ]
@@ -650,16 +643,66 @@ fileDragOverlay =
         ]
 
 
-alertModal : msg -> List (Html msg) -> Html msg
-alertModal msg children =
+modal : msg -> List (Html msg) -> List (Html msg) -> Html msg
+modal msg buttons children =
     div [ class "Modal" ]
         [ div [ class "Modal-backdrop", onClick msg ] []
         , div [ class "Modal-content" ]
             [ div [] children
-            , button [ type_ "button", class "Modal-button", onClick msg ]
-                [ text "Close"
-                ]
+            , div [] buttons
             ]
+        ]
+
+
+modalButton : msg -> String -> Html msg
+modalButton msg label =
+    button [ type_ "button", class "Modal-button", onClick msg ]
+        [ text label
+        ]
+
+
+alertModal : msg -> List (Html msg) -> Html msg
+alertModal msg children =
+    modal
+        msg
+        [ modalButton msg "Close"
+        ]
+        children
+
+
+confirmModal :
+    { cancel : ( msg, String ), confirm : ( msg, String ) }
+    -> List (Html msg)
+    -> Html msg
+confirmModal { cancel, confirm } children =
+    modal
+        (Tuple.first cancel)
+        [ uncurry modalButton cancel
+        , uncurry modalButton confirm
+        ]
+        children
+
+
+viewModals : Model -> Html Msg
+viewModals model =
+    div []
+        [ if model.confirmRemoveAllPointsModalOpen then
+            confirmModal
+                { cancel = ( CloseRemoveAllPoints, "No, keep them!" )
+                , confirm = ( RemoveAllPoints, "Yes, remove them!" )
+                }
+                [ p [] [ text "This removes all points you have added. Are you sure?" ]
+                ]
+          else
+            none
+        , case model.errors of
+            [] ->
+                none
+
+            errors ->
+                alertModal CloseErrorModal
+                    [ ul [] (List.map viewError errors)
+                    ]
         ]
 
 

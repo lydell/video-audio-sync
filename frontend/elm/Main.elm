@@ -69,6 +69,7 @@ init flags =
       , windowSize = { width = 0, height = 0 }
       , points = []
       , isDraggingFile = False
+      , confirmRemoveAllPointsModalOpen = False
       , errors = []
       }
     , Task.perform WindowSize Window.size
@@ -317,7 +318,15 @@ update msg model =
             ( { model | points = newPoints }, Cmd.none )
 
         RemoveAllPoints ->
-            ( { model | points = [] }, Cmd.none )
+            ( { model | points = [], confirmRemoveAllPointsModalOpen = False }
+            , Cmd.none
+            )
+
+        ConfirmRemoveAllPoints ->
+            ( { model | confirmRemoveAllPointsModalOpen = True }, Cmd.none )
+
+        CloseRemoveAllPoints ->
+            ( { model | confirmRemoveAllPointsModalOpen = False }, Cmd.none )
 
         Save ->
             let

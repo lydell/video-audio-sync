@@ -18,6 +18,7 @@ type alias Model =
     , windowSize : Window.Size
     , points : List Point
     , isDraggingFile : Bool
+    , confirmRemoveAllPointsModalOpen : Bool
     , errors : List Error
     }
 
@@ -106,6 +107,8 @@ type Msg
     | AddPoint Point
     | RemovePoint Point
     | RemoveAllPoints
+    | ConfirmRemoveAllPoints
+    | CloseRemoveAllPoints
     | Save
     | OpenMedia MediaPlayerId
     | OpenPoints
