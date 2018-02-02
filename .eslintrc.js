@@ -7,6 +7,7 @@ module.exports = {
     "prettier/prettier": "error",
   },
   globals: {
+    DEBUG: false,
     Elm: false,
     console: false,
     document: false,

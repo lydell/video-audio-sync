@@ -9,6 +9,7 @@ const OUTPUT_PATH = path.resolve(__dirname, "build");
 const PUBLIC_PATH = "/";
 
 const constants = {
+  DEBUG: JSON.stringify(DEBUG),
   "process.env.NODE_ENV": JSON.stringify(DEBUG ? "development" : "production"),
 };
 

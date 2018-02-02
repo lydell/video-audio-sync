@@ -23,7 +23,14 @@ const FILE_TYPES = {
 const objectUrls = new Map();
 
 function start() {
-  const app = Main.embed(document.getElementById("app"));
+  const params = new window.URLSearchParams(
+    DEBUG ? window.location.search : "",
+  );
+
+  const app = Main.embed(document.getElementById("app"), {
+    audio: params.get("audio"),
+    video: params.get("video"),
+  });
 
   setupDragAndDrop(app);
 

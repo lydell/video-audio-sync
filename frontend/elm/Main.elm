@@ -29,9 +29,9 @@ saveFile =
     }
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , update = update
         , subscriptions = subscriptions
@@ -39,10 +39,28 @@ main =
         }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { audio = MediaPlayer.empty
-      , video = MediaPlayer.empty
+type alias Flags =
+    { audio : Maybe String
+    , video : Maybe String
+    }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    let
+        empty =
+            MediaPlayer.empty
+
+        withLocalName maybeName =
+            case maybeName of
+                Just name ->
+                    { empty | name = name, url = Just ("/" ++ name) }
+
+                Nothing ->
+                    empty
+    in
+    ( { audio = withLocalName flags.audio
+      , video = withLocalName flags.video
       , loopState = Normal
       , drag = NoDrag
       , videoArea = emptyArea
