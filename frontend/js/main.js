@@ -3,6 +3,10 @@ import FileSaver from "file-saver";
 import { Main } from "../elm/Main.elm";
 import "../css/main.css";
 
+// `window.URL.createObjectURL(file)` is only needed for a short while before
+// `window.URL.revokeObjectURL(url)` can be called.
+const REVOKE_OBJECT_URL_TIMEOUT = 1000; // ms
+
 const FILE_TYPES = {
   AudioFile: {
     // Chrome oddly didn't show .aac files in the upload dialog for me, so I
@@ -292,7 +296,7 @@ function reportOpenedFile(file, app) {
     success(url);
     window.setTimeout(() => {
       window.URL.revokeObjectURL(url);
-    }, 0);
+    }, REVOKE_OBJECT_URL_TIMEOUT);
     return;
   }
 

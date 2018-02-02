@@ -109,29 +109,39 @@ viewMedia model =
                 maxHeight * aspectRatio
     in
     div [ class "Layout-videoWrapper", DomId.toHtml DomId.VideoArea ]
-        [ video
-            ([ src "/sommaren_video.mp4"
-             , width (truncate clampedWidth)
-             , muted True
-             , onError (MediaErrorMsg Video)
-             , onVideoMetaData (MetaData Video)
-             , onTimeUpdate (CurrentTime Video)
-             , DomId.toHtml DomId.Video
-             , class "Layout-video"
-             ]
-                ++ playEvents Video
-            )
-            []
-        , audio
-            ([ src "/sommaren_audio.aac"
-             , onError (MediaErrorMsg Audio)
-             , onAudioMetaData (MetaData Audio)
-             , onTimeUpdate (CurrentTime Audio)
-             , DomId.toHtml DomId.Audio
-             ]
-                ++ playEvents Audio
-            )
-            []
+        [ case model.video.url of
+            Just url ->
+                video
+                    ([ src url
+                     , width (truncate clampedWidth)
+                     , muted True
+                     , onError (MediaErrorMsg Video)
+                     , onVideoMetaData (MetaData Video)
+                     , onTimeUpdate (CurrentTime Video)
+                     , DomId.toHtml DomId.Video
+                     , class "Layout-video"
+                     ]
+                        ++ playEvents Video
+                    )
+                    []
+
+            Nothing ->
+                none
+        , case model.audio.url of
+            Just url ->
+                audio
+                    ([ src url
+                     , onError (MediaErrorMsg Audio)
+                     , onAudioMetaData (MetaData Audio)
+                     , onTimeUpdate (CurrentTime Audio)
+                     , DomId.toHtml DomId.Audio
+                     ]
+                        ++ playEvents Audio
+                    )
+                    []
+
+            Nothing ->
+                none
         ]
 
 

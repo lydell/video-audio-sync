@@ -110,10 +110,37 @@ update msg model =
 
                 Ports.OpenedFile { name, fileType, content } ->
                     let
-                        _ =
-                            Debug.log "OpenedFile" ( name, fileType, content )
+                        empty =
+                            MediaPlayer.empty
+
+                        newModel =
+                            case fileType of
+                                Ports.AudioFile ->
+                                    { model
+                                        | audio =
+                                            { empty
+                                                | name = name
+                                                , url = Just content
+                                            }
+                                    }
+
+                                Ports.VideoFile ->
+                                    { model
+                                        | video =
+                                            { empty
+                                                | name = name
+                                                , url = Just content
+                                            }
+                                    }
+
+                                Ports.JsonFile ->
+                                    let
+                                        _ =
+                                            Debug.log "Opened JSON file" content
+                                    in
+                                    model
                     in
-                    ( model, Cmd.none )
+                    ( newModel, Cmd.none )
 
                 Ports.InvalidFile details ->
                     ( addError (InvalidFileError details) model, Cmd.none )
@@ -139,17 +166,23 @@ update msg model =
                 name =
                     case id of
                         Audio ->
-                            { name = "TODO: audio.file"
+                            { name = model.audio.name
                             , fileType = Ports.AudioFile
                             }
 
                         Video ->
-                            { name = "TODO: video.file"
+                            { name = model.video.name
                             , fileType = Ports.VideoFile
                             }
+
+                newModel =
+                    model
+                        |> updateMediaPlayer
+                            (always MediaPlayer.empty)
+                            id
+                        |> addError (MediaError name)
             in
-            -- TODO: Reset mediaPlayer
-            ( addError (MediaError name) model, Cmd.none )
+            ( newModel, Cmd.none )
 
         MetaData id details ->
             ( updateMediaPlayer (MediaPlayer.updateMetaData details) id model

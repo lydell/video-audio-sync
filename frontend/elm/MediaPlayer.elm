@@ -9,6 +9,8 @@ type alias MediaPlayer =
     , duration : Time
     , currentTime : Time
     , playState : PlayState
+    , name : String
+    , url : Maybe String
     }
 
 
@@ -23,6 +25,8 @@ empty =
     , duration = 0
     , currentTime = 0
     , playState = Paused
+    , name = ""
+    , url = Nothing
     }
 
 
