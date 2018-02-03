@@ -105,7 +105,7 @@ encode outgoingMessage =
             }
 
         SaveFile { filename, content, mimeType } ->
-            { tag = "Save"
+            { tag = "SaveFile"
             , data =
                 Encode.object
                     [ ( "filename", Encode.string filename )
