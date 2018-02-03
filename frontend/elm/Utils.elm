@@ -114,6 +114,31 @@ getClosestPoint getTime direction time points =
         |> Maybe.map Tuple.second
 
 
+canAddPoint : List Point -> Point -> Bool
+canAddPoint points potentialNewPoint =
+    let
+        hasSelected getTime =
+            List.any
+                (\point ->
+                    let
+                        distance =
+                            abs (getTime point - getTime potentialNewPoint)
+                    in
+                    distance <= maxPointOffset
+                )
+                points
+
+        countBefore getTime =
+            points
+                |> List.filter
+                    (\point -> getTime point < getTime potentialNewPoint)
+                |> List.length
+    in
+    not (hasSelected .audioTime)
+        && not (hasSelected .videoTime)
+        && (countBefore .audioTime == countBefore .videoTime)
+
+
 splitExtension : String -> ( String, String )
 splitExtension filename =
     let

@@ -484,12 +484,16 @@ generalToolbar model =
         ( audioCurrentTime, videoCurrentTime ) =
             Utils.getCurrentTimes model
 
+        potentialNewPoint =
+            { audioTime = audioCurrentTime
+            , videoTime = videoCurrentTime
+            }
+
         selectedPoint =
-            Utils.getSelectedPoint
-                { audioTime = audioCurrentTime
-                , videoTime = videoCurrentTime
-                }
-                model.points
+            Utils.getSelectedPoint potentialNewPoint model.points
+
+        canAddPoint =
+            Utils.canAddPoint model.points potentialNewPoint
     in
     toolbar
         [ buttonGroup
@@ -556,13 +560,8 @@ generalToolbar model =
                     , label = NoLabel
                     , pressed = False
                     , attributes =
-                        [ onClick
-                            (AddPoint
-                                { audioTime = audioCurrentTime
-                                , videoTime = videoCurrentTime
-                                }
-                            )
-                        , disabled (not (hasAudio && hasVideo))
+                        [ onClick (AddPoint potentialNewPoint)
+                        , disabled (not (hasAudio && hasVideo && canAddPoint))
                         ]
                     }
             ]
