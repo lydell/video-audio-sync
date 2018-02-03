@@ -1,6 +1,7 @@
 const ExtractPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
 
@@ -127,7 +128,7 @@ module.exports = {
       minChunks: Infinity,
     }),
 
-    !DEBUG && new webpack.optimize.UglifyJsPlugin(),
+    !DEBUG && new UglifyJsPlugin({ parallel: true }),
 
     new HtmlWebpackPlugin({
       template: "./index.ejs",
