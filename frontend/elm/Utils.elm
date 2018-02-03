@@ -134,7 +134,9 @@ canAddPoint points potentialNewPoint =
                     (\point -> getTime point < getTime potentialNewPoint)
                 |> List.length
     in
-    not (hasSelected .audioTime)
+    (potentialNewPoint.audioTime > 0)
+        && (potentialNewPoint.videoTime > 0)
+        && not (hasSelected .audioTime)
         && not (hasSelected .videoTime)
         && (countBefore .audioTime == countBefore .videoTime)
 
