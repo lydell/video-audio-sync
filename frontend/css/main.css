@@ -176,6 +176,8 @@ label {
   border: var(--border-width) solid var(--grey-luke);
   border-radius: 0;
   background: var(--grey-leia);
+  position: relative;
+  z-index: 1;
 }
 
 .ButtonGroup-button:first-child {
@@ -197,7 +199,7 @@ label {
 .ButtonGroup-button:not(:disabled):active {
   outline: none;
   border-color: var(--blue);
-  position: relative;
+  z-index: 2;
 }
 
 .ButtonGroup-button.is-pressed {
@@ -212,10 +214,6 @@ label {
 
 .ButtonGroup-button:disabled + .ButtonGroup-button:disabled {
   border-left-color: transparent;
-}
-
-.ButtonGroup-button.is-animated {
-  position: relative;
 }
 
 .ButtonGroup-button.is-animated::before {
@@ -253,6 +251,24 @@ label {
 
 .ButtonGroup-buttonLabel {
   font-size: 0.75em;
+}
+
+.ButtonGroup-buttonBadge {
+  --size: 1.5em;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(25%, -25%);
+  height: var(--size);
+  min-width: var(--size);
+  padding: 0 0.33em;
+  border-radius: calc(var(--size) / 2);
+  background-color: var(--blue);
+  color: white;
+  font-size: 0.75em;
+  line-height: var(--size);
+  font-weight: bold;
 }
 
 .Modal {

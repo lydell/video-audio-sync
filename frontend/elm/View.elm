@@ -370,11 +370,10 @@ mediaPlayerToolbar id mediaPlayer loopState =
     in
     toolbar
         [ buttonGroup
-            [ { icon = icon
-              , title = "Open " ++ String.toLower name
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            [ { emptyButton
+                | icon = icon
+                , title = "Open " ++ String.toLower name
+                , attributes =
                     [ onClick (OpenMedia id)
                     , class
                         (if hasMedia then
@@ -386,17 +385,17 @@ mediaPlayerToolbar id mediaPlayer loopState =
               }
             ]
         , buttonGroup
-            [ { icon = playPauseIcon
-              , title = playPauseTitle
-              , label = NoLabel
-              , pressed =
+            [ { emptyButton
+                | icon = playPauseIcon
+                , title = playPauseTitle
+                , pressed =
                     case mediaPlayer.playState of
                         Playing ->
                             True
 
                         Paused ->
                             False
-              , attributes =
+                , attributes =
                     [ disabled (not hasMedia) ]
                         ++ (onClickWithButton <|
                                 case mediaPlayer.playState of
@@ -413,19 +412,17 @@ mediaPlayerToolbar id mediaPlayer loopState =
         , buttonGroup <|
             List.map (buttonDetailsFromJumpAction id forwardEnabled) jumpActionsForward
         , buttonGroup
-            [ { icon = Icon "step-backward"
-              , title = "Previous point"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            [ { emptyButton
+                | icon = Icon "step-backward"
+                , title = "Previous point"
+                , attributes =
                     [ disabled (not backwardEnabled) ]
                         ++ onClickWithButton (JumpByPoint id Backward)
               }
-            , { icon = Icon "step-forward"
-              , title = "Next point"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            , { emptyButton
+                | icon = Icon "step-forward"
+                , title = "Next point"
+                , attributes =
                     [ disabled (not forwardEnabled) ]
                         ++ onClickWithButton (JumpByPoint id Forward)
               }
@@ -450,13 +447,10 @@ buttonDetailsFromJumpAction :
 buttonDetailsFromJumpAction id enabled jumpAction =
     let
         base =
-            { icon = Icon ""
-            , title = ""
-            , label = NoLabel
-            , pressed = False
-            , attributes =
-                [ disabled (not enabled) ]
-                    ++ onClickWithButton (JumpByTime id jumpAction.timeOffset)
+            { emptyButton
+                | attributes =
+                    [ disabled (not enabled) ]
+                        ++ onClickWithButton (JumpByTime id jumpAction.timeOffset)
             }
     in
     if jumpAction.timeOffset < 0 then
@@ -504,11 +498,10 @@ generalToolbar model =
     in
     toolbar
         [ buttonGroup
-            [ { icon = Icon "file-alt"
-              , title = "Open points"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            [ { emptyButton
+                | icon = Icon "file-alt"
+                , title = "Open points"
+                , attributes =
                     [ onClick OpenPoints
                     , class
                         (if hasAudio || hasVideo then
@@ -520,23 +513,23 @@ generalToolbar model =
               }
             ]
         , buttonGroup
-            [ { icon = Icon "sync-alt"
-              , title =
+            [ { emptyButton
+                | icon = Icon "sync-alt"
+                , title =
                     case model.loopState of
                         Normal ->
                             "Video and audio play normally. Click to loop."
 
                         Looping _ ->
                             "Video and audio loop around their current positions. Click to play normally."
-              , label = NoLabel
-              , pressed =
+                , pressed =
                     case model.loopState of
                         Normal ->
                             False
 
                         Looping _ ->
                             True
-              , attributes =
+                , attributes =
                     [ onClick <|
                         case model.loopState of
                             Normal ->
@@ -551,28 +544,27 @@ generalToolbar model =
         , buttonGroup
             [ case selectedPoint of
                 Just point ->
-                    { icon = Icon "minus"
-                    , title = "Remove point"
-                    , label = NoLabel
-                    , pressed = False
-                    , attributes =
-                        [ onClick (RemovePoint point)
-                        , disabled (not (hasAudio && hasVideo))
-                        ]
+                    { emptyButton
+                        | icon = Icon "minus"
+                        , title = "Remove point"
+                        , attributes =
+                            [ onClick (RemovePoint point)
+                            , disabled (not (hasAudio && hasVideo))
+                            ]
                     }
 
                 Nothing ->
-                    { icon = Icon "plus"
-                    , title = "Add point"
-                    , label = NoLabel
-                    , pressed = False
-                    , attributes =
-                        [ onClick (AddPoint potentialNewPoint)
-                        , disabled (not (hasAudio && hasVideo && canAddPoint))
-                        ]
+                    { emptyButton
+                        | icon = Icon "plus"
+                        , title = "Add point"
+                        , attributes =
+                            [ onClick (AddPoint potentialNewPoint)
+                            , disabled (not (hasAudio && hasVideo && canAddPoint))
+                            ]
                     }
-            , { icon = Icon "exclamation-triangle "
-              , title =
+            , { emptyButton
+                | icon = Icon "exclamation-triangle "
+                , title =
                     case numWarnings of
                         0 ->
                             "No warnings!"
@@ -582,38 +574,38 @@ generalToolbar model =
 
                         _ ->
                             toString numWarnings ++ " warnings"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+                , badge =
+                    if numWarnings == 0 then
+                        Nothing
+                    else
+                        Just <| toString numWarnings
+                , attributes =
                     [ onClick OpenPointsWarningsModal
                     , disabled (numWarnings == 0)
                     ]
               }
             ]
         , buttonGroup
-            [ { icon = Icon "save"
-              , title = "Save points"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            [ { emptyButton
+                | icon = Icon "save"
+                , title = "Save points"
+                , attributes =
                     [ onClick Save
                     , disabled (model.points == [])
                     ]
               }
-            , { icon = Icon "trash"
-              , title = "Remove all points"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            , { emptyButton
+                | icon = Icon "trash"
+                , title = "Remove all points"
+                , attributes =
                     [ onClick ConfirmRemoveAllPoints
                     , disabled (model.points == [])
                     ]
               }
-            , { icon = Icon "copy"
-              , title = "Open multiple files in one go"
-              , label = NoLabel
-              , pressed = False
-              , attributes =
+            , { emptyButton
+                | icon = Icon "copy"
+                , title = "Open multiple files in one go"
+                , attributes =
                     [ onClick OpenMultiple
                     , class
                         (if hasAudio || hasVideo then
@@ -636,6 +628,7 @@ type alias ButtonDetails msg =
     { icon : Icon
     , title : String
     , label : ButtonLabel
+    , badge : Maybe String
     , pressed : Bool
     , attributes : List (Attribute msg)
     }
@@ -645,6 +638,17 @@ type ButtonLabel
     = NoLabel
     | LeftLabel String
     | RightLabel String
+
+
+emptyButton : ButtonDetails msg
+emptyButton =
+    { icon = Icon ""
+    , title = ""
+    , label = NoLabel
+    , badge = Nothing
+    , pressed = False
+    , attributes = []
+    }
 
 
 buttonGroup : List (ButtonDetails msg) -> Html msg
@@ -685,6 +689,12 @@ buttonGroupButton buttonDetails =
 
                 RightLabel labelText ->
                     [ icon, label labelText ]
+        , case buttonDetails.badge of
+            Just badgeText ->
+                span [ class "ButtonGroup-buttonBadge" ] [ text badgeText ]
+
+            Nothing ->
+                none
         ]
 
 
