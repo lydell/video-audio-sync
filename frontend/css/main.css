@@ -175,7 +175,6 @@ label {
   border: var(--border-width) solid var(--grey-luke);
   border-radius: 0;
   background: var(--grey-leia);
-  position: relative;
 }
 
 .ButtonGroup-button:first-child {
@@ -197,6 +196,7 @@ label {
 .ButtonGroup-button:not(:disabled):active {
   outline: none;
   border-color: var(--blue);
+  position: relative;
 }
 
 .ButtonGroup-button.is-pressed {
@@ -211,6 +211,10 @@ label {
 
 .ButtonGroup-button:disabled + .ButtonGroup-button:disabled {
   border-left-color: transparent;
+}
+
+.ButtonGroup-button.is-animated {
+  position: relative;
 }
 
 .ButtonGroup-button.is-animated::before {
