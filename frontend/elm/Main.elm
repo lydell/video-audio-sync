@@ -22,14 +22,6 @@ loopRadius =
     3 * Time.second
 
 
-saveFile : Ports.File
-saveFile =
-    { filename = "points.json"
-    , content = ""
-    , mimeType = "application/json"
-    }
-
-
 main : Program Flags Model Msg
 main =
     Html.programWithFlags
@@ -372,7 +364,15 @@ update msg model =
                         |> Points.encode
                         |> Encode.encode 0
             in
-            ( model, Ports.send (Ports.SaveFile { saveFile | content = content }) )
+            ( model
+            , Ports.send
+                (Ports.SaveFile
+                    { filename = pointsSaveFilename model.audio.name
+                    , content = content
+                    , mimeType = "application/json"
+                    }
+                )
+            )
 
         OpenMedia id ->
             let
@@ -779,3 +779,18 @@ updateLoopTimes model =
 addError : Error -> Model -> Model
 addError error model =
     { model | errors = error :: model.errors }
+
+
+pointsSaveFilename : String -> String
+pointsSaveFilename audioName =
+    let
+        ( base, extension ) =
+            Utils.splitExtension audioName
+
+        suffix =
+            "points.json"
+    in
+    if base == "" then
+        suffix
+    else
+        base ++ "_" ++ suffix

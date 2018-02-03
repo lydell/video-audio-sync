@@ -112,3 +112,23 @@ getClosestPoint getTime direction time points =
             )
         |> List.Extra.minimumBy (Tuple.first >> abs)
         |> Maybe.map Tuple.second
+
+
+splitExtension : String -> ( String, String )
+splitExtension filename =
+    let
+        separator =
+            "."
+
+        parts =
+            filename |> String.split separator |> List.reverse
+    in
+    case parts of
+        [] ->
+            ( "", "" )
+
+        [ base ] ->
+            ( base, "" )
+
+        extension :: rest ->
+            ( String.join separator (List.reverse rest), extension )
