@@ -795,7 +795,7 @@ viewModals model =
                                     if index == 0 then
                                         "From the start to point 1"
                                     else
-                                        "Between point " ++ toString (index - 1) ++ " and point " ++ toString index
+                                        "Between point " ++ toString index ++ " and point " ++ toString (index + 1)
                             in
                             li [] [ text <| start ++ ": " ++ toString tempo ++ " times." ]
                         )
