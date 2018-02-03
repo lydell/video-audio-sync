@@ -833,7 +833,7 @@ viewModals model =
 
             errors ->
                 alertModal CloseErrorModal
-                    [ ul [] (List.map viewError errors)
+                    [ ul [] (List.map viewError (List.reverse errors))
                     ]
         ]
 
