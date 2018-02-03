@@ -1,9 +1,19 @@
-module Points exposing (decoder, encode)
+module Points exposing (decoder, encode, tempoMax, tempoMin, validate)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import Time exposing (Time)
 import Types exposing (..)
+
+
+tempoMin : Float
+tempoMin =
+    0.5
+
+
+tempoMax : Float
+tempoMax =
+    2
 
 
 type alias TempoPoint =
@@ -98,3 +108,17 @@ fromTempoPoints tempoPoints =
             ( { audioTime = 0, videoTime = 0 }, [] )
         |> Tuple.second
         |> List.reverse
+
+
+validate : List Point -> List ( Int, Float )
+validate points =
+    points
+        |> toTempoPoints
+        |> List.indexedMap (,)
+        |> List.filterMap
+            (\( index, ( _, tempo ) ) ->
+                if tempo < tempoMin || tempo > tempoMax then
+                    Just ( index, tempo )
+                else
+                    Nothing
+            )

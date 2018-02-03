@@ -17,6 +17,7 @@ type alias Model =
     , controlsArea : Area
     , windowSize : Window.Size
     , points : List Point
+    , pointsWarningsModalOpen : Bool
     , isDraggingFile : Bool
     , confirmRemoveAllPointsModalOpen : Bool
     , confirmOpenPoints : Maybe { name : String, points : List Point }
@@ -117,4 +118,6 @@ type Msg
     | CloseOpenPoints
     | OpenMultiple
     | CloseErrorModal
+    | OpenPointsWarningsModal
+    | ClosePointsWarningsModal
     | WindowSize Window.Size

@@ -9,6 +9,7 @@ import Html.Events exposing (on, onClick)
 import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
+import Points
 import Ports
 import Svg
 import Svg.Attributes as Svg
@@ -494,6 +495,12 @@ generalToolbar model =
 
         canAddPoint =
             Utils.canAddPoint model.points potentialNewPoint
+
+        warnings =
+            Points.validate model.points
+
+        numWarnings =
+            List.length warnings
     in
     toolbar
         [ buttonGroup
@@ -564,6 +571,24 @@ generalToolbar model =
                         , disabled (not (hasAudio && hasVideo && canAddPoint))
                         ]
                     }
+            , { icon = Icon "exclamation-triangle "
+              , title =
+                    case numWarnings of
+                        0 ->
+                            "No warnings!"
+
+                        1 ->
+                            "1 warning"
+
+                        _ ->
+                            toString numWarnings ++ " warnings"
+              , label = NoLabel
+              , pressed = False
+              , attributes =
+                    [ onClick OpenPointsWarningsModal
+                    , disabled (numWarnings == 0)
+                    ]
+              }
             ]
         , buttonGroup
             [ { icon = Icon "save"
@@ -738,7 +763,37 @@ confirmModal { cancel, confirm } children =
 viewModals : Model -> Html Msg
 viewModals model =
     div []
-        [ if model.confirmRemoveAllPointsModalOpen then
+        [ if model.pointsWarningsModalOpen then
+            let
+                warnings =
+                    Points.validate model.points
+            in
+            alertModal ClosePointsWarningsModal
+                [ p []
+                    [ text <|
+                        "The syncing program can handle slowing down audio down to "
+                            ++ toString Points.tempoMin
+                            ++ " times or speeding up audio up to "
+                            ++ toString Points.tempoMax
+                            ++ " times. The audio between some points would need to be slowed down or sped up more than that."
+                    ]
+                , ul [] <|
+                    List.map
+                        (\( index, tempo ) ->
+                            let
+                                start =
+                                    if index == 0 then
+                                        "From the start to point 1"
+                                    else
+                                        "Between point " ++ toString (index - 1) ++ " and point " ++ toString index
+                            in
+                            li [] [ text <| start ++ ": " ++ toString tempo ++ " times." ]
+                        )
+                        warnings
+                ]
+          else
+            none
+        , if model.confirmRemoveAllPointsModalOpen then
             confirmModal
                 { cancel = ( CloseRemoveAllPoints, "No, keep them!" )
                 , confirm = ( RemoveAllPoints, "Yes, remove them!" )

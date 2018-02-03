@@ -60,6 +60,7 @@ init flags =
       , controlsArea = emptyArea
       , windowSize = { width = 0, height = 0 }
       , points = []
+      , pointsWarningsModalOpen = False
       , isDraggingFile = False
       , confirmRemoveAllPointsModalOpen = False
       , confirmOpenPoints = Nothing
@@ -408,6 +409,12 @@ update msg model =
 
         CloseErrorModal ->
             ( { model | errors = [] }, Cmd.none )
+
+        OpenPointsWarningsModal ->
+            ( { model | pointsWarningsModalOpen = True }, Cmd.none )
+
+        ClosePointsWarningsModal ->
+            ( { model | pointsWarningsModalOpen = False }, Cmd.none )
 
         WindowSize size ->
             ( { model | windowSize = size }
