@@ -340,10 +340,10 @@ mediaPlayerToolbar id mediaPlayer loopState =
         ( name, icon ) =
             case id of
                 Audio ->
-                    ( "Audio", Icon "file-audio-o" )
+                    ( "Audio", Icon "file-audio" )
 
                 Video ->
-                    ( "Video", Icon "file-video-o" )
+                    ( "Video", Icon "file-video" )
 
         ( playPauseTitle, playPauseIcon ) =
             case ( mediaPlayer.playState, loopState ) of
@@ -354,7 +354,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
 
                 ( Playing, Looping _ ) ->
                     ( "Looping. Click to pause."
-                    , CustomIcon "pause-circle-o" "fa-lg"
+                    , CustomIcon "pause-circle" "fa-1.25"
                     )
 
                 ( Paused, Normal ) ->
@@ -364,7 +364,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
 
                 ( Paused, Looping _ ) ->
                     ( "Paused. Click to loop."
-                    , CustomIcon "play-circle-o" "fa-lg"
+                    , CustomIcon "play-circle" "fa-1.25"
                     )
     in
     toolbar
@@ -493,7 +493,7 @@ generalToolbar model =
     in
     toolbar
         [ buttonGroup
-            [ { icon = Icon "file-text-o"
+            [ { icon = Icon "file-alt"
               , title = "Open points"
               , label = NoLabel
               , pressed = False
@@ -509,7 +509,7 @@ generalToolbar model =
               }
             ]
         , buttonGroup
-            [ { icon = Icon "repeat"
+            [ { icon = Icon "sync-alt"
               , title =
                     case model.loopState of
                         Normal ->
@@ -567,7 +567,7 @@ generalToolbar model =
                     }
             ]
         , buttonGroup
-            [ { icon = Icon "floppy-o"
+            [ { icon = Icon "save"
               , title = "Save points"
               , label = NoLabel
               , pressed = False
@@ -576,7 +576,7 @@ generalToolbar model =
                     , disabled (model.points == [])
                     ]
               }
-            , { icon = Icon "trash-o"
+            , { icon = Icon "trash"
               , title = "Remove all points"
               , label = NoLabel
               , pressed = False
@@ -585,7 +585,7 @@ generalToolbar model =
                     , disabled (model.points == [])
                     ]
               }
-            , { icon = Icon "files-o"
+            , { icon = Icon "copy"
               , title = "Open multiple files in one go"
               , label = NoLabel
               , pressed = False
@@ -682,7 +682,7 @@ fontawesome icon =
     in
     span
         [ attribute "aria-hidden" "true"
-        , class ("fa fa-" ++ name ++ " " ++ extraClass)
+        , class ("fas fa-" ++ name ++ " " ++ extraClass)
         ]
         []
 
@@ -690,7 +690,7 @@ fontawesome icon =
 fileDragOverlay : Html msg
 fileDragOverlay =
     div [ class "FileDragOverlay" ]
-        [ fontawesome (CustomIcon "files-o" "fa-4x")
+        [ fontawesome (CustomIcon "copy" "fa-4x")
         , p []
             [ text "Drop video, audio and/or points" ]
         ]
