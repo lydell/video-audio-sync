@@ -3,19 +3,19 @@ import FileSaver from "file-saver";
 import { Main } from "../elm/Main.elm";
 import "../css/main.css";
 
+// Chrome does not appear to show .aac and .json files unless explicitly
+// mentioned via file extension.
 const FILE_TYPES = {
   AudioFile: {
-    // Chrome oddly didn't show .aac files in the upload dialog for me, so I
-    // had to add .aac explicitly.
     accept: "audio/*,.aac",
     openAsUrl: true,
   },
   VideoFile: {
-    accept: "video/*",
+    accept: "video/*,.mp4",
     openAsUrl: true,
   },
   JsonFile: {
-    accept: "application/json",
+    accept: "application/json,.json",
     openAsUrl: false,
   },
 };
