@@ -1,8 +1,8 @@
 module View exposing (view)
 
 import DomId
-import Html exposing (Attribute, Html, audio, button, code, div, li, p, pre, span, strong, text, ul, video)
-import Html.Attributes exposing (attribute, class, classList, disabled, src, style, title, type_, width)
+import Html exposing (Attribute, Html, audio, code, div, li, p, pre, strong, text, ul, video)
+import Html.Attributes exposing (class, disabled, src, style, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
@@ -16,6 +16,9 @@ import Svg.Attributes as Svg
 import Time exposing (Time)
 import Types exposing (..)
 import Utils
+import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton)
+import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
+import View.Modal exposing (alertModal, confirmModal)
 
 
 progressBarHeight : Float
@@ -624,103 +627,6 @@ toolbar children =
     div [ class "Toolbar" ] children
 
 
-type alias ButtonDetails msg =
-    { icon : Icon
-    , title : String
-    , label : ButtonLabel
-    , badge : Maybe String
-    , pressed : Bool
-    , attributes : List (Attribute msg)
-    }
-
-
-type ButtonLabel
-    = NoLabel
-    | LeftLabel String
-    | RightLabel String
-
-
-emptyButton : ButtonDetails msg
-emptyButton =
-    { icon = Icon ""
-    , title = ""
-    , label = NoLabel
-    , badge = Nothing
-    , pressed = False
-    , attributes = []
-    }
-
-
-buttonGroup : List (ButtonDetails msg) -> Html msg
-buttonGroup buttons =
-    div [ class "ButtonGroup" ] (List.map buttonGroupButton buttons)
-
-
-buttonGroupButton : ButtonDetails msg -> Html msg
-buttonGroupButton buttonDetails =
-    let
-        label labelText =
-            span
-                [ attribute "aria-hidden" "true"
-                , class "ButtonGroup-buttonLabel"
-                ]
-                [ text labelText ]
-
-        icon =
-            fontawesome buttonDetails.icon
-    in
-    button
-        ([ type_ "button"
-         , title buttonDetails.title
-         , classList
-            [ ( "ButtonGroup-button", True )
-            , ( "is-pressed", buttonDetails.pressed )
-            ]
-         ]
-            ++ buttonDetails.attributes
-        )
-        [ div [ class "ButtonGroup-buttonInner" ] <|
-            case buttonDetails.label of
-                NoLabel ->
-                    [ icon ]
-
-                LeftLabel labelText ->
-                    [ label labelText, icon ]
-
-                RightLabel labelText ->
-                    [ icon, label labelText ]
-        , case buttonDetails.badge of
-            Just badgeText ->
-                span [ class "ButtonGroup-buttonBadge" ] [ text badgeText ]
-
-            Nothing ->
-                none
-        ]
-
-
-type Icon
-    = Icon String
-    | CustomIcon String String
-
-
-fontawesome : Icon -> Html msg
-fontawesome icon =
-    let
-        ( name, extraClass ) =
-            case icon of
-                Icon name ->
-                    ( name, "" )
-
-                CustomIcon name extraClass ->
-                    ( name, extraClass )
-    in
-    span
-        [ attribute "aria-hidden" "true"
-        , class ("fas fa-" ++ name ++ " " ++ extraClass)
-        ]
-        []
-
-
 fileDragOverlay : Html msg
 fileDragOverlay =
     div [ class "FileDragOverlay" ]
@@ -728,46 +634,6 @@ fileDragOverlay =
         , p []
             [ text "Drop video, audio and/or points" ]
         ]
-
-
-modal : msg -> List (Html msg) -> List (Html msg) -> Html msg
-modal msg buttons children =
-    div [ class "Modal" ]
-        [ div [ class "Modal-backdrop", onClick msg ] []
-        , div [ class "Modal-content" ]
-            [ div [ class "Modal-contentInner" ] children
-            , div [ class "Modal-buttons" ] buttons
-            ]
-        ]
-
-
-modalButton : msg -> String -> Html msg
-modalButton msg label =
-    button [ type_ "button", class "Modal-button", onClick msg ]
-        [ text label
-        ]
-
-
-alertModal : msg -> List (Html msg) -> Html msg
-alertModal msg children =
-    modal
-        msg
-        [ modalButton msg "Close"
-        ]
-        children
-
-
-confirmModal :
-    { cancel : ( msg, String ), confirm : ( msg, String ) }
-    -> List (Html msg)
-    -> Html msg
-confirmModal { cancel, confirm } children =
-    modal
-        (Tuple.first cancel)
-        [ uncurry modalButton cancel
-        , uncurry modalButton confirm
-        ]
-        children
 
 
 viewModals : Model -> Html Msg
