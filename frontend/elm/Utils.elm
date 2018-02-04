@@ -159,3 +159,56 @@ splitExtension filename =
 
         extension :: rest ->
             ( String.join separator (List.reverse rest), extension )
+
+
+truncateJsonDecodeErrorMessage : String -> String
+truncateJsonDecodeErrorMessage message =
+    let
+        probe =
+            " but instead got: "
+
+        indexes =
+            String.indexes probe message
+    in
+    case indexes of
+        [] ->
+            message
+
+        index :: _ ->
+            let
+                split =
+                    index + String.length probe
+
+                start =
+                    String.left split message
+
+                end =
+                    String.dropLeft split message
+            in
+            start ++ ellipsis 50 end
+
+
+ellipsis : Int -> String -> String
+ellipsis maxLength string =
+    if String.length string > maxLength then
+        String.left (maxLength - 1) string ++ "…"
+    else
+        string
+
+
+precision : Int -> Float -> String
+precision maxNumDecimals float =
+    let
+        string =
+            toString float
+    in
+    case String.split "." string of
+        [ before, after ] ->
+            if String.length after > maxNumDecimals then
+                -- This doesn’t round properly, but whatever.
+                "~" ++ before ++ "." ++ String.left maxNumDecimals after
+            else
+                string
+
+        _ ->
+            string

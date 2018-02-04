@@ -3,6 +3,7 @@
 
 :root {
   --blue: #229dff;
+  --red: #dc3545;
   --grey-leia: #e9ecef;
   --grey-luke: #adb5bd;
   --spacing: 15px;
@@ -18,6 +19,7 @@ html {
   color: black;
   font: menu;
   font-size: 16px;
+  line-height: 1.2;
 }
 
 body {
@@ -69,6 +71,13 @@ textarea {
 label {
   margin: 0;
   font-weight: inherit;
+}
+
+code {
+  padding: 0.25em;
+  border-radius: 0.25em;
+  background-color: var(--grey-leia);
+  font-size: 0.75em;
 }
 
 .Layout {
@@ -268,6 +277,7 @@ label {
   font-size: 0.75em;
   line-height: var(--size);
   font-weight: bold;
+  tex-align: center;
 }
 
 .Modal {
@@ -295,8 +305,59 @@ label {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 30px;
+  width: 500px;
+  max-width: calc(100% - 2 * var(--spacing));
   background-color: white;
+}
+
+.Modal-contentInner {
+  padding: 30px;
+}
+
+.Modal-contentInner p + p {
+  margin-top: 0.25em;
+}
+
+.Modal-contentInner > * + *,
+.Modal-contentInner > p + p,
+.Modal-contentInner li + li {
+  margin-top: 0.625em;
+}
+
+.Modal-buttons {
+  display: flex;
+}
+
+.Modal-button {
+  flex: 1;
+  margin: 0;
+  padding: 15px 30px;
+  border: none;
+  border-top: 1px solid transparent;
+  background: none;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.Modal-button:hover,
+.Modal-button:focus,
+.Modal-button:active {
+  --color: rgba(0, 0, 0, 0.1);
+
+  outline: none;
+  background-image: linear-gradient(to bottom, var(--color), var(--color));
+}
+
+.Modal-button:nth-child(1) {
+  background-color: var(--blue);
+  background-color: white;
+  color: black;
+  border-top-color: var(--grey-luke);
+}
+
+.Modal-button:nth-child(2) {
+  background-color: var(--red);
+  color: white;
 }
 
 .FileDragOverlay {

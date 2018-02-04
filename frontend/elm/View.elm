@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import DomId
-import Html exposing (Attribute, Html, audio, button, code, div, li, p, span, text, ul, video)
+import Html exposing (Attribute, Html, audio, button, code, div, li, p, pre, span, strong, text, ul, video)
 import Html.Attributes exposing (attribute, class, classList, disabled, src, style, title, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
@@ -735,8 +735,8 @@ modal msg buttons children =
     div [ class "Modal" ]
         [ div [ class "Modal-backdrop", onClick msg ] []
         , div [ class "Modal-content" ]
-            [ div [] children
-            , div [] buttons
+            [ div [ class "Modal-contentInner" ] children
+            , div [ class "Modal-buttons" ] buttons
             ]
         ]
 
@@ -780,12 +780,24 @@ viewModals model =
             in
             alertModal ClosePointsWarningsModal
                 [ p []
-                    [ text <|
-                        "The syncing program can handle slowing down audio down to "
-                            ++ toString Points.tempoMin
-                            ++ " times or speeding up audio up to "
-                            ++ toString Points.tempoMax
-                            ++ " times. The audio between some points would need to be slowed down or sped up more than that."
+                    [ strong [] [ text "There are problems with your points." ]
+                    ]
+                , p []
+                    [ text "The syncing program can handle slowing down audio down to "
+                    , strong []
+                        [ text <|
+                            toString Points.tempoMin
+                                ++ " times"
+                        ]
+                    , text " or speeding up audio up to "
+                    , strong []
+                        [ text <|
+                            toString Points.tempoMax
+                                ++ " times."
+                        ]
+                    ]
+                , p []
+                    [ text "The audio between some points would need to be slowed down or sped up more than that."
                     ]
                 , ul [] <|
                     List.map
@@ -797,7 +809,14 @@ viewModals model =
                                     else
                                         "Between point " ++ toString index ++ " and point " ++ toString (index + 1)
                             in
-                            li [] [ text <| start ++ ": " ++ toString tempo ++ " times." ]
+                            li []
+                                [ text <| start ++ ": "
+                                , strong []
+                                    [ text <|
+                                        Utils.precision 4 tempo
+                                            ++ " times."
+                                    ]
+                                ]
                         )
                         warnings
                 ]
@@ -808,7 +827,8 @@ viewModals model =
                 { cancel = ( CloseRemoveAllPoints, "No, keep them!" )
                 , confirm = ( RemoveAllPoints, "Yes, remove them!" )
                 }
-                [ p [] [ text "This removes all points you have added. Are you sure?" ]
+                [ p [] [ text "This removes all points you have added." ]
+                , p [] [ strong [] [ text "Are you sure?" ] ]
                 ]
           else
             none
@@ -821,8 +841,9 @@ viewModals model =
                     [ p []
                         [ text "This replaces all points you have added with the ones in "
                         , code [] [ text name ]
-                        , text ". Are you sure?"
+                        , text "."
                         ]
+                    , p [] [ strong [] [ text "Are you sure?" ] ]
                     ]
 
             Nothing ->
@@ -833,7 +854,21 @@ viewModals model =
 
             errors ->
                 alertModal CloseErrorModal
-                    [ ul [] (List.map viewError (List.reverse errors))
+                    [ p []
+                        [ strong []
+                            [ text <|
+                                case errors of
+                                    [ _ ] ->
+                                        "There was an error with your file."
+
+                                    _ ->
+                                        "There were some errors with your files."
+                            ]
+                        ]
+                    , ul []
+                        (List.map (\error -> li [] [ viewError error ])
+                            (List.reverse errors)
+                        )
                     ]
         ]
 
@@ -873,12 +908,14 @@ viewError error =
                         ++ ". The file is either unsupported, broken or invalid."
                 ]
 
-        Types.InvalidPointsError { name, message } ->
-            p []
-                [ text "Failed to parse "
-                , code [] [ text name ]
-                , text <| " as " ++ fileTypeToString Ports.JsonFile ++ ". "
-                , code [] [ text message ]
+        InvalidPointsError { name, message } ->
+            div []
+                [ p []
+                    [ text "Failed to parse "
+                    , code [] [ text name ]
+                    , text <| " as " ++ fileTypeToString Ports.JsonFile ++ ". "
+                    ]
+                , p [] [ code [] [ text (Utils.truncateJsonDecodeErrorMessage message) ] ]
                 ]
 
 

@@ -797,7 +797,7 @@ pointsSaveFilename audioName =
         suffix =
             "points.json"
     in
-    if base == "" then
+    if String.isEmpty base then
         suffix
     else
         base ++ "_" ++ suffix
