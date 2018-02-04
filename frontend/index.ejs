@@ -4,8 +4,81 @@
     <meta charset="utf-8">
     <title>Video Audio Sync</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      html {
+        font: menu;
+        background-color: white;
+        color: black;
+      }
+
+      .Loader {
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        width: 20em;
+        margin-left: -10em;
+        text-align: center;
+        font-size: 2em;
+      }
+
+      @supports (transform: translateY(-50%)) {
+        .Loader {
+          top: 50%;
+          transform: translateY(-50%);
+        }
+      }
+
+      .Loader-spinner {
+        margin: 0;
+        font-size: 10em;
+        line-height: 1;
+      }
+
+      .Loader-message {
+        margin: 0;
+      }
+
+      @supports (animation: Test 100ms 1s forwards) {
+        .Loader-spinner {
+          opacity: 0;
+          animation:
+            FadeIn 800ms 200ms forwards,
+            Pulsate 800ms infinite ease-out;
+        }
+
+        .Loader-message {
+          opacity: 0;
+          animation: FadeIn 400ms 5s forwards;
+        }
+      }
+
+      @keyframes FadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes Pulsate {
+        10% {
+          transform: scale(1);
+        }
+
+        70% {
+          transform: scale(1.1);
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
+    <div id="loader" class="Loader">
+      <p class="Loader-spinner">
+        📹
+      </p>
+      <p class="Loader-message">
+        Loading seems to have taken a while. Either it’s just slow, or
+        something’s not working!
+      </p>
+    </div>
   </body>
 </html>

@@ -29,6 +29,8 @@ function start() {
 
   const warnOnClose = !DEBUG || Boolean(params.get("warn_on_close"));
 
+  removeLoader();
+
   const app = Main.embed(document.getElementById("app"), {
     audio: params.get("audio"),
     video: params.get("video"),
@@ -182,6 +184,12 @@ function withElement(id, message, callback) {
   }
 
   callback(element);
+}
+
+function removeLoader() {
+  withElement("loader", "loading/fallback", element => {
+    element.remove();
+  });
 }
 
 function seek(media, time, callback) {
