@@ -225,15 +225,14 @@ label {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background-color: var(--blue);
   animation: ButtonGroup-button-animation 2s infinite ease-in-out;
 }
 
 
 @keyframes ButtonGroup-button-animation {
   to {
-    transform: scale(1.5);
     opacity: 0;
+    box-shadow: 0 0 0 9px var(--blue);
   }
 }
 
