@@ -271,7 +271,6 @@ function openFile({ accept, multiple = false, expectedFileTypes, app }) {
             expectedFileTypes,
           },
         });
-        return;
       }
     }
   };
