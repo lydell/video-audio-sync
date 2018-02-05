@@ -1,6 +1,7 @@
 port module Ports exposing (Area, ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), send, subscribe)
 
 import DomId exposing (DomId)
+import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Custom
 import Json.Encode as Encode
@@ -23,6 +24,7 @@ type OutgoingMessage
     | OpenFile FileType
     | OpenMultipleFiles
     | WarnOnClose (Maybe String)
+    | ClickButton String MouseButton
 
 
 type IncomingMessage
@@ -32,6 +34,7 @@ type IncomingMessage
     | ErroredFile ErroredFileDetails
     | DragEnter
     | DragLeave
+    | Keydown KeydownDetails
 
 
 type alias Area =
@@ -71,6 +74,15 @@ type alias InvalidFileDetails =
 type alias ErroredFileDetails =
     { name : String
     , fileType : FileType
+    }
+
+
+type alias KeydownDetails =
+    { key : String
+    , altKey : Bool
+    , ctrlKey : Bool
+    , metaKey : Bool
+    , shiftKey : Bool
     }
 
 
@@ -138,6 +150,15 @@ encode outgoingMessage =
                         Encode.null
             }
 
+        ClickButton id mouseButton ->
+            { tag = "ClickButton"
+            , data =
+                Encode.object
+                    [ ( "id", Encode.string id )
+                    , ( "right", encodeMouseButton mouseButton )
+                    ]
+            }
+
 
 decoder : String -> Result String (Decoder IncomingMessage)
 decoder tag =
@@ -159,6 +180,9 @@ decoder tag =
 
         "DragLeave" ->
             Ok <| Decode.succeed DragLeave
+
+        "Keydown" ->
+            Ok <| keydownDecoder
 
         _ ->
             Err <| "Unknown message tag: " ++ tag
@@ -190,6 +214,20 @@ encodeLoopMedia id time =
         [ ( "id", DomId.encode id )
         , ( "time", Encode.float time )
         ]
+
+
+encodeMouseButton : MouseButton -> Encode.Value
+encodeMouseButton mouseButton =
+    let
+        right =
+            case mouseButton of
+                Left ->
+                    False
+
+                Right ->
+                    True
+    in
+    Encode.bool right
 
 
 areaMeasurementDecoder : Decoder IncomingMessage
@@ -260,3 +298,14 @@ stringToFileType string =
 
         _ ->
             Err ("Unknown fileType: " ++ string)
+
+
+keydownDecoder : Decoder IncomingMessage
+keydownDecoder =
+    Decode.map5 KeydownDetails
+        (Decode.field "key" Decode.string)
+        (Decode.field "altKey" Decode.bool)
+        (Decode.field "ctrlKey" Decode.bool)
+        (Decode.field "metaKey" Decode.bool)
+        (Decode.field "shiftKey" Decode.bool)
+        |> Decode.map Keydown

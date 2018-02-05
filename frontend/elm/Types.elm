@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Dict exposing (Dict)
 import Html.Events.Custom exposing (MetaDataDetails, MouseButton, MouseDownDetails)
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
@@ -22,6 +23,7 @@ type alias Model =
     , confirmRemoveAllPointsModalOpen : Bool
     , confirmOpenPoints : Maybe { name : String, points : List Point }
     , errors : List Error
+    , keyboardShortcuts : Dict String String
     }
 
 
@@ -62,12 +64,6 @@ type alias DragBar =
 type alias Point =
     { audioTime : Time
     , videoTime : Time
-    }
-
-
-type alias JumpAction =
-    { timeOffset : Time
-    , label : String
     }
 
 

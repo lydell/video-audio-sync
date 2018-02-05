@@ -1,5 +1,7 @@
 module Main exposing (..)
 
+import Buttons
+import Dict
 import DomId exposing (DomId(GraphicsArea, VideoArea))
 import Html exposing (Html)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
@@ -65,6 +67,7 @@ init flags =
       , confirmRemoveAllPointsModalOpen = False
       , confirmOpenPoints = Nothing
       , errors = []
+      , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
       }
     , Task.perform WindowSize Window.size
     )
@@ -213,6 +216,27 @@ update msg model =
 
                 Ports.DragLeave ->
                     ( { model | isDraggingFile = False }, Cmd.none )
+
+                Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
+                    let
+                        mouseButton =
+                            if altKey || ctrlKey || metaKey then
+                                Right
+                            else
+                                Left
+
+                        buttonId =
+                            Dict.get key model.keyboardShortcuts
+
+                        cmd =
+                            case buttonId of
+                                Just id ->
+                                    Ports.send (Ports.ClickButton id mouseButton)
+
+                                Nothing ->
+                                    Cmd.none
+                    in
+                    ( model, cmd )
 
         JsMessage (Err message) ->
             let

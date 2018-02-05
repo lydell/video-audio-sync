@@ -1,13 +1,14 @@
 module View.ButtonGroup exposing (ButtonDetails, ButtonLabel(..), buttonGroup, emptyButton)
 
 import Html exposing (Attribute, Html, button, div, label, span, text)
-import Html.Attributes exposing (attribute, class, classList, title, type_)
+import Html.Attributes exposing (attribute, class, classList, id, title, type_)
 import Html.Custom exposing (none)
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
 
 
 type alias ButtonDetails msg =
-    { icon : Icon
+    { id : String
+    , icon : Icon
     , title : String
     , label : ButtonLabel
     , badge : Maybe String
@@ -24,7 +25,8 @@ type ButtonLabel
 
 emptyButton : ButtonDetails msg
 emptyButton =
-    { icon = Icon ""
+    { id = ""
+    , icon = Icon ""
     , title = ""
     , label = NoLabel
     , badge = Nothing
@@ -53,6 +55,7 @@ buttonGroupButton buttonDetails =
     in
     button
         ([ type_ "button"
+         , id buttonDetails.id
          , title buttonDetails.title
          , classList
             [ ( "ButtonGroup-button", True )

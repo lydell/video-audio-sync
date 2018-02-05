@@ -37,6 +37,7 @@ function start() {
   });
 
   setupDragAndDrop(app);
+  setupKeyboard(app);
 
   app.ports.elmToJs.subscribe(message => {
     switch (message.tag) {
@@ -166,6 +167,19 @@ function start() {
                 event.returnValue = maybeMessage;
                 return maybeMessage;
               };
+        break;
+      }
+
+      case "ClickButton": {
+        const { id, right } = message.data;
+        withElement(id, message, element => {
+          element.focus();
+          if (right) {
+            element.dispatchEvent(new window.CustomEvent("contextmenu"));
+          } else {
+            element.click();
+          }
+        });
         break;
       }
 
@@ -346,6 +360,32 @@ function reportOpenedFile(file, app) {
   reader.onerror = failure;
 
   reader.readAsText(file);
+}
+
+function setupKeyboard(app) {
+  document.addEventListener(
+    "keydown",
+    event => {
+      const { key } = event;
+
+      if (key.length !== 1) {
+        return;
+      }
+
+      event.preventDefault();
+      app.ports.jsToElm.send({
+        tag: "Keydown",
+        data: {
+          key,
+          altKey: event.altKey,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          shiftKey: event.shiftKey,
+        },
+      });
+    },
+    true,
+  );
 }
 
 // Wait for CSS to load in development.

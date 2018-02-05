@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Buttons exposing (JumpAction)
 import DomId
 import Html exposing (Attribute, Html, audio, code, div, li, p, pre, strong, text, ul, video)
 import Html.Attributes exposing (class, disabled, src, style, width)
@@ -13,7 +14,6 @@ import Points
 import Ports
 import Svg
 import Svg.Attributes as Svg
-import Time exposing (Time)
 import Types exposing (..)
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton)
@@ -39,33 +39,6 @@ progressBarMouseAreaExtra =
 svgHeight : Float
 svgHeight =
     (progressBarHeight * 2) + progressBarSpacing
-
-
-jumpActionsForward : List JumpAction
-jumpActionsForward =
-    [ { timeOffset = 100 * Time.millisecond
-      , label = "0.1s"
-      }
-    , { timeOffset = 1 * Time.second
-      , label = "1s"
-      }
-    , { timeOffset = 1 * Time.minute
-      , label = "1m"
-      }
-    , { timeOffset = 10 * Time.minute
-      , label = "10m"
-      }
-    ]
-
-
-jumpActionsBackward : List JumpAction
-jumpActionsBackward =
-    jumpActionsForward
-        |> List.reverse
-        |> List.map
-            (\jumpAction ->
-                { jumpAction | timeOffset = negate jumpAction.timeOffset }
-            )
 
 
 view : Model -> Html Msg
@@ -374,7 +347,8 @@ mediaPlayerToolbar id mediaPlayer loopState =
     toolbar
         [ buttonGroup
             [ { emptyButton
-                | icon = icon
+                | id = Buttons.toString (Buttons.OpenMedia id)
+                , icon = icon
                 , title = "Open " ++ String.toLower name
                 , attributes =
                     [ onClick (OpenMedia id)
@@ -389,7 +363,8 @@ mediaPlayerToolbar id mediaPlayer loopState =
             ]
         , buttonGroup
             [ { emptyButton
-                | icon = playPauseIcon
+                | id = Buttons.toString (Buttons.PlayPause id)
+                , icon = playPauseIcon
                 , title = playPauseTitle
                 , pressed =
                     case mediaPlayer.playState of
@@ -411,19 +386,21 @@ mediaPlayerToolbar id mediaPlayer loopState =
               }
             ]
         , buttonGroup <|
-            List.map (buttonDetailsFromJumpAction id backwardEnabled) jumpActionsBackward
+            List.map (buttonDetailsFromJumpAction id backwardEnabled) Buttons.jumpActionsBackward
         , buttonGroup <|
-            List.map (buttonDetailsFromJumpAction id forwardEnabled) jumpActionsForward
+            List.map (buttonDetailsFromJumpAction id forwardEnabled) Buttons.jumpActionsForward
         , buttonGroup
             [ { emptyButton
-                | icon = Icon "step-backward"
+                | id = Buttons.toString (Buttons.JumpByPoint id Backward)
+                , icon = Icon "step-backward"
                 , title = "Previous point"
                 , attributes =
                     [ disabled (not backwardEnabled) ]
                         ++ onClickWithButton (JumpByPoint id Backward)
               }
             , { emptyButton
-                | icon = Icon "step-forward"
+                | id = Buttons.toString (Buttons.JumpByPoint id Forward)
+                , icon = Icon "step-forward"
                 , title = "Next point"
                 , attributes =
                     [ disabled (not forwardEnabled) ]
@@ -458,13 +435,19 @@ buttonDetailsFromJumpAction id enabled jumpAction =
     in
     if jumpAction.timeOffset < 0 then
         { base
-            | icon = Icon "backward"
+            | id =
+                Buttons.toString
+                    (Buttons.JumpByTime id Backward jumpAction.timeOffset)
+            , icon = Icon "backward"
             , title = "Jump backward: " ++ jumpAction.label
             , label = RightLabel jumpAction.label
         }
     else
         { base
-            | icon = Icon "forward"
+            | id =
+                Buttons.toString
+                    (Buttons.JumpByTime id Forward jumpAction.timeOffset)
+            , icon = Icon "forward"
             , title = "Jump forward: " ++ jumpAction.label
             , label = LeftLabel jumpAction.label
         }
@@ -502,7 +485,8 @@ generalToolbar model =
     toolbar
         [ buttonGroup
             [ { emptyButton
-                | icon = Icon "file-alt"
+                | id = Buttons.toString Buttons.OpenPoints
+                , icon = Icon "file-alt"
                 , title = "Open points"
                 , attributes =
                     [ onClick OpenPoints
@@ -517,7 +501,8 @@ generalToolbar model =
             ]
         , buttonGroup
             [ { emptyButton
-                | icon = Icon "sync-alt"
+                | id = Buttons.toString Buttons.Loop
+                , icon = Icon "sync-alt"
                 , title =
                     case model.loopState of
                         Normal ->
@@ -548,7 +533,8 @@ generalToolbar model =
             [ case selectedPoint of
                 Just point ->
                     { emptyButton
-                        | icon = Icon "minus"
+                        | id = Buttons.toString Buttons.AddRemovePoint
+                        , icon = Icon "minus"
                         , title = "Remove point"
                         , attributes =
                             [ onClick (RemovePoint point)
@@ -558,7 +544,8 @@ generalToolbar model =
 
                 Nothing ->
                     { emptyButton
-                        | icon = Icon "plus"
+                        | id = Buttons.toString Buttons.AddRemovePoint
+                        , icon = Icon "plus"
                         , title = "Add point"
                         , attributes =
                             [ onClick (AddPoint potentialNewPoint)
@@ -566,7 +553,8 @@ generalToolbar model =
                             ]
                     }
             , { emptyButton
-                | icon = Icon "exclamation-triangle "
+                | id = Buttons.toString Buttons.Warnings
+                , icon = Icon "exclamation-triangle "
                 , title =
                     case numWarnings of
                         0 ->
@@ -590,7 +578,8 @@ generalToolbar model =
             ]
         , buttonGroup
             [ { emptyButton
-                | icon = Icon "save"
+                | id = Buttons.toString Buttons.Save
+                , icon = Icon "save"
                 , title = "Save points"
                 , attributes =
                     [ onClick Save
@@ -598,7 +587,8 @@ generalToolbar model =
                     ]
               }
             , { emptyButton
-                | icon = Icon "trash"
+                | id = Buttons.toString Buttons.RemoveAll
+                , icon = Icon "trash"
                 , title = "Remove all points"
                 , attributes =
                     [ onClick ConfirmRemoveAllPoints
@@ -606,7 +596,8 @@ generalToolbar model =
                     ]
               }
             , { emptyButton
-                | icon = Icon "copy"
+                | id = Buttons.toString Buttons.OpenMultiple
+                , icon = Icon "copy"
                 , title = "Open multiple files in one go"
                 , attributes =
                     [ onClick OpenMultiple
