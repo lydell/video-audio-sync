@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Buttons exposing (JumpAction)
+import Dict
 import DomId
 import Html exposing (Attribute, Html, audio, code, div, li, p, pre, strong, text, ul, video)
 import Html.Attributes exposing (class, disabled, src, style, width)
@@ -117,11 +118,18 @@ viewMedia model =
 
 viewControls : Model -> Html Msg
 viewControls model =
+    let
+        shownKeyboardShortcuts =
+            if model.showKeyboardShortcuts then
+                model.keyboardShortcuts
+            else
+                Dict.empty
+    in
     div [ class "Layout-controls", preventContextMenu ]
-        [ mediaPlayerToolbar Video model.video model.loopState
+        [ mediaPlayerToolbar Video model.video model.loopState shownKeyboardShortcuts
         , viewGraphics model
-        , mediaPlayerToolbar Audio model.audio model.loopState
-        , generalToolbar model
+        , mediaPlayerToolbar Audio model.audio model.loopState shownKeyboardShortcuts
+        , generalToolbar model shownKeyboardShortcuts
         ]
 
 
@@ -302,8 +310,13 @@ progressBarForeground { maxValue, currentValue, x, y, onDragStart } =
             ]
 
 
-mediaPlayerToolbar : MediaPlayerId -> MediaPlayer -> LoopState -> Html Msg
-mediaPlayerToolbar id mediaPlayer loopState =
+mediaPlayerToolbar :
+    MediaPlayerId
+    -> MediaPlayer
+    -> LoopState
+    -> KeyboardShortcuts
+    -> Html Msg
+mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts =
     let
         hasMedia =
             MediaPlayer.hasMedia mediaPlayer
@@ -345,7 +358,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
                     )
     in
     toolbar
-        [ buttonGroup
+        [ buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString (Buttons.OpenMedia id)
                 , icon = icon
@@ -361,7 +374,7 @@ mediaPlayerToolbar id mediaPlayer loopState =
                     ]
               }
             ]
-        , buttonGroup
+        , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString (Buttons.PlayPause id)
                 , icon = playPauseIcon
@@ -385,11 +398,11 @@ mediaPlayerToolbar id mediaPlayer loopState =
                            )
               }
             ]
-        , buttonGroup <|
+        , buttonGroup keyboardShortcuts <|
             List.map (buttonDetailsFromJumpAction id backwardEnabled) Buttons.jumpActionsBackward
-        , buttonGroup <|
+        , buttonGroup keyboardShortcuts <|
             List.map (buttonDetailsFromJumpAction id forwardEnabled) Buttons.jumpActionsForward
-        , buttonGroup
+        , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString (Buttons.JumpByPoint id Backward)
                 , icon = Icon "step-backward"
@@ -453,8 +466,8 @@ buttonDetailsFromJumpAction id enabled jumpAction =
         }
 
 
-generalToolbar : Model -> Html Msg
-generalToolbar model =
+generalToolbar : Model -> KeyboardShortcuts -> Html Msg
+generalToolbar model keyboardShortcuts =
     let
         hasAudio =
             MediaPlayer.hasMedia model.audio
@@ -483,7 +496,7 @@ generalToolbar model =
             List.length warnings
     in
     toolbar
-        [ buttonGroup
+        [ buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.OpenPoints
                 , icon = Icon "file-alt"
@@ -499,7 +512,7 @@ generalToolbar model =
                     ]
               }
             ]
-        , buttonGroup
+        , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.Loop
                 , icon = Icon "sync-alt"
@@ -529,7 +542,7 @@ generalToolbar model =
                     ]
               }
             ]
-        , buttonGroup
+        , buttonGroup keyboardShortcuts
             [ case selectedPoint of
                 Just point ->
                     { emptyButton
@@ -576,7 +589,7 @@ generalToolbar model =
                     ]
               }
             ]
-        , buttonGroup
+        , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.Save
                 , icon = Icon "save"
@@ -607,6 +620,21 @@ generalToolbar model =
                          else
                             "is-animated"
                         )
+                    ]
+              }
+            ]
+        , buttonGroup keyboardShortcuts
+            [ { emptyButton
+                | id = Buttons.toString Buttons.ToggleShowKeyboardShortcuts
+                , icon = Icon "keyboard"
+                , title =
+                    if model.showKeyboardShortcuts then
+                        "Showing keyboard shortcuts. Click to hide."
+                    else
+                        "Not showing keyboard shortcuts. Click to show."
+                , pressed = model.showKeyboardShortcuts
+                , attributes =
+                    [ onClick ToggleShowKeyboardShortcuts
                     ]
               }
             ]

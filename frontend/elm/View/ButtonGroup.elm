@@ -1,8 +1,10 @@
 module View.ButtonGroup exposing (ButtonDetails, ButtonLabel(..), buttonGroup, emptyButton)
 
+import Buttons
 import Html exposing (Attribute, Html, button, div, label, span, text)
 import Html.Attributes exposing (attribute, class, classList, id, title, type_)
 import Html.Custom exposing (none)
+import Types exposing (KeyboardShortcuts)
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
 
 
@@ -35,13 +37,24 @@ emptyButton =
     }
 
 
-buttonGroup : List (ButtonDetails msg) -> Html msg
-buttonGroup buttons =
-    div [ class "ButtonGroup" ] (List.map buttonGroupButton buttons)
+buttonGroup : KeyboardShortcuts -> List (ButtonDetails msg) -> Html msg
+buttonGroup keyboardShortcuts buttons =
+    div [ class "ButtonGroup" ]
+        (List.map
+            (\buttonDetails ->
+                let
+                    shortcut =
+                        Buttons.shortcutsFromId buttonDetails.id keyboardShortcuts
+                            |> List.head
+                in
+                buttonGroupButton shortcut buttonDetails
+            )
+            buttons
+        )
 
 
-buttonGroupButton : ButtonDetails msg -> Html msg
-buttonGroupButton buttonDetails =
+buttonGroupButton : Maybe String -> ButtonDetails msg -> Html msg
+buttonGroupButton shortcut buttonDetails =
     let
         label labelText =
             span
@@ -80,4 +93,24 @@ buttonGroupButton buttonDetails =
 
             Nothing ->
                 none
+        , case shortcut of
+            Just string ->
+                let
+                    shownShortcut =
+                        if isLikelyShifted string then
+                            "⇧" ++ string
+                        else
+                            String.toUpper string
+                in
+                span [ class "ButtonGroup-keyboardShortcut" ]
+                    [ text shownShortcut ]
+
+            Nothing ->
+                none
         ]
+
+
+isLikelyShifted : String -> Bool
+isLikelyShifted string =
+    (String.toUpper string /= String.toLower string)
+        && (String.toUpper string == string)

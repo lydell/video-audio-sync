@@ -1,6 +1,6 @@
-module Buttons exposing (ButtonId(..), JumpAction, defaultKeyboardShortCuts, jumpActionsBackward, jumpActionsForward, toString)
+module Buttons exposing (ButtonId(..), JumpAction, defaultKeyboardShortCuts, jumpActionsBackward, jumpActionsForward, shortcutsFromId, toString)
 
-import Dict exposing (Dict)
+import Dict
 import Time exposing (Time)
 import Types exposing (..)
 
@@ -17,6 +17,7 @@ type ButtonId
     | Warnings
     | Save
     | RemoveAll
+    | ToggleShowKeyboardShortcuts
 
 
 type alias JumpAction =
@@ -97,7 +98,7 @@ jumpShortcuts transform jumpActions =
             )
 
 
-defaultKeyboardShortCuts : Dict String String
+defaultKeyboardShortCuts : KeyboardShortcuts
 defaultKeyboardShortCuts =
     [ ( "j", PlayPause Audio )
     , ( "u", PlayPause Video )
@@ -121,7 +122,7 @@ defaultKeyboardShortCuts =
         |> Dict.map (always toString)
 
 
-shortcutsFromId : String -> Dict String String -> List String
+shortcutsFromId : String -> KeyboardShortcuts -> List String
 shortcutsFromId id shortcuts =
     shortcuts
         |> Dict.toList

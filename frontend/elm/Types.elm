@@ -23,7 +23,8 @@ type alias Model =
     , confirmRemoveAllPointsModalOpen : Bool
     , confirmOpenPoints : Maybe { name : String, points : List Point }
     , errors : List Error
-    , keyboardShortcuts : Dict String String
+    , keyboardShortcuts : KeyboardShortcuts
+    , showKeyboardShortcuts : Bool
     }
 
 
@@ -85,6 +86,10 @@ type alias InvalidPointsDetails =
     }
 
 
+type alias KeyboardShortcuts =
+    Dict String String
+
+
 type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
@@ -116,4 +121,5 @@ type Msg
     | CloseErrorModal
     | OpenPointsWarningsModal
     | ClosePointsWarningsModal
+    | ToggleShowKeyboardShortcuts
     | WindowSize Window.Size

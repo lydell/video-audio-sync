@@ -68,6 +68,7 @@ init flags =
       , confirmOpenPoints = Nothing
       , errors = []
       , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
+      , showKeyboardShortcuts = False
       }
     , Task.perform WindowSize Window.size
     )
@@ -439,6 +440,11 @@ update msg model =
 
         ClosePointsWarningsModal ->
             ( { model | pointsWarningsModalOpen = False }, Cmd.none )
+
+        ToggleShowKeyboardShortcuts ->
+            ( { model | showKeyboardShortcuts = not model.showKeyboardShortcuts }
+            , Cmd.none
+            )
 
         WindowSize size ->
             ( { model | windowSize = size }
