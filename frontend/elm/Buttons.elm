@@ -115,6 +115,7 @@ defaultKeyboardShortCuts =
     , ( "i", Warnings )
     , ( "o", Save )
     , ( "p", RemoveAll )
+    , ( "z", ToggleShowKeyboardShortcuts )
     ]
         ++ jumpShortcuts identity jumpActionsForward
         ++ jumpShortcuts String.toUpper jumpActionsBackward
