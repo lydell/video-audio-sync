@@ -173,7 +173,12 @@ function start() {
       case "ClickButton": {
         const { id, right } = message.data;
         withElement(id, message, element => {
-          element.focus();
+          // Focus the element after Elm has re-rendered since Firefox has a
+          // weird bug where the entire window loses focus if a focused
+          // `<button>` gets disabled.
+          window.requestAnimationFrame(() => {
+            element.focus();
+          });
           if (right) {
             element.dispatchEvent(new window.CustomEvent("contextmenu"));
           } else {
