@@ -2,6 +2,7 @@
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
 
 :root {
+  --css-applied: true;
   --blue: #229dff;
   --red: #dc3545;
   --grey-leia: #e9ecef;

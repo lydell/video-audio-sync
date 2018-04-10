@@ -389,4 +389,22 @@ function setupKeyboard(app) {
 }
 
 // Wait for CSS to load in development.
-window.setTimeout(start, 0);
+if (DEBUG) {
+  // eslint-disable-next-line func-style
+  const poll = () => {
+    // main.css sets `--css-applied: true;` so we can look for that.
+    if (
+      window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue("--css-applied")
+        .trim() === "true"
+    ) {
+      start();
+    } else {
+      window.setTimeout(poll, 10);
+    }
+  };
+  poll();
+} else {
+  start();
+}
