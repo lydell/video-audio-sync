@@ -3,7 +3,7 @@ module View exposing (view)
 import Buttons exposing (JumpAction)
 import Dict
 import DomId
-import Html exposing (Attribute, Html, audio, code, div, li, p, pre, strong, text, ul, video)
+import Html exposing (Attribute, Html, audio, br, code, div, li, p, pre, strong, text, ul, video)
 import Html.Attributes exposing (class, disabled, src, style, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
@@ -17,7 +17,7 @@ import Svg
 import Svg.Attributes as Svg
 import Types exposing (..)
 import Utils
-import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton)
+import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
 import View.Modal exposing (alertModal, confirmModal)
 
@@ -80,24 +80,36 @@ viewMedia model =
                 maxHeight * aspectRatio
     in
     div [ class "Layout-videoWrapper", DomId.toHtml DomId.VideoArea ]
-        [ case model.video.url of
-            Just url ->
-                video
-                    ([ src url
-                     , width (truncate clampedWidth)
-                     , muted True
-                     , onError (MediaErrorMsg Video)
-                     , onVideoMetaData (MetaData Video)
-                     , onTimeUpdate (CurrentTime Video)
-                     , DomId.toHtml DomId.Video
-                     , class "Layout-video"
-                     ]
-                        ++ playEvents Video
-                    )
-                    []
+        [ case model.editKeyboardShortcuts of
+            NotEditing ->
+                case model.video.url of
+                    Just url ->
+                        video
+                            ([ src url
+                             , width (truncate clampedWidth)
+                             , muted True
+                             , onError (MediaErrorMsg Video)
+                             , onVideoMetaData (MetaData Video)
+                             , onTimeUpdate (CurrentTime Video)
+                             , DomId.toHtml DomId.Video
+                             , class "Layout-video"
+                             ]
+                                ++ playEvents Video
+                            )
+                            []
 
-            Nothing ->
-                p [ class "Layout-videoMessage" ] [ text "Drag and drop files or use the buttons below to open a video file, the corresponding audio file, and optionally a points file." ]
+                    Nothing ->
+                        p [ class "Layout-videoMessage" ] [ text "Drag and drop files or use the buttons below to open a video file, the corresponding audio file, and optionally a points file." ]
+
+            WaitingForFirstKey ->
+                p [ class "Layout-videoMessage Layout-videoMessage--short" ] [ text "Press the keyboard shortcut you want to change." ]
+
+            WaitingForSecondKey firstKey ->
+                p [ class "Layout-videoMessage Layout-videoMessage--short" ]
+                    [ text "Now press a new keyboard shortcut for:"
+                    , br [] []
+                    , text (formatKey firstKey)
+                    ]
         , case model.audio.url of
             Just url ->
                 audio
@@ -120,15 +132,26 @@ viewControls : Model -> Html Msg
 viewControls model =
     let
         shownKeyboardShortcuts =
-            if model.showKeyboardShortcuts then
+            if
+                model.showKeyboardShortcuts
+                    || (model.editKeyboardShortcuts /= NotEditing)
+            then
                 model.keyboardShortcuts
             else
                 Dict.empty
     in
     div [ class "Layout-controls", preventContextMenu ]
-        [ mediaPlayerToolbar Video model.video model.loopState shownKeyboardShortcuts
+        [ mediaPlayerToolbar Video
+            model.video
+            model.loopState
+            shownKeyboardShortcuts
+            model.editKeyboardShortcuts
         , viewGraphics model
-        , mediaPlayerToolbar Audio model.audio model.loopState shownKeyboardShortcuts
+        , mediaPlayerToolbar Audio
+            model.audio
+            model.loopState
+            shownKeyboardShortcuts
+            model.editKeyboardShortcuts
         , generalToolbar model shownKeyboardShortcuts
         ]
 
@@ -315,8 +338,9 @@ mediaPlayerToolbar :
     -> MediaPlayer
     -> LoopState
     -> KeyboardShortcuts
+    -> EditKeyboardShortcuts
     -> Html Msg
-mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts =
+mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortcuts =
     let
         hasMedia =
             MediaPlayer.hasMedia mediaPlayer
@@ -366,7 +390,7 @@ mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts =
                 , attributes =
                     [ onClick (OpenMedia id)
                     , class
-                        (if hasMedia then
+                        (if hasMedia || editKeyboardShortcuts /= NotEditing then
                             ""
                          else
                             "is-animated"
@@ -504,7 +528,10 @@ generalToolbar model keyboardShortcuts =
                 , attributes =
                     [ onClick OpenPoints
                     , class
-                        (if hasAudio || hasVideo then
+                        (if
+                            (hasAudio || hasVideo)
+                                || (model.editKeyboardShortcuts /= NotEditing)
+                         then
                             ""
                          else
                             "is-animated"
@@ -615,7 +642,10 @@ generalToolbar model keyboardShortcuts =
                 , attributes =
                     [ onClick OpenMultiple
                     , class
-                        (if hasAudio || hasVideo then
+                        (if
+                            (hasAudio || hasVideo)
+                                || (model.editKeyboardShortcuts /= NotEditing)
+                         then
                             ""
                          else
                             "is-animated"
@@ -635,6 +665,19 @@ generalToolbar model keyboardShortcuts =
                 , pressed = model.showKeyboardShortcuts
                 , attributes =
                     [ onClick ToggleShowKeyboardShortcuts
+                    ]
+              }
+            , { emptyButton
+                | id = Buttons.toString Buttons.ToggleEditKeyboardShortcuts
+                , icon = Icon "cog"
+                , title =
+                    if model.showKeyboardShortcuts then
+                        "Editing keyboard shortcuts. Click to finish."
+                    else
+                        "Click to edit keyboard shortcuts."
+                , pressed = model.editKeyboardShortcuts /= NotEditing
+                , attributes =
+                    [ onClick ToggleEditKeyboardShortcuts
                     ]
               }
             ]

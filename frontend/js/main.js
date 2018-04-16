@@ -373,7 +373,7 @@ function setupKeyboard(app) {
     event => {
       const { key } = event;
 
-      if (key.length !== 1) {
+      if (key.length !== 1 || key === " ") {
         return;
       }
 

@@ -69,6 +69,7 @@ init flags =
       , errors = []
       , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
       , showKeyboardShortcuts = False
+      , editKeyboardShortcuts = NotEditing
       }
     , Task.perform WindowSize Window.size
     )
@@ -228,16 +229,42 @@ update msg model =
 
                         buttonId =
                             Dict.get key model.keyboardShortcuts
-
-                        cmd =
-                            case buttonId of
+                    in
+                    case model.editKeyboardShortcuts of
+                        NotEditing ->
+                            ( model
+                            , case buttonId of
                                 Just id ->
                                     Ports.send (Ports.ClickButton id mouseButton)
 
                                 Nothing ->
                                     Cmd.none
-                    in
-                    ( model, cmd )
+                            )
+
+                        WaitingForFirstKey ->
+                            ( { model
+                                | editKeyboardShortcuts =
+                                    case buttonId of
+                                        Just _ ->
+                                            WaitingForSecondKey key
+
+                                        _ ->
+                                            model.editKeyboardShortcuts
+                              }
+                            , Cmd.none
+                            )
+
+                        WaitingForSecondKey firstKey ->
+                            ( { model
+                                | editKeyboardShortcuts = WaitingForFirstKey
+                                , keyboardShortcuts =
+                                    updateKeyboardShortcuts
+                                        firstKey
+                                        key
+                                        model.keyboardShortcuts
+                              }
+                            , Cmd.none
+                            )
 
         JsMessage (Err message) ->
             let
@@ -443,6 +470,17 @@ update msg model =
 
         ToggleShowKeyboardShortcuts ->
             ( { model | showKeyboardShortcuts = not model.showKeyboardShortcuts }
+            , Cmd.none
+            )
+
+        ToggleEditKeyboardShortcuts ->
+            ( { model
+                | editKeyboardShortcuts =
+                    if model.editKeyboardShortcuts == NotEditing then
+                        WaitingForFirstKey
+                    else
+                        NotEditing
+              }
             , Cmd.none
             )
 
@@ -831,3 +869,17 @@ pointsSaveFilename audioName =
         suffix
     else
         base ++ "_" ++ suffix
+
+
+updateKeyboardShortcuts : String -> String -> KeyboardShortcuts -> KeyboardShortcuts
+updateKeyboardShortcuts firstKey secondKey keyboardShortcuts =
+    let
+        firstKeyShortcut =
+            Dict.get firstKey keyboardShortcuts
+
+        secondKeyShortcut =
+            Dict.get secondKey keyboardShortcuts
+    in
+    keyboardShortcuts
+        |> Dict.update firstKey (always secondKeyShortcut)
+        |> Dict.update secondKey (always firstKeyShortcut)

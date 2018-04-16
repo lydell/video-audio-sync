@@ -1,4 +1,4 @@
-module View.ButtonGroup exposing (ButtonDetails, ButtonLabel(..), buttonGroup, emptyButton)
+module View.ButtonGroup exposing (ButtonDetails, ButtonLabel(..), buttonGroup, emptyButton, formatKey)
 
 import Buttons
 import Html exposing (Attribute, Html, button, div, label, span, text)
@@ -95,19 +95,20 @@ buttonGroupButton shortcut buttonDetails =
                 none
         , case shortcut of
             Just string ->
-                let
-                    shownShortcut =
-                        if isLikelyShifted string then
-                            "⇧" ++ string
-                        else
-                            String.toUpper string
-                in
                 span [ class "ButtonGroup-keyboardShortcut" ]
-                    [ text shownShortcut ]
+                    [ text (formatKey string) ]
 
             Nothing ->
                 none
         ]
+
+
+formatKey : String -> String
+formatKey key =
+    if isLikelyShifted key then
+        "⇧" ++ key
+    else
+        String.toUpper key
 
 
 isLikelyShifted : String -> Bool

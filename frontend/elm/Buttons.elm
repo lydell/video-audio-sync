@@ -18,6 +18,7 @@ type ButtonId
     | Save
     | RemoveAll
     | ToggleShowKeyboardShortcuts
+    | ToggleEditKeyboardShortcuts
 
 
 type alias JumpAction =
@@ -116,6 +117,7 @@ defaultKeyboardShortCuts =
     , ( "o", Save )
     , ( "p", RemoveAll )
     , ( "z", ToggleShowKeyboardShortcuts )
+    , ( "Z", ToggleEditKeyboardShortcuts )
     ]
         ++ jumpShortcuts identity jumpActionsForward
         ++ jumpShortcuts String.toUpper jumpActionsBackward

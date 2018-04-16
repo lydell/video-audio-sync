@@ -25,6 +25,7 @@ type alias Model =
     , errors : List Error
     , keyboardShortcuts : KeyboardShortcuts
     , showKeyboardShortcuts : Bool
+    , editKeyboardShortcuts : EditKeyboardShortcuts
     }
 
 
@@ -90,6 +91,12 @@ type alias KeyboardShortcuts =
     Dict String String
 
 
+type EditKeyboardShortcuts
+    = NotEditing
+    | WaitingForFirstKey
+    | WaitingForSecondKey String
+
+
 type Msg
     = NoOp
     | JsMessage (Result String IncomingMessage)
@@ -122,4 +129,5 @@ type Msg
     | OpenPointsWarningsModal
     | ClosePointsWarningsModal
     | ToggleShowKeyboardShortcuts
+    | ToggleEditKeyboardShortcuts
     | WindowSize Window.Size

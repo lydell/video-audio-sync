@@ -111,6 +111,11 @@ code {
   font-size: 4vmin;
 }
 
+.Layout-videoMessage--short {
+  width: auto;
+  text-align: center;
+}
+
 .Layout-controls {
   padding: var(--spacing);
 }
