@@ -367,17 +367,26 @@ function reportOpenedFile(file, app) {
   reader.readAsText(file);
 }
 
+const IGNORED = /^($|Dead$|Alt|Control|Hyper|Meta|Shift|Super|OS)/;
+
 function setupKeyboard(app) {
   document.addEventListener(
     "keydown",
     event => {
-      const { key } = event;
+      const { key: rawKey } = event;
+      const key = rawKey === " " ? "Space" : rawKey;
 
-      if (key.length !== 1 || key === " ") {
+      if (IGNORED.test(key)) {
         return;
       }
 
-      event.preventDefault();
+      let defaultPrevented = false;
+
+      if (key.length === 1) {
+        event.preventDefault();
+        defaultPrevented = true;
+      }
+
       app.ports.jsToElm.send({
         tag: "Keydown",
         data: {
@@ -386,6 +395,7 @@ function setupKeyboard(app) {
           ctrlKey: event.ctrlKey,
           metaKey: event.metaKey,
           shiftKey: event.shiftKey,
+          defaultPrevented,
         },
       });
     },

@@ -83,6 +83,7 @@ type alias KeydownDetails =
     , ctrlKey : Bool
     , metaKey : Bool
     , shiftKey : Bool
+    , defaultPrevented : Bool
     }
 
 
@@ -302,10 +303,11 @@ stringToFileType string =
 
 keydownDecoder : Decoder IncomingMessage
 keydownDecoder =
-    Decode.map5 KeydownDetails
+    Decode.map6 KeydownDetails
         (Decode.field "key" Decode.string)
         (Decode.field "altKey" Decode.bool)
         (Decode.field "ctrlKey" Decode.bool)
         (Decode.field "metaKey" Decode.bool)
         (Decode.field "shiftKey" Decode.bool)
+        (Decode.field "defaultPrevented" Decode.bool)
         |> Decode.map Keydown

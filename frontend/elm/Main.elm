@@ -219,7 +219,7 @@ update msg model =
                 Ports.DragLeave ->
                     ( { model | isDraggingFile = False }, Cmd.none )
 
-                Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
+                Ports.Keydown { key, altKey, ctrlKey, metaKey, defaultPrevented } ->
                     let
                         mouseButton =
                             if altKey || ctrlKey || metaKey then
@@ -241,28 +241,43 @@ update msg model =
                                     Cmd.none
                             )
 
-                        WaitingForFirstKey ->
+                        WaitingForFirstKey _ ->
                             ( { model
                                 | editKeyboardShortcuts =
                                     case buttonId of
                                         Just _ ->
-                                            WaitingForSecondKey key
+                                            WaitingForSecondKey
+                                                { unavailableKey = Nothing
+                                                , firstKey = key
+                                                }
 
                                         _ ->
-                                            model.editKeyboardShortcuts
+                                            WaitingForFirstKey
+                                                { unavailableKey = Just key }
                               }
                             , Cmd.none
                             )
 
-                        WaitingForSecondKey firstKey ->
-                            ( { model
-                                | editKeyboardShortcuts = WaitingForFirstKey
-                                , keyboardShortcuts =
-                                    updateKeyboardShortcuts
-                                        firstKey
-                                        key
-                                        model.keyboardShortcuts
-                              }
+                        WaitingForSecondKey { firstKey } ->
+                            ( if defaultPrevented then
+                                { model
+                                    | editKeyboardShortcuts =
+                                        WaitingForFirstKey
+                                            { unavailableKey = Nothing }
+                                    , keyboardShortcuts =
+                                        updateKeyboardShortcuts
+                                            firstKey
+                                            key
+                                            model.keyboardShortcuts
+                                }
+                              else
+                                { model
+                                    | editKeyboardShortcuts =
+                                        WaitingForSecondKey
+                                            { unavailableKey = Just key
+                                            , firstKey = firstKey
+                                            }
+                                }
                             , Cmd.none
                             )
 
@@ -477,7 +492,7 @@ update msg model =
             ( { model
                 | editKeyboardShortcuts =
                     if model.editKeyboardShortcuts == NotEditing then
-                        WaitingForFirstKey
+                        WaitingForFirstKey { unavailableKey = Nothing }
                     else
                         NotEditing
               }

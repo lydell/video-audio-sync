@@ -101,14 +101,30 @@ viewMedia model =
                     Nothing ->
                         p [ class "Layout-videoMessage" ] [ text "Drag and drop files or use the buttons below to open a video file, the corresponding audio file, and optionally a points file." ]
 
-            WaitingForFirstKey ->
-                p [ class "Layout-videoMessage Layout-videoMessage--short" ] [ text "Press the keyboard shortcut you want to change." ]
+            WaitingForFirstKey { unavailableKey } ->
+                div [ class "Layout-videoMessage Layout-videoMessage--short" ]
+                    [ case unavailableKey of
+                        Just key ->
+                            p [] [ text <| "There’s no shortcut for: " ++ formatKey key ]
 
-            WaitingForSecondKey firstKey ->
-                p [ class "Layout-videoMessage Layout-videoMessage--short" ]
-                    [ text "Now press a new keyboard shortcut for:"
-                    , br [] []
-                    , text (formatKey firstKey)
+                        Nothing ->
+                            none
+                    , p [] [ text "Press the keyboard shortcut you want to change." ]
+                    ]
+
+            WaitingForSecondKey { unavailableKey, firstKey } ->
+                div [ class "Layout-videoMessage Layout-videoMessage--short" ]
+                    [ case unavailableKey of
+                        Just key ->
+                            p [] [ text <| "This key cannot be used: " ++ formatKey key ]
+
+                        Nothing ->
+                            none
+                    , p []
+                        [ text "Now press a new keyboard shortcut for:"
+                        , br [] []
+                        , text (formatKey firstKey)
+                        ]
                     ]
         , case model.audio.url of
             Just url ->

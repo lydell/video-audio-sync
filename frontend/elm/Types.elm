@@ -93,8 +93,8 @@ type alias KeyboardShortcuts =
 
 type EditKeyboardShortcuts
     = NotEditing
-    | WaitingForFirstKey
-    | WaitingForSecondKey String
+    | WaitingForFirstKey { unavailableKey : Maybe String }
+    | WaitingForSecondKey { unavailableKey : Maybe String, firstKey : String }
 
 
 type Msg
