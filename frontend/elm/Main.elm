@@ -230,56 +230,67 @@ update msg model =
                         buttonId =
                             Dict.get key model.keyboardShortcuts
                     in
-                    case model.editKeyboardShortcuts of
-                        NotEditing ->
-                            ( model
-                            , case buttonId of
-                                Just id ->
-                                    Ports.send (Ports.ClickButton id mouseButton)
+                    if key == "Escape" then
+                        ( { model
+                            | pointsWarningsModalOpen = False
+                            , confirmRemoveAllPointsModalOpen = False
+                            , confirmOpenPoints = Nothing
+                            , showKeyboardShortcuts = False
+                            , editKeyboardShortcuts = NotEditing
+                          }
+                        , Cmd.none
+                        )
+                    else
+                        case model.editKeyboardShortcuts of
+                            NotEditing ->
+                                ( model
+                                , case buttonId of
+                                    Just id ->
+                                        Ports.send (Ports.ClickButton id mouseButton)
 
-                                Nothing ->
-                                    Cmd.none
-                            )
+                                    Nothing ->
+                                        Cmd.none
+                                )
 
-                        WaitingForFirstKey _ ->
-                            ( { model
-                                | editKeyboardShortcuts =
-                                    case buttonId of
-                                        Just _ ->
-                                            WaitingForSecondKey
-                                                { unavailableKey = Nothing
-                                                , firstKey = key
-                                                }
+                            WaitingForFirstKey _ ->
+                                ( { model
+                                    | editKeyboardShortcuts =
+                                        case buttonId of
+                                            Just _ ->
+                                                WaitingForSecondKey
+                                                    { unavailableKey = Nothing
+                                                    , firstKey = key
+                                                    }
 
-                                        _ ->
+                                            _ ->
+                                                WaitingForFirstKey
+                                                    { unavailableKey = Just key }
+                                  }
+                                , Cmd.none
+                                )
+
+                            WaitingForSecondKey { firstKey } ->
+                                ( if defaultPrevented then
+                                    { model
+                                        | editKeyboardShortcuts =
                                             WaitingForFirstKey
-                                                { unavailableKey = Just key }
-                              }
-                            , Cmd.none
-                            )
-
-                        WaitingForSecondKey { firstKey } ->
-                            ( if defaultPrevented then
-                                { model
-                                    | editKeyboardShortcuts =
-                                        WaitingForFirstKey
-                                            { unavailableKey = Nothing }
-                                    , keyboardShortcuts =
-                                        updateKeyboardShortcuts
-                                            firstKey
-                                            key
-                                            model.keyboardShortcuts
-                                }
-                              else
-                                { model
-                                    | editKeyboardShortcuts =
-                                        WaitingForSecondKey
-                                            { unavailableKey = Just key
-                                            , firstKey = firstKey
-                                            }
-                                }
-                            , Cmd.none
-                            )
+                                                { unavailableKey = Nothing }
+                                        , keyboardShortcuts =
+                                            updateKeyboardShortcuts
+                                                firstKey
+                                                key
+                                                model.keyboardShortcuts
+                                    }
+                                  else
+                                    { model
+                                        | editKeyboardShortcuts =
+                                            WaitingForSecondKey
+                                                { unavailableKey = Just key
+                                                , firstKey = firstKey
+                                                }
+                                    }
+                                , Cmd.none
+                                )
 
         JsMessage (Err message) ->
             let
