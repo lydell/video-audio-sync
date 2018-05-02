@@ -1,6 +1,5 @@
+import _ from "lodash";
 import matchesAccept from "attr-accept";
-
-import { partition } from "./pure-utils";
 
 export function withElement(id, message, callback) {
   const element = document.getElementById(id);
@@ -30,7 +29,7 @@ export function openFiles({ accept, multiple = false, onOpenedFiles }) {
     fileInput.onchange = null;
 
     onOpenedFiles(
-      partition(fileInput.files, file => matchesAccept(file, accept)),
+      _.partition(fileInput.files, file => matchesAccept(file, accept)),
     );
   };
 

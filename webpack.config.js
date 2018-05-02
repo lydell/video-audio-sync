@@ -1,8 +1,10 @@
+const path = require("path");
+
 const ExtractPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
 const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const path = require("path");
 const webpack = require("webpack");
 
 const DEBUG = process.env.NODE_ENV !== "production";
@@ -127,6 +129,8 @@ module.exports = {
       name: "manifest",
       minChunks: Infinity,
     }),
+
+    new LodashModuleReplacementPlugin(),
 
     !DEBUG && new UglifyJsPlugin({ parallel: true }),
 

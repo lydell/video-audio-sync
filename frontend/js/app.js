@@ -1,9 +1,9 @@
 import FileSaver from "file-saver";
+import _ from "lodash";
 import matchesAccept from "attr-accept";
 
 import { Main } from "../elm/Main.elm";
 
-import { has } from "./pure-utils";
 import { openFiles, readFileAsText, seek, withElement } from "./effect-utils";
 
 export default class App {
@@ -238,7 +238,7 @@ export default class App {
 
   shouldSuppressKeydown(data) {
     return (
-      has(data.key, this.keyboardShortcuts) || this.editingKeyboardShortcuts
+      _.has(data.key, this.keyboardShortcuts) || this.editingKeyboardShortcuts
     );
   }
 
