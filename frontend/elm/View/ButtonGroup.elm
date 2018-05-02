@@ -4,7 +4,8 @@ import Buttons
 import Html exposing (Attribute, Html, button, div, label, span, text)
 import Html.Attributes exposing (attribute, class, classList, id, title, type_)
 import Html.Custom exposing (none)
-import Types exposing (KeyboardShortcuts)
+import List.Extra
+import Types exposing (KeyboardShortcutState(..), KeyboardShortcutsWithState)
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
 
 
@@ -37,8 +38,8 @@ emptyButton =
     }
 
 
-buttonGroup : KeyboardShortcuts -> List (ButtonDetails msg) -> Html msg
-buttonGroup keyboardShortcuts buttons =
+buttonGroup : KeyboardShortcutsWithState -> List (ButtonDetails msg) -> Html msg
+buttonGroup { keyboardShortcuts, highlighted } buttons =
     div [ class "ButtonGroup" ]
         (List.map
             (\buttonDetails ->
@@ -46,14 +47,24 @@ buttonGroup keyboardShortcuts buttons =
                     shortcut =
                         Buttons.shortcutsFromId buttonDetails.id keyboardShortcuts
                             |> List.head
+
+                    shortcutWithHighlight =
+                        case shortcut of
+                            Just string ->
+                                List.Extra.find (Tuple.first >> (==) string) highlighted
+                                    |> Maybe.withDefault ( string, Regular )
+                                    |> Just
+
+                            Nothing ->
+                                Nothing
                 in
-                buttonGroupButton shortcut buttonDetails
+                buttonGroupButton shortcutWithHighlight buttonDetails
             )
             buttons
         )
 
 
-buttonGroupButton : Maybe String -> ButtonDetails msg -> Html msg
+buttonGroupButton : Maybe ( String, KeyboardShortcutState ) -> ButtonDetails msg -> Html msg
 buttonGroupButton shortcut buttonDetails =
     let
         label labelText =
@@ -94,8 +105,14 @@ buttonGroupButton shortcut buttonDetails =
             Nothing ->
                 none
         , case shortcut of
-            Just string ->
-                span [ class "ButtonGroup-keyboardShortcut" ]
+            Just ( string, highlight ) ->
+                span
+                    [ classList
+                        [ ( "ButtonGroup-keyboardShortcut", True )
+                        , ( "is-toBeChanged", highlight == ToBeChanged )
+                        , ( "is-justChanged", highlight == JustChanged )
+                        ]
+                    ]
                     [ text (formatKey string) ]
 
             Nothing ->

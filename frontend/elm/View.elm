@@ -4,7 +4,7 @@ import Buttons exposing (JumpAction)
 import Dict
 import DomId
 import Html exposing (Attribute, Html, audio, br, button, code, div, li, p, pre, strong, text, ul, video)
-import Html.Attributes exposing (class, disabled, src, style, type_, width)
+import Html.Attributes exposing (class, classList, disabled, src, style, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
@@ -177,11 +177,33 @@ viewControls model =
                 model.showKeyboardShortcuts
                     || (model.editKeyboardShortcuts /= NotEditing)
             then
-                model.keyboardShortcuts
+                let
+                    highlighted =
+                        case model.editKeyboardShortcuts of
+                            NotEditing ->
+                                []
+
+                            WaitingForFirstKey { justChangedKeys } ->
+                                List.map (\key -> ( key, JustChanged )) justChangedKeys
+
+                            WaitingForSecondKey { firstKey } ->
+                                [ ( firstKey, ToBeChanged ) ]
+                in
+                { keyboardShortcuts = model.keyboardShortcuts
+                , highlighted = highlighted
+                }
             else
-                Dict.empty
+                { keyboardShortcuts = Dict.empty
+                , highlighted = []
+                }
     in
-    div [ class "Layout-controls", preventContextMenu ]
+    div
+        [ classList
+            [ ( "Layout-controls", True )
+            , ( "is-editKeyboardShortcuts", model.editKeyboardShortcuts /= NotEditing )
+            ]
+        , preventContextMenu
+        ]
         [ mediaPlayerToolbar Video
             model.video
             model.loopState
@@ -378,7 +400,7 @@ mediaPlayerToolbar :
     MediaPlayerId
     -> MediaPlayer
     -> LoopState
-    -> KeyboardShortcuts
+    -> KeyboardShortcutsWithState
     -> EditKeyboardShortcuts
     -> Html Msg
 mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortcuts =
@@ -531,7 +553,7 @@ buttonDetailsFromJumpAction id enabled jumpAction =
         }
 
 
-generalToolbar : Model -> KeyboardShortcuts -> Html Msg
+generalToolbar : Model -> KeyboardShortcutsWithState -> Html Msg
 generalToolbar model keyboardShortcuts =
     let
         hasAudio =

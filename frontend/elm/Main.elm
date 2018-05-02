@@ -291,7 +291,9 @@ update msg model =
 
                                                 _ ->
                                                     WaitingForFirstKey
-                                                        { unavailableKey = Just key }
+                                                        { unavailableKey = Just key
+                                                        , justChangedKeys = []
+                                                        }
                                       }
                                     , Cmd.none
                                     )
@@ -308,7 +310,9 @@ update msg model =
                                         ( { model
                                             | editKeyboardShortcuts =
                                                 WaitingForFirstKey
-                                                    { unavailableKey = Nothing }
+                                                    { unavailableKey = Nothing
+                                                    , justChangedKeys = [ firstKey, key ]
+                                                    }
                                             , keyboardShortcuts =
                                                 keyboardShortcuts
                                             , undoKeyboardShortcuts = Nothing
@@ -537,7 +541,10 @@ update msg model =
             ( { model
                 | editKeyboardShortcuts =
                     if model.editKeyboardShortcuts == NotEditing then
-                        WaitingForFirstKey { unavailableKey = Nothing }
+                        WaitingForFirstKey
+                            { unavailableKey = Nothing
+                            , justChangedKeys = []
+                            }
                     else
                         NotEditing
               }
@@ -551,7 +558,10 @@ update msg model =
             in
             ( { model
                 | editKeyboardShortcuts =
-                    WaitingForFirstKey { unavailableKey = Nothing }
+                    WaitingForFirstKey
+                        { unavailableKey = Nothing
+                        , justChangedKeys = []
+                        }
                 , keyboardShortcuts = keyboardShortcuts
                 , undoKeyboardShortcuts = Just model.keyboardShortcuts
               }

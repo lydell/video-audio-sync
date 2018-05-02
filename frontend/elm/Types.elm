@@ -92,9 +92,21 @@ type alias KeyboardShortcuts =
     Dict String String
 
 
+type alias KeyboardShortcutsWithState =
+    { keyboardShortcuts : KeyboardShortcuts
+    , highlighted : List ( String, KeyboardShortcutState )
+    }
+
+
+type KeyboardShortcutState
+    = Regular
+    | ToBeChanged
+    | JustChanged
+
+
 type EditKeyboardShortcuts
     = NotEditing
-    | WaitingForFirstKey { unavailableKey : Maybe String }
+    | WaitingForFirstKey { unavailableKey : Maybe String, justChangedKeys : List String }
     | WaitingForSecondKey { unavailableKey : Maybe String, firstKey : String }
 
 
