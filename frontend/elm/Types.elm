@@ -24,6 +24,7 @@ type alias Model =
     , confirmOpenPoints : Maybe { name : String, points : List Point }
     , errors : List Error
     , keyboardShortcuts : KeyboardShortcuts
+    , undoKeyboardShortcuts : Maybe KeyboardShortcuts
     , showKeyboardShortcuts : Bool
     , editKeyboardShortcuts : EditKeyboardShortcuts
     }
@@ -131,4 +132,5 @@ type Msg
     | ToggleShowKeyboardShortcuts
     | ToggleEditKeyboardShortcuts
     | ResetKeyboardShortcuts
+    | UndoResetKeyboardShortcuts
     | WindowSize Window.Size

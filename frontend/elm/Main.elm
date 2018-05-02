@@ -68,6 +68,7 @@ init flags =
       , confirmOpenPoints = Nothing
       , errors = []
       , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
+      , undoKeyboardShortcuts = Nothing
       , showKeyboardShortcuts = False
       , editKeyboardShortcuts = NotEditing
       }
@@ -238,6 +239,7 @@ update msg model =
                                 , confirmOpenPoints = Nothing
                                 , showKeyboardShortcuts = False
                                 , editKeyboardShortcuts = NotEditing
+                                , undoKeyboardShortcuts = Nothing
                               }
                             , Cmd.none
                             )
@@ -285,6 +287,7 @@ update msg model =
                                                     firstKey
                                                     key
                                                     model.keyboardShortcuts
+                                            , undoKeyboardShortcuts = Nothing
                                         }
                                       else
                                         { model
@@ -520,9 +523,23 @@ update msg model =
                 | editKeyboardShortcuts =
                     WaitingForFirstKey { unavailableKey = Nothing }
                 , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
+                , undoKeyboardShortcuts = Just model.keyboardShortcuts
               }
             , Cmd.none
             )
+
+        UndoResetKeyboardShortcuts ->
+            case model.undoKeyboardShortcuts of
+                Just keyboardShortcuts ->
+                    ( { model
+                        | keyboardShortcuts = keyboardShortcuts
+                        , undoKeyboardShortcuts = Nothing
+                      }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         WindowSize size ->
             ( { model | windowSize = size }

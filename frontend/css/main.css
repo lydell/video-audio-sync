@@ -124,15 +124,18 @@ code {
   margin-top: var(--spacing);
 }
 
+.Layout-videoMessageExtra {
+  margin-top: 1em;
+  font-size: 0.8em;
+}
+
 .ResetButton {
   --color: white;
 
   margin: 0;
-  margin-top: 1em;
   padding: 0.25em 0.5em;
   border: 1px solid var(--color);
   border-radius: 4px;
-  font-size: 0.8em;
   color: var(--color);
   background: none;
   transition-property: color, background-color;
@@ -144,6 +147,16 @@ code {
 .ResetButton:active {
   background-color: var(--color);
   color: black;
+}
+
+.LinkButton {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  background: none;
+  text-decoration: underline;
 }
 
 .Graphics {

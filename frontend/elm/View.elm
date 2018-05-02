@@ -110,11 +110,31 @@ viewMedia model =
                         Nothing ->
                             none
                     , p [] [ text "Press the keyboard shortcut you want to change." ]
-                    , if model.keyboardShortcuts == Buttons.defaultKeyboardShortCuts then
-                        none
-                      else
-                        button [ type_ "button", class "ResetButton", onClick ResetKeyboardShortcuts ]
-                            [ text "Reset all shortcuts" ]
+                    , case model.undoKeyboardShortcuts of
+                        Just _ ->
+                            p [ class "Layout-videoMessageExtra" ]
+                                [ text "All reset! ("
+                                , button
+                                    [ type_ "button"
+                                    , class "LinkButton"
+                                    , onClick UndoResetKeyboardShortcuts
+                                    ]
+                                    [ text "Undo" ]
+                                , text ")"
+                                ]
+
+                        Nothing ->
+                            if model.keyboardShortcuts == Buttons.defaultKeyboardShortCuts then
+                                none
+                            else
+                                p [ class "Layout-videoMessageExtra" ]
+                                    [ button
+                                        [ type_ "button"
+                                        , class "ResetButton"
+                                        , onClick ResetKeyboardShortcuts
+                                        ]
+                                        [ text "Reset all shortcuts" ]
+                                    ]
                     ]
 
             WaitingForSecondKey { unavailableKey, firstKey } ->
