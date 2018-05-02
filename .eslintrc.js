@@ -1,14 +1,14 @@
+const baseRules = require("eslint-config-lydell");
+
 module.exports = {
-  extends: ["lydell"],
   plugins: ["prettier"],
   parser: "babel-eslint",
   env: { es6: true },
-  rules: {
+  rules: Object.assign({}, baseRules(), {
     "prettier/prettier": "error",
-  },
+  }),
   globals: {
     DEBUG: false,
-    Elm: false,
     console: false,
     document: false,
     window: false,

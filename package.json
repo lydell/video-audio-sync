@@ -5,7 +5,7 @@
     "start": "webpack-dev-server"
   },
   "devDependencies": {
-    "babel-core": "6.26.0",
+    "babel-core": "6.26.3",
     "babel-eslint": "8.2.3",
     "babel-loader": "7.1.4",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -16,20 +16,20 @@
     "elm-hot-loader": "0.5.4",
     "elm-webpack-loader": "4.5.0",
     "eslint": "4.19.1",
-    "eslint-config-lydell": "6.1.0",
+    "eslint-config-lydell": "7.0.0",
     "eslint-plugin-prettier": "2.6.0",
     "extract-text-webpack-plugin": "3.0.2",
     "file-loader": "1.1.11",
     "html-webpack-plugin": "3.2.0",
-    "prettier": "1.12.0",
+    "prettier": "1.12.1",
     "script-ext-html-webpack-plugin": "2.0.1",
-    "style-loader": "0.20.3",
-    "uglifyjs-webpack-plugin": "1.2.4",
+    "style-loader": "0.21.0",
+    "uglifyjs-webpack-plugin": "1.2.5",
     "webpack": "3.10.0",
     "webpack-dev-server": "2.11.1"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free-webfonts": "1.0.6",
+    "@fortawesome/fontawesome-free-webfonts": "1.0.7",
     "attr-accept": "1.1.2",
     "file-saver": "1.3.8"
   }
