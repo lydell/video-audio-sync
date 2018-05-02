@@ -124,6 +124,28 @@ code {
   margin-top: var(--spacing);
 }
 
+.ResetButton {
+  --color: white;
+
+  margin: 0;
+  margin-top: 1em;
+  padding: 0.25em 0.5em;
+  border: 1px solid var(--color);
+  border-radius: 4px;
+  font-size: 0.8em;
+  color: var(--color);
+  background: none;
+  transition-property: color, background-color;
+  transition-duration: 200ms;
+}
+
+.ResetButton:hover,
+.ResetButton:focus,
+.ResetButton:active {
+  background-color: var(--color);
+  color: black;
+}
+
 .Graphics {
   position: relative;
 }

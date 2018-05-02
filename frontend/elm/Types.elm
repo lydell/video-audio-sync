@@ -130,4 +130,5 @@ type Msg
     | ClosePointsWarningsModal
     | ToggleShowKeyboardShortcuts
     | ToggleEditKeyboardShortcuts
+    | ResetKeyboardShortcuts
     | WindowSize Window.Size

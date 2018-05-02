@@ -3,8 +3,8 @@ module View exposing (view)
 import Buttons exposing (JumpAction)
 import Dict
 import DomId
-import Html exposing (Attribute, Html, audio, br, code, div, li, p, pre, strong, text, ul, video)
-import Html.Attributes exposing (class, disabled, src, style, width)
+import Html exposing (Attribute, Html, audio, br, button, code, div, li, p, pre, strong, text, ul, video)
+import Html.Attributes exposing (class, disabled, src, style, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
@@ -110,6 +110,11 @@ viewMedia model =
                         Nothing ->
                             none
                     , p [] [ text "Press the keyboard shortcut you want to change." ]
+                    , if model.keyboardShortcuts == Buttons.defaultKeyboardShortCuts then
+                        none
+                      else
+                        button [ type_ "button", class "ResetButton", onClick ResetKeyboardShortcuts ]
+                            [ text "Reset all shortcuts" ]
                     ]
 
             WaitingForSecondKey { unavailableKey, firstKey } ->
