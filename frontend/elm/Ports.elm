@@ -24,10 +24,8 @@ type OutgoingMessage
     | SaveFile File
     | OpenFile FileType
     | OpenMultipleFiles
-    | WarnOnClose (Maybe String)
     | ClickButton String MouseButton
-    | PersistKeyboardShortcuts (Dict String String)
-    | EditingKeyboardShortcuts Bool
+    | StateSync StateSyncModel
 
 
 type IncomingMessage
@@ -89,6 +87,13 @@ type alias KeydownDetails =
     }
 
 
+type alias StateSyncModel =
+    { keyboardShortcuts : Dict String String
+    , editingKeyboardShortcuts : Bool
+    , warnOnClose : Maybe String
+    }
+
+
 encode : OutgoingMessage -> TaggedData
 encode outgoingMessage =
     case outgoingMessage of
@@ -142,17 +147,6 @@ encode outgoingMessage =
             , data = Encode.null
             }
 
-        WarnOnClose maybeMessage ->
-            { tag = "WarnOnClose"
-            , data =
-                case maybeMessage of
-                    Just message ->
-                        Encode.string message
-
-                    Nothing ->
-                        Encode.null
-            }
-
         ClickButton id mouseButton ->
             { tag = "ClickButton"
             , data =
@@ -162,18 +156,28 @@ encode outgoingMessage =
                     ]
             }
 
-        PersistKeyboardShortcuts keyboardShortcuts ->
-            { tag = "PersistKeyboardShortcuts"
+        StateSync model ->
+            { tag = "StateSync"
             , data =
-                keyboardShortcuts
-                    |> Dict.map (always Encode.string)
-                    |> Dict.toList
-                    |> Encode.object
-            }
+                Encode.object
+                    [ ( "keyboardShortcuts"
+                      , model.keyboardShortcuts
+                            |> Dict.map (always Encode.string)
+                            |> Dict.toList
+                            |> Encode.object
+                      )
+                    , ( "editingKeyboardShortcuts"
+                      , Encode.bool model.editingKeyboardShortcuts
+                      )
+                    , ( "warnOnClose"
+                      , case model.warnOnClose of
+                            Just message ->
+                                Encode.string message
 
-        EditingKeyboardShortcuts editing ->
-            { tag = "EditingKeyboardShortcuts"
-            , data = Encode.bool editing
+                            Nothing ->
+                                Encode.null
+                      )
+                    ]
             }
 
 

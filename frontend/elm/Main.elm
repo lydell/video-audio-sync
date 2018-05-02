@@ -95,7 +95,13 @@ init flags =
       }
     , Cmd.batch
         [ Task.perform WindowSize Window.size
-        , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
+        , Ports.send
+            (Ports.StateSync
+                { keyboardShortcuts = keyboardShortcuts
+                , editingKeyboardShortcuts = False
+                , warnOnClose = Nothing
+                }
+            )
         ]
     )
 
@@ -135,7 +141,7 @@ updateWithCmds msg model =
         ( newModel, cmd ) =
             update msg model
 
-        warnOnCloseMessage =
+        warnOnClose =
             case newModel.points of
                 [] ->
                     Nothing
@@ -146,9 +152,13 @@ updateWithCmds msg model =
     ( newModel
     , Cmd.batch
         [ cmd
-        , Ports.send (Ports.WarnOnClose warnOnCloseMessage)
-        , Ports.send (Ports.PersistKeyboardShortcuts newModel.keyboardShortcuts)
-        , Ports.send (Ports.EditingKeyboardShortcuts (newModel.editKeyboardShortcuts /= NotEditing))
+        , Ports.send
+            (Ports.StateSync
+                { keyboardShortcuts = newModel.keyboardShortcuts
+                , editingKeyboardShortcuts = newModel.editKeyboardShortcuts /= NotEditing
+                , warnOnClose = warnOnClose
+                }
+            )
         ]
     )
 
