@@ -1,5 +1,6 @@
-port module Ports exposing (Area, ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), send, subscribe)
+port module Ports exposing (Area, ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), keyboardShortcutsDecoder, send, subscribe)
 
+import Dict exposing (Dict)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
@@ -25,6 +26,7 @@ type OutgoingMessage
     | OpenMultipleFiles
     | WarnOnClose (Maybe String)
     | ClickButton String MouseButton
+    | PersistKeyboardShortcuts (Dict String String)
 
 
 type IncomingMessage
@@ -158,6 +160,15 @@ encode outgoingMessage =
                     [ ( "id", Encode.string id )
                     , ( "right", encodeMouseButton mouseButton )
                     ]
+            }
+
+        PersistKeyboardShortcuts keyboardShortcuts ->
+            { tag = "PersistKeyboardShortcuts"
+            , data =
+                keyboardShortcuts
+                    |> Dict.map (always Encode.string)
+                    |> Dict.toList
+                    |> Encode.object
             }
 
 
@@ -311,3 +322,8 @@ keydownDecoder =
         (Decode.field "shiftKey" Decode.bool)
         (Decode.field "defaultPrevented" Decode.bool)
         |> Decode.map Keydown
+
+
+keyboardShortcutsDecoder : Decoder (Maybe (Dict String String))
+keyboardShortcutsDecoder =
+    Decode.nullable (Decode.dict Decode.string)

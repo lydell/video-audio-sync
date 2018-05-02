@@ -3,6 +3,8 @@ import FileSaver from "file-saver";
 import { Main } from "../elm/Main.elm";
 import "../css/main.css";
 
+const LS_KEY_KEYBOARD_SHORTCUTS = "keyboardShortcuts";
+
 // Chrome does not appear to show .aac and .json files unless explicitly
 // mentioned via file extension.
 const FILE_TYPES = {
@@ -34,6 +36,7 @@ function start() {
   const app = Main.embed(document.getElementById("app"), {
     audio: params.get("audio"),
     video: params.get("video"),
+    keyboardShortcuts: getLocalStorage(LS_KEY_KEYBOARD_SHORTCUTS),
   });
 
   setupDragAndDrop(app);
@@ -185,6 +188,11 @@ function start() {
             element.click();
           }
         });
+        break;
+      }
+
+      case "PersistKeyboardShortcuts": {
+        setLocalStorage(LS_KEY_KEYBOARD_SHORTCUTS, message.data);
         break;
       }
 
@@ -401,6 +409,31 @@ function setupKeyboard(app) {
     },
     true,
   );
+}
+
+function getLocalStorage(key) {
+  try {
+    const data = window.localStorage.getItem(key);
+    return data == null ? null : JSON.parse(data);
+  } catch (error) {
+    console.warn("Failed to read from localStorage", {
+      key,
+      error,
+    });
+  }
+  return null;
+}
+
+function setLocalStorage(key, data) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.warn("Failed to write to localStorage", {
+      key,
+      data,
+      error,
+    });
+  }
 }
 
 // Wait for CSS to load in development.

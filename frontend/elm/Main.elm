@@ -37,6 +37,7 @@ main =
 type alias Flags =
     { audio : Maybe String
     , video : Maybe String
+    , keyboardShortcuts : Decode.Value
     }
 
 
@@ -53,6 +54,25 @@ init flags =
 
                 Nothing ->
                     empty
+
+        keyboardShortcutsResult =
+            Decode.decodeValue Ports.keyboardShortcutsDecoder flags.keyboardShortcuts
+
+        keyboardShortcuts =
+            case keyboardShortcutsResult of
+                Ok (Just shortcuts) ->
+                    shortcuts
+
+                Ok Nothing ->
+                    Buttons.defaultKeyboardShortCuts
+
+                Err message ->
+                    let
+                        _ =
+                            Debug.log "Failed to decode saved keyboardShortcuts"
+                                { message = message, data = flags.keyboardShortcuts }
+                    in
+                    Buttons.defaultKeyboardShortCuts
     in
     ( { audio = withLocalName flags.audio
       , video = withLocalName flags.video
@@ -67,7 +87,7 @@ init flags =
       , confirmRemoveAllPointsModalOpen = False
       , confirmOpenPoints = Nothing
       , errors = []
-      , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
+      , keyboardShortcuts = keyboardShortcuts
       , undoKeyboardShortcuts = Nothing
       , showKeyboardShortcuts = False
       , editKeyboardShortcuts = NotEditing
@@ -277,28 +297,34 @@ update msg model =
                                     )
 
                                 WaitingForSecondKey { firstKey } ->
-                                    ( if defaultPrevented then
-                                        { model
-                                            | editKeyboardShortcuts =
-                                                WaitingForFirstKey
-                                                    { unavailableKey = Nothing }
-                                            , keyboardShortcuts =
+                                    if defaultPrevented then
+                                        let
+                                            keyboardShortcuts =
                                                 updateKeyboardShortcuts
                                                     firstKey
                                                     key
                                                     model.keyboardShortcuts
+                                        in
+                                        ( { model
+                                            | editKeyboardShortcuts =
+                                                WaitingForFirstKey
+                                                    { unavailableKey = Nothing }
+                                            , keyboardShortcuts =
+                                                keyboardShortcuts
                                             , undoKeyboardShortcuts = Nothing
-                                        }
-                                      else
-                                        { model
+                                          }
+                                        , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
+                                        )
+                                    else
+                                        ( { model
                                             | editKeyboardShortcuts =
                                                 WaitingForSecondKey
                                                     { unavailableKey = Just key
                                                     , firstKey = firstKey
                                                     }
-                                        }
-                                    , Cmd.none
-                                    )
+                                          }
+                                        , Cmd.none
+                                        )
 
         JsMessage (Err message) ->
             let
@@ -519,13 +545,17 @@ update msg model =
             )
 
         ResetKeyboardShortcuts ->
+            let
+                keyboardShortcuts =
+                    Buttons.defaultKeyboardShortCuts
+            in
             ( { model
                 | editKeyboardShortcuts =
                     WaitingForFirstKey { unavailableKey = Nothing }
-                , keyboardShortcuts = Buttons.defaultKeyboardShortCuts
+                , keyboardShortcuts = keyboardShortcuts
                 , undoKeyboardShortcuts = Just model.keyboardShortcuts
               }
-            , Cmd.none
+            , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
             )
 
         UndoResetKeyboardShortcuts ->
@@ -535,7 +565,7 @@ update msg model =
                         | keyboardShortcuts = keyboardShortcuts
                         , undoKeyboardShortcuts = Nothing
                       }
-                    , Cmd.none
+                    , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
                     )
 
                 Nothing ->
