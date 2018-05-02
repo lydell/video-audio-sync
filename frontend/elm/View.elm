@@ -3,7 +3,7 @@ module View exposing (view)
 import Buttons exposing (JumpAction)
 import Dict
 import DomId
-import Html exposing (Attribute, Html, audio, br, button, code, div, li, p, pre, strong, text, ul, video)
+import Html exposing (Attribute, Html, audio, button, code, div, kbd, li, p, pre, strong, text, ul, video)
 import Html.Attributes exposing (class, classList, disabled, src, style, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
@@ -105,14 +105,17 @@ viewMedia model =
                 div [ class "Layout-videoMessage Layout-videoMessage--short" ]
                     [ case unavailableKey of
                         Just key ->
-                            p [] [ text <| "There’s no shortcut for: " ++ formatKey key ]
+                            p [ class "Layout-videoMessageBefore" ]
+                                [ kbd [] [ text (formatKey key) ]
+                                , text " has no shortcut."
+                                ]
 
                         Nothing ->
                             none
                     , p [] [ text "Press the keyboard shortcut you want to change." ]
                     , case model.undoKeyboardShortcuts of
                         Just _ ->
-                            p [ class "Layout-videoMessageExtra" ]
+                            p [ class "Layout-videoMessageAfter" ]
                                 [ text "All reset! ("
                                 , button
                                     [ type_ "button"
@@ -127,7 +130,7 @@ viewMedia model =
                             if model.keyboardShortcuts == Buttons.defaultKeyboardShortCuts then
                                 none
                             else
-                                p [ class "Layout-videoMessageExtra" ]
+                                p [ class "Layout-videoMessageAfter" ]
                                     [ button
                                         [ type_ "button"
                                         , class "ResetButton"
@@ -138,19 +141,25 @@ viewMedia model =
                     ]
 
             WaitingForSecondKey { unavailableKey, firstKey } ->
-                div [ class "Layout-videoMessage Layout-videoMessage--short" ]
-                    [ case unavailableKey of
+                div [ class "Layout-videoMessage Layout-videoMessage--short" ] <|
+                    case unavailableKey of
                         Just key ->
-                            p [] [ text <| "This key cannot be used: " ++ formatKey key ]
+                            [ p [ class "Layout-videoMessageBefore" ]
+                                [ kbd [] [ text (formatKey key) ]
+                                , text <| " cannot be used."
+                                ]
+                            , p []
+                                [ text "Press a new keyboard shortcut for:" ]
+                            , p [ class "Layout-videoMessageAfter" ]
+                                [ kbd [] [ text (formatKey firstKey) ] ]
+                            ]
 
                         Nothing ->
-                            none
-                    , p []
-                        [ text "Now press a new keyboard shortcut for:"
-                        , br [] []
-                        , text (formatKey firstKey)
-                        ]
-                    ]
+                            [ p []
+                                [ text "Now press a new keyboard shortcut for:" ]
+                            , p [ class "Layout-videoMessageAfter" ]
+                                [ kbd [] [ text (formatKey firstKey) ] ]
+                            ]
         , case model.audio.url of
             Just url ->
                 audio

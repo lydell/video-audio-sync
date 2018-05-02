@@ -82,6 +82,12 @@ code {
   font-size: 0.75em;
 }
 
+kbd {
+  border: 1px solid currentColor;
+  border-radius: 0.2em;
+  padding: 0 0.2em;
+}
+
 .Layout {
   display: flex;
   flex-direction: column;
@@ -125,7 +131,12 @@ code {
   margin-top: var(--spacing);
 }
 
-.Layout-videoMessageExtra {
+.Layout-videoMessageBefore {
+  margin-bottom: 1em;
+  font-size: 0.8em;
+}
+
+.Layout-videoMessageAfter {
   margin-top: 1em;
   font-size: 0.8em;
 }
