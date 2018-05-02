@@ -93,7 +93,10 @@ init flags =
       , editKeyboardShortcuts = NotEditing
       , helpModalOpen = False
       }
-    , Task.perform WindowSize Window.size
+    , Cmd.batch
+        [ Task.perform WindowSize Window.size
+        , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
+        ]
     )
 
 
@@ -144,6 +147,8 @@ updateWithCmds msg model =
     , Cmd.batch
         [ cmd
         , Ports.send (Ports.WarnOnClose warnOnCloseMessage)
+        , Ports.send (Ports.PersistKeyboardShortcuts newModel.keyboardShortcuts)
+        , Ports.send (Ports.EditingKeyboardShortcuts (newModel.editKeyboardShortcuts /= NotEditing))
         ]
     )
 
@@ -241,7 +246,7 @@ update msg model =
                 Ports.DragLeave ->
                     ( { model | isDraggingFile = False }, Cmd.none )
 
-                Ports.Keydown { key, altKey, ctrlKey, metaKey, defaultPrevented } ->
+                Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
                     let
                         mouseButton =
                             if altKey || ctrlKey || metaKey then
@@ -301,7 +306,7 @@ update msg model =
                                     )
 
                                 WaitingForSecondKey { firstKey } ->
-                                    if defaultPrevented then
+                                    if String.length key == 1 then
                                         let
                                             keyboardShortcuts =
                                                 updateKeyboardShortcuts
@@ -319,7 +324,7 @@ update msg model =
                                                 keyboardShortcuts
                                             , undoKeyboardShortcuts = Nothing
                                           }
-                                        , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
+                                        , Cmd.none
                                         )
                                     else
                                         ( { model
@@ -567,7 +572,7 @@ update msg model =
                 , keyboardShortcuts = keyboardShortcuts
                 , undoKeyboardShortcuts = Just model.keyboardShortcuts
               }
-            , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
+            , Cmd.none
             )
 
         UndoResetKeyboardShortcuts ->
@@ -577,7 +582,7 @@ update msg model =
                         | keyboardShortcuts = keyboardShortcuts
                         , undoKeyboardShortcuts = Nothing
                       }
-                    , Ports.send (Ports.PersistKeyboardShortcuts keyboardShortcuts)
+                    , Cmd.none
                     )
 
                 Nothing ->

@@ -27,6 +27,7 @@ type OutgoingMessage
     | WarnOnClose (Maybe String)
     | ClickButton String MouseButton
     | PersistKeyboardShortcuts (Dict String String)
+    | EditingKeyboardShortcuts Bool
 
 
 type IncomingMessage
@@ -85,7 +86,6 @@ type alias KeydownDetails =
     , ctrlKey : Bool
     , metaKey : Bool
     , shiftKey : Bool
-    , defaultPrevented : Bool
     }
 
 
@@ -169,6 +169,11 @@ encode outgoingMessage =
                     |> Dict.map (always Encode.string)
                     |> Dict.toList
                     |> Encode.object
+            }
+
+        EditingKeyboardShortcuts editing ->
+            { tag = "EditingKeyboardShortcuts"
+            , data = Encode.bool editing
             }
 
 
@@ -314,13 +319,12 @@ stringToFileType string =
 
 keydownDecoder : Decoder IncomingMessage
 keydownDecoder =
-    Decode.map6 KeydownDetails
+    Decode.map5 KeydownDetails
         (Decode.field "key" Decode.string)
         (Decode.field "altKey" Decode.bool)
         (Decode.field "ctrlKey" Decode.bool)
         (Decode.field "metaKey" Decode.bool)
         (Decode.field "shiftKey" Decode.bool)
-        (Decode.field "defaultPrevented" Decode.bool)
         |> Decode.map Keydown
 
 

@@ -24,6 +24,9 @@ const FILE_TYPES = {
 
 const objectUrls = new Map();
 
+let keyboardShortcuts = {};
+let editingKeyboardShortcuts = false;
+
 function start() {
   const params = new window.URLSearchParams(
     DEBUG ? window.location.search : "",
@@ -192,7 +195,13 @@ function start() {
       }
 
       case "PersistKeyboardShortcuts": {
-        setLocalStorage(LS_KEY_KEYBOARD_SHORTCUTS, message.data);
+        keyboardShortcuts = message.data;
+        setLocalStorage(LS_KEY_KEYBOARD_SHORTCUTS, keyboardShortcuts);
+        break;
+      }
+
+      case "EditingKeyboardShortcuts": {
+        editingKeyboardShortcuts = message.data;
         break;
       }
 
@@ -388,11 +397,11 @@ function setupKeyboard(app) {
         return;
       }
 
-      let defaultPrevented = false;
-
-      if (key.length === 1) {
+      if (
+        Object.prototype.hasOwnProperty.call(keyboardShortcuts, key) ||
+        editingKeyboardShortcuts
+      ) {
         event.preventDefault();
-        defaultPrevented = true;
       }
 
       app.ports.jsToElm.send({
@@ -403,7 +412,6 @@ function setupKeyboard(app) {
           ctrlKey: event.ctrlKey,
           metaKey: event.metaKey,
           shiftKey: event.shiftKey,
-          defaultPrevented,
         },
       });
     },
