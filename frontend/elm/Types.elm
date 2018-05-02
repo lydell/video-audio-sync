@@ -27,6 +27,7 @@ type alias Model =
     , undoKeyboardShortcuts : Maybe KeyboardShortcuts
     , showKeyboardShortcuts : Bool
     , editKeyboardShortcuts : EditKeyboardShortcuts
+    , helpModalOpen : Bool
     }
 
 
@@ -145,4 +146,6 @@ type Msg
     | ToggleEditKeyboardShortcuts
     | ResetKeyboardShortcuts
     | UndoResetKeyboardShortcuts
+    | OpenHelpModal
+    | CloseHelpModal
     | WindowSize Window.Size

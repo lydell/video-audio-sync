@@ -752,6 +752,15 @@ generalToolbar model keyboardShortcuts =
                     [ onClick ToggleEditKeyboardShortcuts
                     ]
               }
+            , { emptyButton
+                | id = Buttons.toString Buttons.HelpModal
+                , icon = Icon "question-circle"
+                , title = "Help"
+                , pressed = model.helpModalOpen
+                , attributes =
+                    [ onClick OpenHelpModal
+                    ]
+              }
             ]
         ]
 
@@ -870,6 +879,11 @@ viewModals model =
                             (List.reverse errors)
                         )
                     ]
+        , if model.helpModalOpen then
+            alertModal CloseHelpModal
+                [ p [] [ text "TODO: Help text." ] ]
+          else
+            none
         ]
 
 

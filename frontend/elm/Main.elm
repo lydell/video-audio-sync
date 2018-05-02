@@ -91,6 +91,7 @@ init flags =
       , undoKeyboardShortcuts = Nothing
       , showKeyboardShortcuts = False
       , editKeyboardShortcuts = NotEditing
+      , helpModalOpen = False
       }
     , Task.perform WindowSize Window.size
     )
@@ -260,6 +261,7 @@ update msg model =
                                 , showKeyboardShortcuts = False
                                 , editKeyboardShortcuts = NotEditing
                                 , undoKeyboardShortcuts = Nothing
+                                , helpModalOpen = False
                               }
                             , Cmd.none
                             )
@@ -580,6 +582,16 @@ update msg model =
 
                 Nothing ->
                     ( model, Cmd.none )
+
+        OpenHelpModal ->
+            ( { model | helpModalOpen = True }
+            , Cmd.none
+            )
+
+        CloseHelpModal ->
+            ( { model | helpModalOpen = False }
+            , Cmd.none
+            )
 
         WindowSize size ->
             ( { model | windowSize = size }
