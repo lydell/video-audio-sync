@@ -752,7 +752,9 @@ generalToolbar model keyboardShortcuts =
                     [ onClick ToggleEditKeyboardShortcuts
                     ]
               }
-            , { emptyButton
+            ]
+        , buttonGroup keyboardShortcuts
+            [ { emptyButton
                 | id = Buttons.toString Buttons.HelpModal
                 , icon = Icon "question-circle"
                 , title = "Help"
