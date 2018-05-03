@@ -14,6 +14,7 @@
 .OutlineButton:hover,
 .OutlineButton:focus,
 .OutlineButton:active {
+  outline: none;
   background-color: var(--color);
   color: black;
 }
