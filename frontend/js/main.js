@@ -24,8 +24,8 @@ const FILE_TYPES = {
 
 function start() {
   const params = DEBUG
-    ? new Map()
-    : new window.URLSearchParams(window.location.search);
+    ? new window.URLSearchParams(window.location.search)
+    : new Map();
 
   const allowWarnOnClose = !DEBUG || Boolean(params.get("warn_on_close"));
 
