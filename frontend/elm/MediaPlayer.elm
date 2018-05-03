@@ -5,7 +5,10 @@ import Time exposing (Time)
 
 
 type alias MediaPlayer =
-    { size : { width : Float, height : Float }
+    { size :
+        { width : Float
+        , height : Float
+        }
     , duration : Time
     , currentTime : Time
     , playState : PlayState

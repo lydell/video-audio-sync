@@ -22,7 +22,7 @@ formatDuration duration =
         ( seconds, secondsRest ) =
             divRem minutesRest Time.second
 
-        ( milliseconds, millisecondsRest ) =
+        ( milliseconds, _ ) =
             divRem secondsRest Time.millisecond
 
         pad number numChars =

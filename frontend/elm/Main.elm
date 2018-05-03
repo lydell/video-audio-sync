@@ -2,8 +2,8 @@ module Main exposing (..)
 
 import Buttons
 import Dict
-import DomId exposing (DomId(GraphicsArea, VideoArea))
-import Html exposing (Html)
+import DomId exposing (DomId)
+import Html
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -490,9 +490,6 @@ update msg model =
 
         Save ->
             let
-                encoded =
-                    Points.encode model.points
-
                 content =
                     model.points
                         |> Points.encode
@@ -983,7 +980,7 @@ addError error model =
 pointsSaveFilename : String -> String
 pointsSaveFilename audioName =
     let
-        ( base, extension ) =
+        ( base, _ ) =
             Utils.splitExtension audioName
 
         suffix =

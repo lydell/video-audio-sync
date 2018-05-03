@@ -12,16 +12,16 @@ type Icon
 fontawesome : Icon -> Html msg
 fontawesome icon =
     let
-        ( name, extraClass ) =
+        ( namePart, extraClass ) =
             case icon of
                 Icon name ->
                     ( name, "" )
 
-                CustomIcon name extraClass ->
-                    ( name, extraClass )
+                CustomIcon name extra ->
+                    ( name, extra )
     in
     span
         [ attribute "aria-hidden" "true"
-        , class ("fas fa-" ++ name ++ " " ++ extraClass)
+        , class ("fas fa-" ++ namePart ++ " " ++ extraClass)
         ]
         []
