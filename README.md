@@ -2,7 +2,8 @@
 
 _Work in progress._
 
-Fix videos where the audio is out of sync, in much stranger ways than just a simple constant time shift.
+Fix videos where the audio is out of sync, in much stranger ways than just a
+simple constant time shift.
 
 ## Background
 
@@ -39,7 +40,8 @@ I haven’t really tested anything other than Firefox and Chrome.
 
 1.  Run `python3 extract.py summer94.mp4 aac` to separate the video and audio of
     `summer94.mp4` their own files (assuming `aac` is the audio format).
-2.  Open the separated video and audio files to the browser-based sync tool.
+2.  Open the separated video and audio files to the [browser-based sync
+    tool][app].
 3.  Find matching points of video and audio using the tool and download the
     resulting points file.
 4.  Run `python3 sync.py summer94_video.mp4 summer94_audio.aac points.json` to
@@ -78,6 +80,7 @@ Additional tasks:
 
 [MIT](LICENSE)
 
+[app]: https://lydell.github.io/video-audio-sync/
 [chrome]: https://www.google.com/chrome/index.html
 [chromium]: https://www.chromium.org/
 [elm-analyse]: https://github.com/stil4m/elm-analyse
