@@ -43,10 +43,18 @@ function start() {
     const app = new App({
       rootElement: element,
       flags,
-      allowWarnOnClose,
       fileTypes: FILE_TYPES,
       persistKeyboardShortcuts: keyboardShortcuts => {
         setLocalStorage(LS_KEY_KEYBOARD_SHORTCUTS, keyboardShortcuts);
+      },
+      warnOnClose(warnOnClose) {
+        window.onbeforeunload =
+          warnOnClose == null || !allowWarnOnClose
+            ? null
+            : event => {
+                event.returnValue = warnOnClose;
+                return warnOnClose;
+              };
       },
     });
 

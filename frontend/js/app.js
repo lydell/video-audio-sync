@@ -10,16 +10,16 @@ export default class App {
   constructor({
     rootElement,
     flags,
-    allowWarnOnClose,
     fileTypes,
     persistKeyboardShortcuts,
+    warnOnClose,
   }) {
     const elmApp = Main.embed(rootElement, flags);
 
     this.elmApp = elmApp;
-    this.allowWarnOnClose = allowWarnOnClose;
     this.fileTypes = fileTypes;
     this.persistKeyboardShortcuts = persistKeyboardShortcuts;
+    this.warnOnClose = warnOnClose;
 
     this.objectUrls = new Map();
     this.keyboardShortcuts = {};
@@ -188,14 +188,7 @@ export default class App {
           this.editingKeyboardShortcuts = editingKeyboardShortcuts;
 
           this.persistKeyboardShortcuts(keyboardShortcuts);
-
-          window.onbeforeunload =
-            warnOnClose == null || !this.allowWarnOnClose
-              ? null
-              : event => {
-                  event.returnValue = warnOnClose;
-                  return warnOnClose;
-                };
+          this.warnOnClose(warnOnClose);
           break;
         }
 
