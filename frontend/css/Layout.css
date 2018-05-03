@@ -33,14 +33,6 @@
   text-align: center;
 }
 
-.Layout-controls {
-  padding: var(--spacing);
-}
-
-.Layout-controls > * + * {
-  margin-top: var(--spacing);
-}
-
 .Layout-videoMessageBefore {
   margin-bottom: 1em;
   font-size: 0.8em;
@@ -49,4 +41,12 @@
 .Layout-videoMessageAfter {
   margin-top: 1em;
   font-size: 0.8em;
+}
+
+.Layout-controls {
+  padding: var(--spacing);
+}
+
+.Layout-controls > * + * {
+  margin-top: var(--spacing);
 }
