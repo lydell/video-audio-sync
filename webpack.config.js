@@ -9,7 +9,7 @@ const webpack = require("webpack");
 
 const DEBUG = process.env.NODE_ENV !== "production";
 const OUTPUT_PATH = path.resolve(__dirname, "build");
-const PUBLIC_PATH = "/";
+const PUBLIC_PATH = DEBUG ? "/" : "/video-audio-sync/";
 
 const constants = {
   DEBUG: JSON.stringify(DEBUG),
