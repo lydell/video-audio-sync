@@ -3,6 +3,7 @@
   "scripts": {
     "build": "rm -rf build/ && NODE_ENV=production webpack --hide-modules",
     "start": "webpack-dev-server",
+    "elm-analyse": "elm-analyse",
     "elm-format": "elm-format frontend/elm/",
     "eslint": "eslint .",
     "stylelint": "stylelint frontend/css/",
@@ -17,6 +18,7 @@
     "babel-preset-env": "1.6.1",
     "css-loader": "0.28.11",
     "elm": "0.18.0",
+    "elm-analyse": "0.14.2",
     "elm-format": "0.7.0-exp",
     "elm-hot-loader": "0.5.4",
     "elm-webpack-loader": "4.5.0",

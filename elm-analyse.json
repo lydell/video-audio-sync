@@ -1,0 +1,11 @@
+{
+  "checks": {
+    "DebugLog": false,
+    "ExposeAll": false,
+    "ImportAll": false
+  },
+  "excludedPaths": [
+    "frontend/elm/Types.elm",
+    "frontend/elm/View.elm"
+  ]
+}
