@@ -7,7 +7,8 @@
     "elm-format": "elm-format frontend/elm/",
     "eslint": "eslint .",
     "stylelint": "stylelint frontend/css/",
-    "fix": "npm run elm-format -- --yes && npm run eslint -- --fix && npm run stylelint -- --fix"
+    "fix": "npm run elm-format -- --yes && npm run eslint -- --fix && npm run stylelint -- --fix",
+    "test": "npm run elm-format -- --validate && npm run eslint && npm run stylelint"
   },
   "devDependencies": {
     "babel-core": "6.26.3",

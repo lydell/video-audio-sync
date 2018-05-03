@@ -1,4 +1,4 @@
-# Video Audio Sync
+# Video Audio Sync [![Build Status][travis-badge]][travis-link]
 
 _Work in progress._
 
@@ -71,6 +71,7 @@ Additional tasks:
   most errors.
 * `yarn run fix` runs all format/lint tools in autofix mode.
 * `yarn run build` makes a production build.
+* `yarn run test` is run by [Travis CI].
 
 ## License
 
@@ -88,3 +89,6 @@ Additional tasks:
 [onbeforeunload]: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
 [python]: https://www.python.org/
 [stylelint]: https://stylelint.io/
+[travis ci]: https://travis-ci.org/
+[travis-badge]: (https://travis-ci.org/lydell/video-audio-sync.svg?branch=master)
+[travis-link]: https://travis-ci.org/lydell/video-audio-sync
