@@ -1,14 +1,14 @@
 {
   "private": true,
   "scripts": {
-    "build": "rm -rf build/ && NODE_ENV=production webpack --hide-modules",
+    "build": "NODE_ENV=production webpack --hide-modules",
     "start": "webpack-dev-server",
     "elm-analyse": "elm-analyse",
     "elm-format": "elm-format frontend/elm/",
     "eslint": "eslint .",
     "stylelint": "stylelint frontend/css/",
     "fix": "npm run elm-format -- --yes && npm run eslint -- --fix && npm run stylelint -- --fix",
-    "test": "npm run elm-format -- --validate && npm run eslint && npm run stylelint"
+    "test": "npm run elm-format -- --validate && npm run eslint && npm run stylelint && npm run build"
   },
   "devDependencies": {
     "babel-core": "6.26.3",
