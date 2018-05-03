@@ -68,7 +68,6 @@
 
 .Modal-button:nth-child(1) {
   border-top-color: var(--grey-luke);
-  background-color: var(--blue);
   background-color: white;
   color: black;
 }
