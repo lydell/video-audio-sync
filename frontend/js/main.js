@@ -23,9 +23,9 @@ const FILE_TYPES = {
 };
 
 function start() {
-  const params = new window.URLSearchParams(
-    DEBUG ? window.location.search : "",
-  );
+  const params = DEBUG
+    ? new Map()
+    : new window.URLSearchParams(window.location.search);
 
   const allowWarnOnClose = !DEBUG || Boolean(params.get("warn_on_close"));
 
@@ -35,8 +35,8 @@ function start() {
 
   withElement("app", "main app element", element => {
     const flags = {
-      audio: params.get("audio"),
-      video: params.get("video"),
+      audio: params.get("audio") || null,
+      video: params.get("video") || null,
       keyboardShortcuts: getLocalStorage(LS_KEY_KEYBOARD_SHORTCUTS),
     };
 
