@@ -90,5 +90,5 @@ Additional tasks:
 [python]: https://www.python.org/
 [stylelint]: https://stylelint.io/
 [travis ci]: https://travis-ci.org/
-[travis-badge]: (https://travis-ci.org/lydell/video-audio-sync.svg?branch=master)
+[travis-badge]: https://travis-ci.org/lydell/video-audio-sync.svg?branch=master
 [travis-link]: https://travis-ci.org/lydell/video-audio-sync
