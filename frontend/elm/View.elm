@@ -3,8 +3,8 @@ module View exposing (view)
 import Buttons exposing (JumpAction)
 import Dict
 import DomId
-import Html exposing (Attribute, Html, audio, button, code, div, kbd, li, p, pre, strong, text, ul, video)
-import Html.Attributes exposing (class, classList, disabled, src, style, type_, width)
+import Html exposing (Attribute, Html, a, audio, button, code, div, h1, kbd, li, p, pre, strong, text, ul, video)
+import Html.Attributes exposing (class, classList, disabled, href, src, style, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
@@ -883,7 +883,31 @@ viewModals model =
                     ]
         , if model.helpModalOpen then
             alertModal CloseHelpModal
-                [ p [] [ text "TODO: Help text." ] ]
+                [ h1 [] [ text "Video Audio Sync" ]
+                , p [] [ text "Fix videos where the audio is out of sync, in much stranger ways than just a simple constant time shift." ]
+                , p [] [ text "This tool lets you find points where the video and audio match, and save those points. Another tool then uses those points to speed up or slow down segments of the audio so that it syncs up with the video." ]
+                , p [] [ text "To learn more, see the ", a [ href "https://github.com/lydell/video-audio-sync#video-audio-sync" ] [ text "project page." ] ]
+                , p [] [ strong [] [ text "Note: " ], text "This currently ", a [ href "https://github.com/lydell/video-audio-sync#browser-support" ] [ text "works best in Chrome." ] ]
+                , p [] [ text "Open the ", a [ href "https://github.com/lydell/video-audio-sync#usage" ] [ text "separated" ], text " ", fontawesome (Icon "file-video"), text " video and ", fontawesome (Icon "file-audio"), text " audio files." ]
+                , p [] [ text "Use the ", fontawesome (Icon "play"), text " ", fontawesome (Icon "backward"), text " ", fontawesome (Icon "forward"), text " Playback buttons to find a spot where you’d like to sync the video and audio." ]
+                , p [] [ strong [] [ text "Tip: " ], text "Right-click a button to make it control both audio and video at the same time. If you use the ", fontawesome (Icon "keyboard"), text " keyboard: Hold Control, Command or Alt while pressing a keyboard shortcut." ]
+                , p [] [ text "Good syncing spots include:" ]
+                , ul []
+                    [ li []
+                        [ text "Somebody making a distinct noise, such as closing a door." ]
+                    , li []
+                        [ text "Scene transitions, especially when going from indoors to outdoors." ]
+                    , li []
+                        [ text "Closeups of people talking." ]
+                    ]
+                , p [] [ text "When you’ve found a good spot, ", fontawesome (Icon "pause"), text " pause the video and find roughly the corresponding audio spot." ]
+                , p [] [ text "Now press the ", fontawesome (Icon "sync-alt"), text " Loop button. It will loop around your spot, from 3 seconds before to 3 seconds after." ]
+                , p [] [ text "While looping, tweak the video and audio positions using the more fine-grained time controls, until the audio and video are in sync in that little segment." ]
+                , p [] [ text "When satisfied, press the ", fontawesome (Icon "plus"), text " Plus button to save the point." ]
+                , p [] [ text "Then repeat for as many points you want. You can use the ", fontawesome (Icon "step-backward"), fontawesome (Icon "step-forward"), text " Jump buttons to go back to earlier points if you made a mistake. Points can be ", fontawesome (Icon "minus"), text " removed and ", fontawesome (Icon "plus"), text " replaced with new ones." ]
+                , p [] [ text "Finally, click the ", fontawesome (Icon "save"), text " Save button to save your points to a file. You can also ", fontawesome (Icon "file-alt"), text " open previous files you’ve made if you want to tweak them." ]
+                , p [] [ text "Once you’ve got the points file, ", a [ href "https://github.com/lydell/video-audio-sync#usage" ] [ text "sync the audio and video back up" ], text " into one file." ]
+                ]
           else
             none
         ]

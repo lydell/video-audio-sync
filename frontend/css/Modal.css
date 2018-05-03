@@ -28,18 +28,23 @@
   background-color: white;
 }
 
+.Modal-scroll {
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
 .Modal-contentInner {
   padding: 30px;
 }
 
-.Modal-contentInner p + p {
-  margin-top: 0.25em;
-}
-
 .Modal-contentInner > * + *,
-.Modal-contentInner > p + p,
 .Modal-contentInner li + li {
   margin-top: 0.625em;
+}
+
+.Modal-contentInner ul > li {
+  margin-left: 1em;
+  list-style: disc;
 }
 
 .Modal-buttons {

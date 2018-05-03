@@ -2,26 +2,54 @@
 
 _Work in progress._
 
-Tool for syncing up video and audio.
+Fix videos where the audio is out of sync, in much stranger ways than just a simple constant time shift.
 
-1.  `python3 extract.py my_video.mp4 aac`
-2.  Upload the extracted video and audio files to the browser-based sync tool.
-3.  Sync points of video and audio using the tool and download the resulting
-    points file.
-4.  `python3 sync.py my_video_video.mp4 my_video_audio.aac points.json`
+## Background
 
-## Development
+I transferred some old VHS cassettes to my computer using a video capture tool.
+The results were good, except that the audio was out-of-sync.
 
-Requirements:
+The audio tracks of the videos were longer than the video tracks. But speeding
+the audio up to match in length didn’t help. (The videos are so long that you
+can’t hear the speed difference.) The audio was still not in sync. It turned out
+that the amount of time the audio was off differed throughout the video. We’re
+talking everything from a couple of seconds up to one and a half minutes, with
+no predictable pattern.
 
-* [Node.js] 8
+Instead of speeding up the entire audio track, different segments of it needs to
+be sped up differently. I couldn’t find a tool that could do that in a somewhat
+automated fashion, so I built one myself (using technology I know and enjoy).
+
+## Requirements:
+
+* [Chrome]
 * [Python] 3.5
 * [ffmpeg] 3.3
 
-(Later versions might work as well.)
+Later versions might work as well.
 
-You need to know [Elm] and web technology, and perhaps a little bit about Python
-and ffmeg.
+### Browser support
+
+I noticed that [Firefox] does not report the correct length of the audio.
+[Chrome] \(and [Chromium]) does, however. The app _should_ work in any modern
+browser, but be aware that browsers may interpret media files differently. Also,
+I haven’t really tested anything other than Firefox and Chrome.
+
+## Usage
+
+1.  Run `python3 extract.py summer94.mp4 aac` to separate the video and audio of
+    `summer94.mp4` their own files (assuming `aac` is the audio format).
+2.  Open the separated video and audio files to the browser-based sync tool.
+3.  Find matching points of video and audio using the tool and download the
+    resulting points file.
+4.  Run `python3 sync.py summer94_video.mp4 summer94_audio.aac points.json` to
+    speed up and slow down segments of `summer94_audio.aac` according to
+    `points.json` and then produce a single file again.
+
+## Development
+
+For the frontend you’ll need [Node.js] 8 (or possibly later) and some knowledge
+about [Elm] and web technology.
 
 1.  `npm install`
 2.  `npm start`
@@ -48,11 +76,14 @@ Additional tasks:
 
 [MIT](LICENSE)
 
+[chrome]: https://www.google.com/chrome/index.html
+[chromium]: https://www.chromium.org/
 [elm-analyse]: https://github.com/stil4m/elm-analyse
 [elm-format]: https://github.com/avh4/elm-format
 [elm]: http://elm-lang.org/
 [eslint]: https://eslint.org/
 [ffmpeg]: https://ffmpeg.org/
+[firefox]: https://www.mozilla.org/firefox/
 [node.js]: https://nodejs.org/en/
 [onbeforeunload]: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
 [python]: https://www.python.org/

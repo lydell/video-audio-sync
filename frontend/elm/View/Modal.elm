@@ -10,7 +10,8 @@ modal msg buttons children =
     div [ class "Modal" ]
         [ div [ class "Modal-backdrop", onClick msg ] []
         , div [ class "Modal-content" ]
-            [ div [ class "Modal-contentInner" ] children
+            [ div [ class "Modal-scroll" ]
+                [ div [ class "Modal-contentInner" ] children ]
             , div [ class "Modal-buttons" ] buttons
             ]
         ]
