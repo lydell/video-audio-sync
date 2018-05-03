@@ -60,7 +60,7 @@ function start() {
 if (DEBUG) {
   // eslint-disable-next-line func-style
   const poll = () => {
-    // main.css sets `--css-applied: true;` so we can look for that.
+    // globals.css sets `--css-applied: true;` so we can look for that.
     if (
       window
         .getComputedStyle(document.documentElement)
