@@ -886,7 +886,7 @@ viewModals model =
                 [ h1 [] [ text "Video Audio Sync" ]
                 , p [] [ text "Fix videos where the audio is out of sync, in much stranger ways than just a simple constant time shift." ]
                 , p [] [ text "This tool lets you find points where the video and audio match, and save those points. Another tool then uses those points to speed up or slow down segments of the audio so that it syncs up with the video." ]
-                , p [] [ text "To learn more, see the ", a [ href "https://github.com/lydell/video-audio-sync#video-audio-sync" ] [ text "project page." ] ]
+                , p [] [ text "To learn more, see the ", a [ href "https://github.com/lydell/video-audio-sync#video-audio-sync-" ] [ text "project page." ] ]
                 , p [] [ strong [] [ text "Note: " ], text "This currently ", a [ href "https://github.com/lydell/video-audio-sync#browser-support" ] [ text "works best in Chrome." ] ]
                 , p [] [ text "Open the ", a [ href "https://github.com/lydell/video-audio-sync#usage" ] [ text "separated" ], text " ", fontawesome (Icon "file-video"), text " video and ", fontawesome (Icon "file-audio"), text " audio files." ]
                 , p [] [ text "Use the ", fontawesome (Icon "play"), text " ", fontawesome (Icon "backward"), text " ", fontawesome (Icon "forward"), text " Playback buttons to find a spot where you’d like to sync the video and audio." ]
