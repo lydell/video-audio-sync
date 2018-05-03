@@ -52,7 +52,8 @@ For the frontend you’ll need [Node.js] 8 (or possibly later) and some knowledg
 about [Elm] and web technology.
 
 1.  `npm install`
-2.  `npm start`
+2.  `npm run elm-install`
+3.  `npm start`
 
 Magic GET parameters:
 

@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "elm-install": "elm-package install --yes",
     "build": "NODE_ENV=production webpack --hide-modules",
     "start": "webpack-dev-server",
     "elm-analyse": "elm-analyse",
