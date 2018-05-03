@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Html.Events.Custom exposing (MetaDataDetails, MouseButton, MouseDownDetails)
 import MediaPlayer exposing (MediaPlayer)
 import Mouse
+import Points exposing (Direction, Point)
 import Ports exposing (Area, ErroredFileDetails, IncomingMessage, InvalidFileDetails, OpenedFileDetails)
 import Time exposing (Time)
 import Window
@@ -63,17 +64,6 @@ type alias DragBar =
     { x : Float
     , width : Float
     }
-
-
-type alias Point =
-    { audioTime : Time
-    , videoTime : Time
-    }
-
-
-type Direction
-    = Forward
-    | Backward
 
 
 type Error

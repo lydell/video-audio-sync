@@ -8,8 +8,9 @@ import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode
 import Json.Encode as Encode
 import MediaPlayer exposing (MediaPlayer)
+import ModelUtils
 import Mouse
-import Points
+import Points exposing (Direction(Backward, Forward))
 import Ports exposing (Area)
 import Task
 import Time exposing (Time)
@@ -767,10 +768,10 @@ jumpByPoint : LockState -> MediaPlayerId -> Direction -> Model -> ( Model, Cmd M
 jumpByPoint lockState id direction model =
     let
         ( audioCurrentTime, videoCurrentTime ) =
-            Utils.getCurrentTimes model
+            ModelUtils.getCurrentTimes model
 
         calculateTime getTime currentTime mediaPlayer =
-            Utils.getClosestPoint getTime direction currentTime model.points
+            Points.getClosestPoint getTime direction currentTime model.points
                 |> Maybe.map getTime
                 |> Maybe.withDefault
                     (case direction of

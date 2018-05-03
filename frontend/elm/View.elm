@@ -11,7 +11,8 @@ import Html.Events exposing (on, onClick)
 import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
-import Points
+import ModelUtils
+import Points exposing (Direction(Backward, Forward))
 import Ports
 import Svg
 import Svg.Attributes as Svg
@@ -265,7 +266,7 @@ viewGraphics model =
             videoY + progressBarHeight + progressBarSpacing
 
         ( audioCurrentTime, videoCurrentTime ) =
-            Utils.getCurrentTimes model
+            ModelUtils.getCurrentTimes model
 
         videoProgressBarDetails =
             { maxValue = toScale model.video.duration
@@ -573,7 +574,7 @@ generalToolbar model keyboardShortcuts =
             MediaPlayer.hasMedia model.video
 
         ( audioCurrentTime, videoCurrentTime ) =
-            Utils.getCurrentTimes model
+            ModelUtils.getCurrentTimes model
 
         potentialNewPoint =
             { audioTime = audioCurrentTime
@@ -581,10 +582,10 @@ generalToolbar model keyboardShortcuts =
             }
 
         selectedPoint =
-            Utils.getSelectedPoint potentialNewPoint model.points
+            Points.getSelectedPoint potentialNewPoint model.points
 
         canAddPoint =
-            Utils.canAddPoint model.points potentialNewPoint
+            Points.canAddPoint model.points potentialNewPoint
 
         warnings =
             Points.validate model.points

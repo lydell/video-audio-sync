@@ -1,13 +1,6 @@
 module Utils exposing (..)
 
-import List.Extra
 import Time exposing (Time)
-import Types exposing (..)
-
-
-maxPointOffset : Time
-maxPointOffset =
-    0.05 * Time.second
 
 
 formatDuration : Time -> String
@@ -47,98 +40,6 @@ divRem numerator divisor =
             numerator - toFloat whole * divisor
     in
     ( whole, rest )
-
-
-getCurrentTimes : Model -> ( Time, Time )
-getCurrentTimes model =
-    case model.loopState of
-        Normal ->
-            ( model.audio.currentTime
-            , model.video.currentTime
-            )
-
-        Looping { audioTime, videoTime } ->
-            ( audioTime
-            , videoTime
-            )
-
-
-getSelectedPoint :
-    { audioTime : Time, videoTime : Time }
-    -> List Point
-    -> Maybe Point
-getSelectedPoint { audioTime, videoTime } points =
-    points
-        |> List.map
-            (\point ->
-                let
-                    audioDistance =
-                        abs (point.audioTime - audioTime)
-
-                    videoDistance =
-                        abs (point.videoTime - videoTime)
-                in
-                ( audioDistance, videoDistance, point )
-            )
-        |> List.filter
-            (\( audioDistance, videoDistance, _ ) ->
-                (audioDistance < maxPointOffset)
-                    && (videoDistance < maxPointOffset)
-            )
-        |> List.Extra.minimumBy
-            (\( audioDistance, videoDistance, _ ) ->
-                audioDistance + videoDistance
-            )
-        |> Maybe.map (\( _, _, point ) -> point)
-
-
-getClosestPoint :
-    (Point -> Time)
-    -> Direction
-    -> Time
-    -> List Point
-    -> Maybe Point
-getClosestPoint getTime direction time points =
-    points
-        |> List.map (\point -> ( getTime point - time, point ))
-        |> List.filter
-            (\( distance, _ ) ->
-                case direction of
-                    Forward ->
-                        distance >= maxPointOffset
-
-                    Backward ->
-                        distance <= -maxPointOffset
-            )
-        |> List.Extra.minimumBy (Tuple.first >> abs)
-        |> Maybe.map Tuple.second
-
-
-canAddPoint : List Point -> Point -> Bool
-canAddPoint points potentialNewPoint =
-    let
-        hasSelected getTime =
-            List.any
-                (\point ->
-                    let
-                        distance =
-                            abs (getTime point - getTime potentialNewPoint)
-                    in
-                    distance <= maxPointOffset
-                )
-                points
-
-        countBefore getTime =
-            points
-                |> List.filter
-                    (\point -> getTime point < getTime potentialNewPoint)
-                |> List.length
-    in
-    (potentialNewPoint.audioTime > 0)
-        && (potentialNewPoint.videoTime > 0)
-        && not (hasSelected .audioTime)
-        && not (hasSelected .videoTime)
-        && (countBefore .audioTime == countBefore .videoTime)
 
 
 splitExtension : String -> ( String, String )

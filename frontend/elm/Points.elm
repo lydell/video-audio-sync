@@ -1,9 +1,9 @@
-module Points exposing (decoder, encode, tempoMax, tempoMin, validate)
+module Points exposing (Direction(..), Point, canAddPoint, decoder, encode, getClosestPoint, getSelectedPoint, tempoMax, tempoMin, validate)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import List.Extra
 import Time exposing (Time)
-import Types exposing (..)
 
 
 tempoMin : Float
@@ -16,8 +16,24 @@ tempoMax =
     2
 
 
+maxPointOffset : Time
+maxPointOffset =
+    0.05 * Time.second
+
+
 type alias TempoPoint =
     ( Time, Float )
+
+
+type alias Point =
+    { audioTime : Time
+    , videoTime : Time
+    }
+
+
+type Direction
+    = Forward
+    | Backward
 
 
 encode : List Point -> Encode.Value
@@ -122,3 +138,81 @@ validate points =
                 else
                     Nothing
             )
+
+
+getSelectedPoint :
+    { audioTime : Time, videoTime : Time }
+    -> List Point
+    -> Maybe Point
+getSelectedPoint { audioTime, videoTime } points =
+    points
+        |> List.map
+            (\point ->
+                let
+                    audioDistance =
+                        abs (point.audioTime - audioTime)
+
+                    videoDistance =
+                        abs (point.videoTime - videoTime)
+                in
+                ( audioDistance, videoDistance, point )
+            )
+        |> List.filter
+            (\( audioDistance, videoDistance, _ ) ->
+                (audioDistance < maxPointOffset)
+                    && (videoDistance < maxPointOffset)
+            )
+        |> List.Extra.minimumBy
+            (\( audioDistance, videoDistance, _ ) ->
+                audioDistance + videoDistance
+            )
+        |> Maybe.map (\( _, _, point ) -> point)
+
+
+getClosestPoint :
+    (Point -> Time)
+    -> Direction
+    -> Time
+    -> List Point
+    -> Maybe Point
+getClosestPoint getTime direction time points =
+    points
+        |> List.map (\point -> ( getTime point - time, point ))
+        |> List.filter
+            (\( distance, _ ) ->
+                case direction of
+                    Forward ->
+                        distance >= maxPointOffset
+
+                    Backward ->
+                        distance <= -maxPointOffset
+            )
+        |> List.Extra.minimumBy (Tuple.first >> abs)
+        |> Maybe.map Tuple.second
+
+
+canAddPoint : List Point -> Point -> Bool
+canAddPoint points potentialNewPoint =
+    let
+        hasSelected getTime =
+            List.any
+                (\point ->
+                    let
+                        distance =
+                            abs (getTime point - getTime potentialNewPoint)
+                    in
+                    distance <= maxPointOffset
+                )
+                points
+
+        countBefore getTime =
+            points
+                |> List.filter
+                    (\point -> getTime point < getTime potentialNewPoint)
+                |> List.length
+    in
+    (potentialNewPoint.audioTime > 0)
+        && (potentialNewPoint.videoTime > 0)
+        && not (hasSelected .audioTime)
+        && not (hasSelected .videoTime)
+        && (countBefore .audioTime == countBefore .videoTime)
