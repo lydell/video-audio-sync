@@ -4,6 +4,17 @@
       "env",
       {
         "modules": false,
+        "useBuiltIns": "usage",
+        "debug": true,
+        "targets": {
+          "browsers": [
+            "last 2 Chrome versions",
+            "last 2 Firefox versions",
+            "last 1 Edge version",
+            "last 2 Safari versions",
+            "last 2 Opera versions"
+          ]
+        }
       }
     ]
   ],
