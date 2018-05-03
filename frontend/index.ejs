@@ -38,27 +38,25 @@
         margin: 0;
       }
 
-      @supports (animation: Test 100ms 1s forwards) {
-        .Loader-spinner {
-          opacity: 0;
-          animation:
-            FadeIn 800ms 200ms forwards,
-            Pulsate 800ms infinite ease-out;
-        }
-
-        .Loader-message {
-          opacity: 0;
-          animation: FadeIn 400ms 5s forwards;
-        }
+      .Loader-spinner {
+        opacity: 0;
+        animation:
+          Loading-fadeIn 800ms 200ms forwards,
+          Loading-pulsate 800ms infinite ease-out;
       }
 
-      @keyframes FadeIn {
+      .Loader-message {
+        opacity: 0;
+        animation: Loading-fadeIn 400ms 5s forwards;
+      }
+
+      @keyframes Loading-fadeIn {
         to {
           opacity: 1;
         }
       }
 
-      @keyframes Pulsate {
+      @keyframes Loading-pulsate {
         10% {
           transform: scale(1);
         }
