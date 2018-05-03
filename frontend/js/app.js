@@ -231,7 +231,7 @@ export default class App {
 
   shouldSuppressKeydown(data) {
     return (
-      _.has(data.key, this.keyboardShortcuts) || this.editingKeyboardShortcuts
+      _.has(this.keyboardShortcuts, data.key) || this.editingKeyboardShortcuts
     );
   }
 
