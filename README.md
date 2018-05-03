@@ -12,6 +12,17 @@ Tool for syncing up video and audio.
 
 ## Development
 
+Requirements:
+
+* [Node.js] 8
+* [Python] 3.5
+* [ffmpeg] 3.3
+
+(Later versions might work as well.)
+
+You need to know [Elm] and web technology, and perhaps a little bit about Python
+and ffmeg.
+
 1.  `npm install`
 2.  `npm start`
 
@@ -39,6 +50,10 @@ Additional tasks:
 
 [elm-analyse]: https://github.com/stil4m/elm-analyse
 [elm-format]: https://github.com/avh4/elm-format
+[elm]: http://elm-lang.org/
 [eslint]: https://eslint.org/
+[ffmpeg]: https://ffmpeg.org/
+[node.js]: https://nodejs.org/en/
 [onbeforeunload]: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload
+[python]: https://www.python.org/
 [stylelint]: https://stylelint.io/
