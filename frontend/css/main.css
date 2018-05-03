@@ -11,7 +11,9 @@
   --pulsate-animation: Pulsate 2s infinite ease-in-out;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   background-repeat: no-repeat;
 }
@@ -19,7 +21,7 @@
 html {
   background-color: white;
   color: black;
-  font: menu;
+  font: "menu", sans-serif;
   font-size: 16px;
   line-height: 1.2;
 }
@@ -47,8 +49,8 @@ select,
 textarea {
   font-family: inherit;
   font-size: inherit;
-  line-height: inherit;
   letter-spacing: inherit;
+  line-height: inherit;
 }
 
 button {
@@ -57,8 +59,8 @@ button {
 
 button::-moz-focus-inner,
 input::-moz-focus-inner {
-  border: 0;
   padding: 0;
+  border: 0;
 }
 
 textarea {
@@ -66,8 +68,8 @@ textarea {
 }
 
 *::placeholder {
-  color: inherit;
   opacity: 0.5;
+  color: inherit;
 }
 
 label {
@@ -83,9 +85,9 @@ code {
 }
 
 kbd {
+  padding: 0 0.2em;
   border: 1px solid currentColor;
   border-radius: 0.2em;
-  padding: 0 0.2em;
 }
 
 .Layout {
@@ -95,9 +97,9 @@ kbd {
 }
 
 .Layout-videoWrapper {
+  position: relative;
   flex: 1;
   background-color: black;
-  position: relative;
 }
 
 .Layout-video {
@@ -111,10 +113,10 @@ kbd {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
   width: 15em;
   max-width: calc(100% - 2 * var(--spacing));
+  transform: translate(-50%, -50%);
+  color: white;
   font-size: 4vmin;
 }
 
@@ -146,12 +148,12 @@ kbd {
 
   margin: 0;
   padding: 0.25em 0.5em;
-  border: 1px solid var(--color);
-  border-radius: 4px;
-  color: var(--color);
-  background: none;
   transition-property: color, background-color;
   transition-duration: 200ms;
+  border: 1px solid var(--color);
+  border-radius: 4px;
+  background: none;
+  color: var(--color);
 }
 
 .ResetButton:hover,
@@ -166,8 +168,8 @@ kbd {
   padding: 0;
   border: none;
   border-radius: 0;
-  color: inherit;
   background: none;
+  color: inherit;
   text-decoration: underline;
 }
 
@@ -197,9 +199,9 @@ kbd {
 /* .ProgressBarForeground {} */
 
 .ProgressBarForeground-current {
-  fill: none;
-  stroke: black;
   stroke-width: 2px;
+  stroke: black;
+  fill: none;
 }
 
 .ProgressBarForeground-mouseArea {
@@ -208,9 +210,9 @@ kbd {
 }
 
 .Point {
-  fill: none;
-  stroke: var(--grey-luke);
   stroke-width: 2px;
+  stroke: var(--grey-luke);
+  fill: none;
 }
 
 .Toolbar {
@@ -231,6 +233,8 @@ kbd {
   --border-width: 1px;
   --border-radius: 4px;
 
+  position: relative;
+  z-index: 1;
   min-width: var(--size);
   height: var(--size);
   margin: 0;
@@ -238,8 +242,6 @@ kbd {
   border: var(--border-width) solid var(--grey-luke);
   border-radius: 0;
   background: var(--grey-leia);
-  position: relative;
-  z-index: 1;
 }
 
 .ButtonGroup-button:first-child {
@@ -256,20 +258,20 @@ kbd {
   margin-left: calc(-1 * var(--border-width));
 }
 
+.ButtonGroup-button:disabled {
+  color: black;
+}
+
 .ButtonGroup-button:not(:disabled):hover,
 .ButtonGroup-button:not(:disabled):focus,
 .ButtonGroup-button:not(:disabled):active {
-  outline: none;
-  border-color: var(--blue);
   z-index: 2;
+  border-color: var(--blue);
+  outline: none;
 }
 
 .ButtonGroup-button.is-pressed {
   background-color: var(--grey-luke);
-}
-
-.ButtonGroup-button:disabled {
-  color: black;
 }
 
 .Layout-controls:not(.is-editKeyboardShortcuts) .ButtonGroup-button:disabled {
@@ -278,6 +280,7 @@ kbd {
   cursor: not-allowed;
 }
 
+/* stylelint-disable-next-line max-line-length */
 .Layout-controls:not(.is-editKeyboardShortcuts) .ButtonGroup-button:disabled + .ButtonGroup-button:disabled {
   border-left-color: transparent;
 }
@@ -290,14 +293,14 @@ kbd {
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: var(--border-radius);
   animation: var(--pulsate-animation);
+  border-radius: var(--border-radius);
 }
 
 .ButtonGroup-buttonInner {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
 }
@@ -316,16 +319,16 @@ kbd {
   position: absolute;
   top: 0;
   right: 0;
-  transform: translate(25%, -25%);
-  height: var(--size);
   min-width: var(--size);
+  height: var(--size);
   padding: 0 0.33em;
+  transform: translate(25%, -25%);
   border-radius: calc(var(--size) / 2);
   background-color: var(--blue);
   color: white;
   font-size: 0.75em;
-  line-height: var(--size);
   font-weight: bold;
+  line-height: var(--size);
   text-align: center;
   pointer-events: none;
 }
@@ -336,16 +339,16 @@ kbd {
   position: absolute;
   top: calc(100% - 5px);
   left: 50%;
-  transform: var(--transform);
   padding: 2px 4px;
+  transform: var(--transform);
+  transition: transform 400ms ease-out;
   border-radius: var(--border-radius);
   background-color: var(--blue);
   color: white;
   font-size: 0.75em;
-  line-height: 1;
   font-weight: bold;
+  line-height: 1;
   pointer-events: none;
-  transition: transform 400ms ease-out;
 }
 
 .ButtonGroup-keyboardShortcut::before {
@@ -412,9 +415,9 @@ kbd {
   z-index: 2;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   width: 500px;
   max-width: calc(100% - 2 * var(--spacing));
+  transform: translate(-50%, -50%);
   background-color: white;
 }
 
@@ -457,10 +460,10 @@ kbd {
 }
 
 .Modal-button:nth-child(1) {
+  border-top-color: var(--grey-luke);
   background-color: var(--blue);
   background-color: white;
   color: black;
-  border-top-color: var(--grey-luke);
 }
 
 .Modal-button:nth-child(2) {
@@ -470,13 +473,13 @@ kbd {
 
 .FileDragOverlay {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   position: fixed;
   z-index: 9000;
   top: 0;
   left: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
