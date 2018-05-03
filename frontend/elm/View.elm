@@ -133,7 +133,7 @@ viewMedia model =
                                 p [ class "Layout-videoMessageAfter" ]
                                     [ button
                                         [ type_ "button"
-                                        , class "ResetButton"
+                                        , class "OutlineButton"
                                         , onClick ResetKeyboardShortcuts
                                         ]
                                         [ text "Reset all shortcuts" ]

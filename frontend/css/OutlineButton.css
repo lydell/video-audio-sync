@@ -1,0 +1,19 @@
+.OutlineButton {
+  --color: white;
+
+  margin: 0;
+  padding: 0.25em 0.5em;
+  transition-property: color, background-color;
+  transition-duration: 200ms;
+  border: 1px solid var(--color);
+  border-radius: 4px;
+  background: none;
+  color: var(--color);
+}
+
+.OutlineButton:hover,
+.OutlineButton:focus,
+.OutlineButton:active {
+  background-color: var(--color);
+  color: black;
+}

@@ -1,0 +1,5 @@
+.Point {
+  stroke-width: 2px;
+  stroke: var(--grey-luke);
+  fill: none;
+}

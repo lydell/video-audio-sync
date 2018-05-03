@@ -1,0 +1,78 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  background-repeat: no-repeat;
+}
+
+html {
+  background-color: white;
+  color: black;
+  font: "menu", sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+body {
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul > li {
+  list-style: none;
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
+textarea {
+  width: 100%;
+}
+
+*::placeholder {
+  opacity: 0.5;
+  color: inherit;
+}
+
+label {
+  margin: 0;
+  font-weight: inherit;
+}
+
+code {
+  padding: 0.25em;
+  border-radius: 0.25em;
+  background-color: var(--grey-leia);
+  font-size: 0.75em;
+}
+
+kbd {
+  padding: 0 0.2em;
+  border: 1px solid currentColor;
+  border-radius: 0.2em;
+}

@@ -1,0 +1,9 @@
+/* .ProgressBarBackground {} */
+
+.ProgressBarBackground-background {
+  fill: var(--grey-leia);
+}
+
+.ProgressBarBackground-progress {
+  fill: var(--blue);
+}

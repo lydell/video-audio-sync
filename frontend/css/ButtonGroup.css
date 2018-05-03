@@ -1,0 +1,166 @@
+.ButtonGroup {
+  display: flex;
+}
+
+.ButtonGroup-button {
+  --size: 32px;
+  --border-width: 1px;
+  --border-radius: 4px;
+
+  position: relative;
+  z-index: 1;
+  min-width: var(--size);
+  height: var(--size);
+  margin: 0;
+  padding: 5px;
+  border: var(--border-width) solid var(--grey-luke);
+  border-radius: 0;
+  background: var(--grey-leia);
+}
+
+.ButtonGroup-button:first-child {
+  border-top-left-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+}
+
+.ButtonGroup-button:last-child {
+  border-top-right-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
+}
+
+.ButtonGroup-button:not(:first-child) {
+  margin-left: calc(-1 * var(--border-width));
+}
+
+.ButtonGroup-button:disabled {
+  color: black;
+}
+
+.ButtonGroup-button:not(:disabled):hover,
+.ButtonGroup-button:not(:disabled):focus,
+.ButtonGroup-button:not(:disabled):active {
+  z-index: 2;
+  border-color: var(--blue);
+  outline: none;
+}
+
+.ButtonGroup-button.is-pressed {
+  background-color: var(--grey-luke);
+}
+
+.Layout-controls:not(.is-editKeyboardShortcuts) .ButtonGroup-button:disabled {
+  opacity: 0.5;
+  color: var(--grey-luke);
+  cursor: not-allowed;
+}
+
+/* stylelint-disable-next-line max-line-length */
+.Layout-controls:not(.is-editKeyboardShortcuts) .ButtonGroup-button:disabled + .ButtonGroup-button:disabled {
+  border-left-color: transparent;
+}
+
+.ButtonGroup-button.is-animated::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: var(--pulsate-animation);
+  border-radius: var(--border-radius);
+}
+
+.ButtonGroup-buttonInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ButtonGroup-buttonInner > * + * {
+  margin-left: 5px;
+}
+
+.ButtonGroup-buttonLabel {
+  font-size: 0.75em;
+}
+
+.ButtonGroup-buttonBadge {
+  --size: 1.5em;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: var(--size);
+  height: var(--size);
+  padding: 0 0.33em;
+  transform: translate(25%, -25%);
+  border-radius: calc(var(--size) / 2);
+  background-color: var(--blue);
+  color: white;
+  font-size: 0.75em;
+  font-weight: bold;
+  line-height: var(--size);
+  text-align: center;
+  pointer-events: none;
+}
+
+.ButtonGroup-keyboardShortcut {
+  --transform: translateX(-50%);
+
+  position: absolute;
+  top: calc(100% - 5px);
+  left: 50%;
+  padding: 2px 4px;
+  transform: var(--transform);
+  transition: transform 400ms ease-out;
+  border-radius: var(--border-radius);
+  background-color: var(--blue);
+  color: white;
+  font-size: 0.75em;
+  font-weight: bold;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.ButtonGroup-keyboardShortcut::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--border-radius);
+}
+
+.ButtonGroup-keyboardShortcut.is-toBeChanged {
+  transform: var(--transform) scale(1.25);
+}
+
+.ButtonGroup-keyboardShortcut.is-toBeChanged::before {
+  animation: var(--pulsate-animation);
+}
+
+.ButtonGroup-keyboardShortcut.is-justChanged {
+  animation: Zoom 1s ease-out;
+}
+
+@keyframes Pulsate {
+  to {
+    opacity: 0;
+    box-shadow: 0 0 0 9px var(--blue);
+  }
+}
+
+@keyframes Zoom {
+  20% {
+    transform: var(--transform) scale(1.5);
+  }
+
+  to {
+    transform: var(--transform) scale(1);
+  }
+}

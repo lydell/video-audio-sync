@@ -1,0 +1,9 @@
+:root {
+  --css-applied: true;
+  --blue: #229dff;
+  --red: #dc3545;
+  --grey-leia: #e9ecef;
+  --grey-luke: #adb5bd;
+  --spacing: 15px;
+  --pulsate-animation: Pulsate 2s infinite ease-in-out;
+}

@@ -1,0 +1,52 @@
+.Layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.Layout-videoWrapper {
+  position: relative;
+  flex: 1;
+  background-color: black;
+}
+
+.Layout-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.Layout-videoMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15em;
+  max-width: calc(100% - 2 * var(--spacing));
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 4vmin;
+}
+
+.Layout-videoMessage--short {
+  width: auto;
+  text-align: center;
+}
+
+.Layout-controls {
+  padding: var(--spacing);
+}
+
+.Layout-controls > * + * {
+  margin-top: var(--spacing);
+}
+
+.Layout-videoMessageBefore {
+  margin-bottom: 1em;
+  font-size: 0.8em;
+}
+
+.Layout-videoMessageAfter {
+  margin-top: 1em;
+  font-size: 0.8em;
+}

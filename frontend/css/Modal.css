@@ -1,0 +1,79 @@
+.Modal {
+  position: fixed;
+  z-index: 8000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.Modal-backdrop {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.Modal-content {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 500px;
+  max-width: calc(100% - 2 * var(--spacing));
+  transform: translate(-50%, -50%);
+  background-color: white;
+}
+
+.Modal-contentInner {
+  padding: 30px;
+}
+
+.Modal-contentInner p + p {
+  margin-top: 0.25em;
+}
+
+.Modal-contentInner > * + *,
+.Modal-contentInner > p + p,
+.Modal-contentInner li + li {
+  margin-top: 0.625em;
+}
+
+.Modal-buttons {
+  display: flex;
+}
+
+.Modal-button {
+  flex: 1;
+  margin: 0;
+  padding: 15px 30px;
+  border: none;
+  border-top: 1px solid transparent;
+  background: none;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.Modal-button:hover,
+.Modal-button:focus,
+.Modal-button:active {
+  --color: rgba(0, 0, 0, 0.1);
+
+  outline: none;
+  background-image: linear-gradient(to bottom, var(--color), var(--color));
+}
+
+.Modal-button:nth-child(1) {
+  border-top-color: var(--grey-luke);
+  background-color: var(--blue);
+  background-color: white;
+  color: black;
+}
+
+.Modal-button:nth-child(2) {
+  background-color: var(--red);
+  color: white;
+}

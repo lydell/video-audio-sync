@@ -1,0 +1,9 @@
+.LinkButton {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+}
