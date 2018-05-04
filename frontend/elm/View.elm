@@ -20,6 +20,8 @@ import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
 import View.Modal as Modal
+import View.Modals.ConfirmOpenPoints as ConfirmOpenPointsModal
+import View.Modals.ConfirmRemoveAllPoints as ConfirmRemoveAllPointsModal
 import View.Modals.Errors as ErrorsModal
 import View.Modals.Help as HelpModal
 import View.Modals.PointsWarnings as PointsWarningsModal
@@ -793,28 +795,19 @@ viewModals model =
           else
             none
         , if model.confirmRemoveAllPointsModalOpen then
-            Modal.confirm
-                { cancel = ( CloseRemoveAllPoints, "No, keep them!" )
-                , confirm = ( RemoveAllPoints, "Yes, remove them!" )
+            ConfirmRemoveAllPointsModal.view
+                { cancel = CloseRemoveAllPoints
+                , confirm = RemoveAllPoints
                 }
-                [ p [] [ text "This removes all points you have added." ]
-                , p [] [ strong [] [ text "Are you sure?" ] ]
-                ]
           else
             none
         , case model.confirmOpenPoints of
             Just { name, points } ->
-                Modal.confirm
-                    { cancel = ( CloseOpenPoints, "No, keep my current points!" )
-                    , confirm = ( OpenConfirmedPoints points, "Yes, replace them!" )
+                ConfirmOpenPointsModal.view
+                    { cancel = CloseOpenPoints
+                    , confirm = OpenConfirmedPoints points
+                    , name = name
                     }
-                    [ p []
-                        [ text "This replaces all points you have added with the ones in "
-                        , code [] [ text name ]
-                        , text "."
-                        ]
-                    , p [] [ strong [] [ text "Are you sure?" ] ]
-                    ]
 
             Nothing ->
                 none
