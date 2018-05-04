@@ -2,8 +2,8 @@ port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subs
 
 import Data.Area exposing (Area, areaDecoder)
 import Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, invalidFileDecoder, openedFileDecoder)
-import Data.KeyboardShortcuts exposing (KeyboardShortcuts, encodeKeyboardShortcuts)
 import Data.KeydownDetails exposing (KeydownDetails, keydownDetailsDecoder)
+import Data.StateSyncModel exposing (StateSyncModel, encodeStateSyncModel)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
@@ -45,13 +45,6 @@ type IncomingMessage
     | DragEnter
     | DragLeave
     | Keydown KeydownDetails
-
-
-type alias StateSyncModel =
-    { keyboardShortcuts : KeyboardShortcuts
-    , editingKeyboardShortcuts : Bool
-    , warnOnClose : Maybe String
-    }
 
 
 encode : OutgoingMessage -> TaggedData
@@ -118,23 +111,7 @@ encode outgoingMessage =
 
         StateSync model ->
             { tag = "StateSync"
-            , data =
-                Encode.object
-                    [ ( "keyboardShortcuts"
-                      , encodeKeyboardShortcuts model.keyboardShortcuts
-                      )
-                    , ( "editingKeyboardShortcuts"
-                      , Encode.bool model.editingKeyboardShortcuts
-                      )
-                    , ( "warnOnClose"
-                      , case model.warnOnClose of
-                            Just message ->
-                                Encode.string message
-
-                            Nothing ->
-                                Encode.null
-                      )
-                    ]
+            , data = encodeStateSyncModel model
             }
 
 
