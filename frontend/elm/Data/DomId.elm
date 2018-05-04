@@ -1,4 +1,4 @@
-module DomId exposing (DomId(..), decoder, encode, toHtml)
+module Data.DomId exposing (DomId(..), decoder, encode, toHtml)
 
 import Html
 import Html.Attributes

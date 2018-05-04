@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Buttons
 import Data.Area as Area
+import Data.DomId as DomId exposing (DomId)
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
@@ -9,7 +10,6 @@ import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Data.StateSyncModel as StateSyncModel
 import Dict
-import DomId exposing (DomId)
 import Html
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode

@@ -1,12 +1,12 @@
 module View exposing (view)
 
 import Buttons exposing (JumpAction)
+import Data.DomId as DomId
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWithState)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
-import DomId
 import Html exposing (Attribute, Html, a, audio, button, code, div, h1, kbd, li, p, pre, strong, text, ul, video)
 import Html.Attributes exposing (class, classList, disabled, href, src, style, type_, width)
 import Html.Attributes.Custom exposing (muted)

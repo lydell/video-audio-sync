@@ -1,10 +1,10 @@
 port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
 import Data.Area as Area exposing (Area)
+import Data.DomId as DomId exposing (DomId)
 import Data.File as File exposing (ErroredFileDetails, File, FileType, InvalidFileDetails, OpenedFileDetails)
 import Data.KeydownDetails as KeydownDetails exposing (KeydownDetails)
 import Data.StateSyncModel as StateSyncModel exposing (StateSyncModel)
-import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
