@@ -1,10 +1,10 @@
 module Buttons exposing (ButtonId(..), JumpAction, defaultKeyboardShortCuts, jumpActionsBackward, jumpActionsForward, shortcutsFromId, toString)
 
 import Data.KeyboardShortcuts exposing (KeyboardShortcuts)
+import Data.Model exposing (MediaPlayerId(Audio, Video))
 import Data.Point exposing (Direction(Backward, Forward))
 import Dict
 import Time exposing (Time)
-import Types exposing (MediaPlayerId(Audio, Video))
 
 
 type ButtonId

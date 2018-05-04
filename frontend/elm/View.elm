@@ -4,6 +4,7 @@ import Buttons exposing (JumpAction)
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWithState)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
+import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import DomId
 import Html exposing (Attribute, Html, a, audio, button, code, div, h1, kbd, li, p, pre, strong, text, ul, video)
@@ -16,7 +17,6 @@ import Json.Decode as Decode exposing (Decoder)
 import ModelUtils
 import Svg
 import Svg.Attributes as Svg
-import Types exposing (..)
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)

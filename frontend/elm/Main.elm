@@ -5,6 +5,7 @@ import Data.Area as Area
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
+import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Data.StateSyncModel as StateSyncModel
 import Dict
@@ -18,7 +19,6 @@ import Mouse
 import Ports
 import Task
 import Time exposing (Time)
-import Types exposing (..)
 import Utils
 import View
 import Window

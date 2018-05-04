@@ -1,4 +1,4 @@
-module Types exposing (..)
+module Data.Model exposing (..)
 
 import Data.Area exposing (Area)
 import Data.File exposing (ErroredFileDetails, InvalidFileDetails, OpenedFileDetails)
