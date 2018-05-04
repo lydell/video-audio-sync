@@ -113,3 +113,22 @@ precision maxNumDecimals float =
 
         _ ->
             string
+
+
+humanList : String -> List String -> String
+humanList joinWord strings =
+    case List.reverse strings of
+        [] ->
+            ""
+
+        [ string ] ->
+            string
+
+        last :: rest ->
+            let
+                start =
+                    rest
+                        |> List.reverse
+                        |> String.join ", "
+            in
+            start ++ " " ++ joinWord ++ " " ++ last

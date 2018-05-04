@@ -901,7 +901,8 @@ viewError error =
                             "nothing"
 
                         _ ->
-                            humanList "or" (List.map File.fileTypeToHumanString expectedFileTypes)
+                            Utils.humanList "or"
+                                (List.map File.fileTypeToHumanString expectedFileTypes)
             in
             p []
                 [ code [] [ text name ]
@@ -971,22 +972,3 @@ toPoints coords =
     coords
         |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
         |> String.join " "
-
-
-humanList : String -> List String -> String
-humanList joinWord strings =
-    case List.reverse strings of
-        [] ->
-            ""
-
-        [ string ] ->
-            string
-
-        last :: rest ->
-            let
-                start =
-                    rest
-                        |> List.reverse
-                        |> String.join ", "
-            in
-            start ++ " " ++ joinWord ++ " " ++ last
