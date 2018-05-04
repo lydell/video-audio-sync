@@ -3,11 +3,20 @@ module Utils exposing (..)
 import Time exposing (Time)
 
 
-formatDuration : Time -> String
-formatDuration duration =
+type alias PartionedTime =
+    { hours : Int
+    , minutes : Int
+    , seconds : Int
+    , milliseconds : Int
+    , rest : Float
+    }
+
+
+partitionTime : Time -> PartionedTime
+partitionTime time =
     let
         ( hours, hoursRest ) =
-            divRem duration Time.hour
+            divRem time Time.hour
 
         ( minutes, minutesRest ) =
             divRem hoursRest Time.minute
@@ -15,8 +24,22 @@ formatDuration duration =
         ( seconds, secondsRest ) =
             divRem minutesRest Time.second
 
-        ( milliseconds, _ ) =
+        ( milliseconds, rest ) =
             divRem secondsRest Time.millisecond
+    in
+    { hours = hours
+    , minutes = minutes
+    , seconds = seconds
+    , milliseconds = milliseconds
+    , rest = rest
+    }
+
+
+formatDuration : Time -> String
+formatDuration duration =
+    let
+        { hours, minutes, seconds, milliseconds } =
+            partitionTime duration
 
         pad number numChars =
             String.padLeft numChars '0' (toString number)
@@ -28,6 +51,36 @@ formatDuration duration =
         ++ pad seconds 2
         ++ "."
         ++ pad milliseconds 3
+
+
+formatTime : Time -> String
+formatTime time =
+    let
+        { hours, minutes, seconds, milliseconds } =
+            partitionTime time
+
+        segments =
+            [ ( hours, "hour" )
+            , ( minutes, "minute" )
+            , ( seconds, "second" )
+            , ( milliseconds, "millisecond" )
+            ]
+
+        formatSegment ( quantity, name ) =
+            toString quantity ++ " " ++ name ++ pluralize quantity
+    in
+    segments
+        |> List.filter (\( quantity, _ ) -> quantity > 0)
+        |> List.map formatSegment
+        |> humanList "and"
+
+
+pluralize : Int -> String
+pluralize number =
+    if number == 1 then
+        ""
+    else
+        "s"
 
 
 divRem : Float -> Float -> ( Int, Float )

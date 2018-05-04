@@ -24,11 +24,6 @@ import View
 import Window
 
 
-loopRadius : Time
-loopRadius =
-    3 * Time.second
-
-
 main : Program Flags Model Msg
 main =
     Html.programWithFlags
@@ -832,10 +827,10 @@ updateCurrentTime id currentTime model =
                 Looping ({ audioTime, videoTime, restarting } as loopDetails) ->
                     let
                         startMovement =
-                            min loopRadius (min audioTime videoTime)
+                            min ModelUtils.loopRadius (min audioTime videoTime)
 
                         endMovement =
-                            min loopRadius <|
+                            min ModelUtils.loopRadius <|
                                 min
                                     (model.audio.duration - audioTime)
                                     (model.video.duration - videoTime)

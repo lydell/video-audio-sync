@@ -2,7 +2,14 @@ module View.Modals.Help exposing (view)
 
 import Html exposing (Html, a, h1, li, p, strong, text, ul)
 import Html.Attributes exposing (href)
+import ModelUtils
+import Utils
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
+
+
+loopRadius : String
+loopRadius =
+    Utils.formatTime ModelUtils.loopRadius
 
 
 view : List (Html msg)
@@ -22,7 +29,7 @@ view =
         , li [] [ text "Closeups of people talking." ]
         ]
     , p [] [ text "When you’ve found a good spot, ", icon "pause", text " pause the video and find roughly the corresponding audio spot." ]
-    , p [] [ text "Now press the ", icon "sync-alt", text " Loop button. It will loop around your spot, from 3 seconds before to 3 seconds after." ]
+    , p [] [ text "Now press the ", icon "sync-alt", text <| " Loop button. It will loop around your spot, from " ++ loopRadius ++ " before to " ++ loopRadius ++ " after." ]
     , p [] [ text "While looping, tweak the video and audio positions using the more fine-grained time controls, until the audio and video are in sync in that little segment." ]
     , p [] [ text "When satisfied, press the ", icon "plus", text " Plus button to save the point." ]
     , p [] [ text "Then repeat for as many points you want. You can use the ", icon "step-backward", icon "step-forward", text " Jump buttons to go back to earlier points if you made a mistake. Points can be ", icon "minus", text " removed and ", icon "plus", text " replaced with new ones." ]
