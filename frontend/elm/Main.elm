@@ -148,24 +148,32 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp ->
-            ( model, Cmd.none )
+            ( model
+            , Cmd.none
+            )
 
         JsMessage (Ok incomingMessage) ->
             case incomingMessage of
                 Ports.AreaMeasurement id area ->
                     case id of
                         DomId.VideoArea ->
-                            ( { model | videoArea = area }, Cmd.none )
+                            ( { model | videoArea = area }
+                            , Cmd.none
+                            )
 
                         DomId.GraphicsArea ->
-                            ( { model | controlsArea = area }, Cmd.none )
+                            ( { model | controlsArea = area }
+                            , Cmd.none
+                            )
 
                         _ ->
                             let
                                 _ =
                                     Debug.log "unexpected AreaMeasurement" id
                             in
-                            ( model, Cmd.none )
+                            ( model
+                            , Cmd.none
+                            )
 
                 Ports.OpenedFile { name, fileType, content } ->
                     let
@@ -223,19 +231,29 @@ update msg model =
                                                 )
                                                 model
                     in
-                    ( newModel, Cmd.none )
+                    ( newModel
+                    , Cmd.none
+                    )
 
                 Ports.InvalidFile details ->
-                    ( addError (Error.InvalidFile details) model, Cmd.none )
+                    ( addError (Error.InvalidFile details) model
+                    , Cmd.none
+                    )
 
                 Ports.ErroredFile details ->
-                    ( addError (Error.ErroredFile details) model, Cmd.none )
+                    ( addError (Error.ErroredFile details) model
+                    , Cmd.none
+                    )
 
                 Ports.DragEnter ->
-                    ( { model | isDraggingFile = True }, Cmd.none )
+                    ( { model | isDraggingFile = True }
+                    , Cmd.none
+                    )
 
                 Ports.DragLeave ->
-                    ( { model | isDraggingFile = False }, Cmd.none )
+                    ( { model | isDraggingFile = False }
+                    , Cmd.none
+                    )
 
                 Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
                     let
@@ -263,7 +281,9 @@ update msg model =
                             )
 
                         "Tab" ->
-                            ( model, Cmd.none )
+                            ( model
+                            , Cmd.none
+                            )
 
                         _ ->
                             case model.editKeyboardShortcuts of
@@ -333,7 +353,9 @@ update msg model =
                 _ =
                     Debug.log "incomingMessage error" message
             in
-            ( model, Cmd.none )
+            ( model
+            , Cmd.none
+            )
 
         MediaErrorMsg id ->
             let
@@ -449,14 +471,18 @@ update msg model =
             )
 
         AddPoint point ->
-            ( { model | points = point :: model.points }, Cmd.none )
+            ( { model | points = point :: model.points }
+            , Cmd.none
+            )
 
         RemovePoint point ->
             let
                 newPoints =
                     List.filter ((/=) point) model.points
             in
-            ( { model | points = newPoints }, Cmd.none )
+            ( { model | points = newPoints }
+            , Cmd.none
+            )
 
         RemoveAllPoints ->
             ( { model | points = [], confirmRemoveAllPointsModalOpen = False }
@@ -464,10 +490,14 @@ update msg model =
             )
 
         ConfirmRemoveAllPoints ->
-            ( { model | confirmRemoveAllPointsModalOpen = True }, Cmd.none )
+            ( { model | confirmRemoveAllPointsModalOpen = True }
+            , Cmd.none
+            )
 
         CloseRemoveAllPoints ->
-            ( { model | confirmRemoveAllPointsModalOpen = False }, Cmd.none )
+            ( { model | confirmRemoveAllPointsModalOpen = False }
+            , Cmd.none
+            )
 
         Save ->
             let
@@ -511,7 +541,9 @@ update msg model =
             )
 
         CloseOpenPoints ->
-            ( { model | confirmOpenPoints = Nothing }, Cmd.none )
+            ( { model | confirmOpenPoints = Nothing }
+            , Cmd.none
+            )
 
         OpenMultiple ->
             ( model
@@ -519,13 +551,19 @@ update msg model =
             )
 
         CloseErrorsModal ->
-            ( { model | errors = [] }, Cmd.none )
+            ( { model | errors = [] }
+            , Cmd.none
+            )
 
         OpenPointsWarningsModal ->
-            ( { model | pointsWarningsModalOpen = True }, Cmd.none )
+            ( { model | pointsWarningsModalOpen = True }
+            , Cmd.none
+            )
 
         ClosePointsWarningsModal ->
-            ( { model | pointsWarningsModalOpen = False }, Cmd.none )
+            ( { model | pointsWarningsModalOpen = False }
+            , Cmd.none
+            )
 
         ToggleShowKeyboardShortcuts ->
             ( { model | showKeyboardShortcuts = not model.showKeyboardShortcuts }
