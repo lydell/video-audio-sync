@@ -543,6 +543,7 @@ updateIncoming msg model =
                         | pointsWarningsModalOpen = False
                         , confirmRemoveAllPointsModalOpen = False
                         , confirmOpenPoints = Nothing
+                        , errors = []
                         , showKeyboardShortcuts = False
                         , editKeyboardShortcuts = NotEditing
                         , undoKeyboardShortcuts = Nothing
