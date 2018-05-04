@@ -3,10 +3,16 @@ module View.Modals.PointsWarnings exposing (view)
 import Data.Point as Point exposing (Point)
 import Html exposing (Html, li, p, strong, text, ul)
 import Utils
+import View.Modal as Modal
 
 
-view : List Point -> List (Html msg)
-view points =
+view : msg -> List Point -> Html msg
+view msg points =
+    Modal.alert msg (content points)
+
+
+content : List Point -> List (Html msg)
+content points =
     let
         warnings =
             Point.validate points

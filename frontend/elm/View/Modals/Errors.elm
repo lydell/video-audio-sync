@@ -4,10 +4,16 @@ import Data.Error as Error exposing (Error)
 import Data.File as File
 import Html exposing (Html, code, li, p, strong, text, ul)
 import Utils
+import View.Modal as Modal
 
 
-view : List Error -> List (Html msg)
-view errors =
+view : msg -> List Error -> Html msg
+view msg errors =
+    Modal.alert msg (content errors)
+
+
+content : List Error -> List (Html msg)
+content errors =
     [ p []
         [ strong []
             [ text <|

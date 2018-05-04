@@ -5,6 +5,12 @@ import Html.Attributes exposing (href)
 import ModelUtils
 import Utils
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
+import View.Modal as Modal
+
+
+view : msg -> Html msg
+view msg =
+    Modal.alert msg content
 
 
 loopRadius : String
@@ -12,8 +18,8 @@ loopRadius =
     Utils.formatTime ModelUtils.loopRadius
 
 
-view : List (Html msg)
-view =
+content : List (Html msg)
+content =
     [ h1 [] [ text "Video Audio Sync" ]
     , p [] [ text "Fix videos where the audio is out of sync, in much stranger ways than just a simple constant time shift." ]
     , p [] [ text "This tool lets you find points where the video and audio match, and save those points. Another tool then uses those points to speed up or slow down segments of the audio so that it syncs up with the video." ]

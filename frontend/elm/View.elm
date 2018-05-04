@@ -19,7 +19,6 @@ import Svg.Attributes as Svg
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
-import View.Modal as Modal
 import View.Modals.ConfirmOpenPoints as ConfirmOpenPointsModal
 import View.Modals.ConfirmRemoveAllPoints as ConfirmRemoveAllPointsModal
 import View.Modals.Errors as ErrorsModal
@@ -790,8 +789,7 @@ viewModals : Model -> Html Msg
 viewModals model =
     div []
         [ if model.pointsWarningsModalOpen then
-            Modal.alert ClosePointsWarningsModal
-                (PointsWarningsModal.view model.points)
+            PointsWarningsModal.view ClosePointsWarningsModal model.points
           else
             none
         , if model.confirmRemoveAllPointsModalOpen then
@@ -816,10 +814,9 @@ viewModals model =
                 none
 
             errors ->
-                Modal.alert CloseErrorsModal
-                    (ErrorsModal.view (List.reverse errors))
+                ErrorsModal.view CloseErrorsModal (List.reverse errors)
         , if model.helpModalOpen then
-            Modal.alert CloseHelpModal HelpModal.view
+            HelpModal.view CloseHelpModal
           else
             none
         ]
