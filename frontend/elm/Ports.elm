@@ -171,16 +171,19 @@ decoder tag =
                 |> Ok
 
         "DragEnter" ->
-            Ok <| Decode.succeed DragEnter
+            Decode.succeed DragEnter
+                |> Ok
 
         "DragLeave" ->
-            Ok <| Decode.succeed DragLeave
+            Decode.succeed DragLeave
+                |> Ok
 
         "Keydown" ->
-            Ok <| keydownDecoder
+            keydownDecoder
+                |> Ok
 
         _ ->
-            Err <| "Unknown message tag: " ++ tag
+            Err ("Unknown message tag: " ++ tag)
 
 
 send : OutgoingMessage -> Cmd msg
