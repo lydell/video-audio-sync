@@ -11,6 +11,12 @@ import Json.Encode as Encode
 import Time exposing (Time)
 
 
+port elmToJs : TaggedData -> Cmd msg
+
+
+port jsToElm : (TaggedData -> msg) -> Sub msg
+
+
 type alias TaggedData =
     { tag : String
     , data : Encode.Value
@@ -189,12 +195,6 @@ subscribe tagger =
             decoder tag
                 |> Result.andThen (flip Decode.decodeValue data)
                 |> tagger
-
-
-port elmToJs : TaggedData -> Cmd msg
-
-
-port jsToElm : (TaggedData -> msg) -> Sub msg
 
 
 encodeLoopMedia : DomId -> Time -> Encode.Value
