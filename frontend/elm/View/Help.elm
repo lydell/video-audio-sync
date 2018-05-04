@@ -1,12 +1,12 @@
-module View.Help exposing (help)
+module View.Help exposing (view)
 
 import Html exposing (Html, a, h1, li, p, strong, text, ul)
 import Html.Attributes exposing (href)
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
 
 
-help : List (Html msg)
-help =
+view : List (Html msg)
+view =
     [ h1 [] [ text "Video Audio Sync" ]
     , p [] [ text "Fix videos where the audio is out of sync, in much stranger ways than just a simple constant time shift." ]
     , p [] [ text "This tool lets you find points where the video and audio match, and save those points. Another tool then uses those points to speed up or slow down segments of the audio so that it syncs up with the video." ]

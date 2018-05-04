@@ -20,8 +20,8 @@ import Types exposing (..)
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
-import View.Help exposing (help)
-import View.Modal exposing (alertModal, confirmModal)
+import View.Help as Help
+import View.Modal as Modal
 
 
 progressBarHeight : Float
@@ -791,7 +791,7 @@ viewModals model =
                 warnings =
                     Point.validate model.points
             in
-            alertModal ClosePointsWarningsModal
+            Modal.alert ClosePointsWarningsModal
                 [ p []
                     [ strong [] [ text "There are problems with your points." ]
                     ]
@@ -836,7 +836,7 @@ viewModals model =
           else
             none
         , if model.confirmRemoveAllPointsModalOpen then
-            confirmModal
+            Modal.confirm
                 { cancel = ( CloseRemoveAllPoints, "No, keep them!" )
                 , confirm = ( RemoveAllPoints, "Yes, remove them!" )
                 }
@@ -847,7 +847,7 @@ viewModals model =
             none
         , case model.confirmOpenPoints of
             Just { name, points } ->
-                confirmModal
+                Modal.confirm
                     { cancel = ( CloseOpenPoints, "No, keep my current points!" )
                     , confirm = ( OpenConfirmedPoints points, "Yes, replace them!" )
                     }
@@ -866,7 +866,7 @@ viewModals model =
                 none
 
             errors ->
-                alertModal CloseErrorModal
+                Modal.alert CloseErrorModal
                     [ p []
                         [ strong []
                             [ text <|
@@ -884,7 +884,7 @@ viewModals model =
                         )
                     ]
         , if model.helpModalOpen then
-            alertModal CloseHelpModal help
+            Modal.alert CloseHelpModal Help.view
           else
             none
         ]

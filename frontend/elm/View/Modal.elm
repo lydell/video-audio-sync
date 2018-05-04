@@ -1,4 +1,4 @@
-module View.Modal exposing (alertModal, confirmModal)
+module View.Modal exposing (alert, confirm)
 
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, type_)
@@ -24,8 +24,8 @@ modalButton msg label =
         ]
 
 
-alertModal : msg -> List (Html msg) -> Html msg
-alertModal msg children =
+alert : msg -> List (Html msg) -> Html msg
+alert msg children =
     modal
         msg
         [ modalButton msg "Close"
@@ -33,11 +33,11 @@ alertModal msg children =
         children
 
 
-confirmModal :
+confirm :
     { cancel : ( msg, String ), confirm : ( msg, String ) }
     -> List (Html msg)
     -> Html msg
-confirmModal { cancel, confirm } children =
+confirm { cancel, confirm } children =
     modal
         (Tuple.first cancel)
         [ uncurry modalButton cancel
