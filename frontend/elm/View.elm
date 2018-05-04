@@ -2,9 +2,9 @@ module View exposing (view)
 
 import Buttons exposing (JumpAction)
 import Data.File as File
+import Data.KeyboardShortcuts as KeyboardShortcuts
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Point as Point exposing (Direction(Backward, Forward))
-import Dict
 import DomId
 import Html exposing (Attribute, Html, a, audio, button, code, div, h1, kbd, li, p, pre, strong, text, ul, video)
 import Html.Attributes exposing (class, classList, disabled, href, src, style, type_, width)
@@ -204,7 +204,7 @@ viewControls model =
                 , highlighted = highlighted
                 }
             else
-                { keyboardShortcuts = Dict.empty
+                { keyboardShortcuts = KeyboardShortcuts.empty
                 , highlighted = []
                 }
     in

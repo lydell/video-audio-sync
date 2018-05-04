@@ -1,4 +1,4 @@
-module Data.KeyboardShortcuts exposing (KeyboardShortcuts, encodeKeyboardShortcuts, keyboardShortcutsDecoder, updateKeyboardShortcuts)
+module Data.KeyboardShortcuts exposing (KeyboardShortcuts, decoder, empty, encode, update)
 
 import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
@@ -9,20 +9,25 @@ type alias KeyboardShortcuts =
     Dict String String
 
 
-keyboardShortcutsDecoder : Decoder KeyboardShortcuts
-keyboardShortcutsDecoder =
+empty : KeyboardShortcuts
+empty =
+    Dict.empty
+
+
+decoder : Decoder KeyboardShortcuts
+decoder =
     Decode.dict Decode.string
 
 
-encodeKeyboardShortcuts : KeyboardShortcuts -> Encode.Value
-encodeKeyboardShortcuts =
+encode : KeyboardShortcuts -> Encode.Value
+encode =
     Dict.map (always Encode.string)
         >> Dict.toList
         >> Encode.object
 
 
-updateKeyboardShortcuts : String -> String -> KeyboardShortcuts -> KeyboardShortcuts
-updateKeyboardShortcuts firstKey secondKey keyboardShortcuts =
+update : String -> String -> KeyboardShortcuts -> KeyboardShortcuts
+update firstKey secondKey keyboardShortcuts =
     let
         firstKeyShortcut =
             Dict.get firstKey keyboardShortcuts

@@ -1,4 +1,4 @@
-module Data.Area exposing (Area, areaDecoder, emptyArea)
+module Data.Area exposing (Area, decoder, empty)
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -11,8 +11,8 @@ type alias Area =
     }
 
 
-emptyArea : Area
-emptyArea =
+empty : Area
+empty =
     { width = 0
     , height = 0
     , x = 0
@@ -20,8 +20,8 @@ emptyArea =
     }
 
 
-areaDecoder : Decoder Area
-areaDecoder =
+decoder : Decoder Area
+decoder =
     Decode.map4 Area
         (Decode.field "width" Decode.float)
         (Decode.field "height" Decode.float)

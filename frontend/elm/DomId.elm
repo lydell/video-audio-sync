@@ -1,4 +1,4 @@
-module DomId exposing (DomId(..), decode, encode, toHtml)
+module DomId exposing (DomId(..), decoder, encode, toHtml)
 
 import Html
 import Html.Attributes
@@ -19,8 +19,8 @@ toHtml id =
     Html.Attributes.id (toString id)
 
 
-decode : Decoder DomId
-decode =
+decoder : Decoder DomId
+decoder =
     Decode.string
         |> Decode.andThen
             (fromString >> Json.Decode.Custom.fromResult)

@@ -1,11 +1,12 @@
 module Main exposing (..)
 
 import Buttons
-import Data.Area exposing (emptyArea)
+import Data.Area as Area
 import Data.File as File
-import Data.KeyboardShortcuts exposing (keyboardShortcutsDecoder, updateKeyboardShortcuts)
+import Data.KeyboardShortcuts as KeyboardShortcuts
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
 import Data.Point as Point exposing (Direction(Backward, Forward))
+import Data.StateSyncModel as StateSyncModel
 import Dict
 import DomId exposing (DomId)
 import Html
@@ -60,7 +61,7 @@ init flags =
                     empty
 
         keyboardShortcutsResult =
-            Decode.decodeValue (Decode.nullable keyboardShortcutsDecoder)
+            Decode.decodeValue (Decode.nullable KeyboardShortcuts.decoder)
                 flags.keyboardShortcuts
 
         keyboardShortcuts =
@@ -78,13 +79,16 @@ init flags =
                                 { message = message, data = flags.keyboardShortcuts }
                     in
                     Buttons.defaultKeyboardShortCuts
+
+        emptyStateSyncModel =
+            StateSyncModel.empty
     in
     ( { audio = withLocalName flags.audio
       , video = withLocalName flags.video
       , loopState = Normal
       , drag = NoDrag
-      , videoArea = emptyArea
-      , controlsArea = emptyArea
+      , videoArea = Area.empty
+      , controlsArea = Area.empty
       , windowSize = { width = 0, height = 0 }
       , points = []
       , pointsWarningsModalOpen = False
@@ -102,10 +106,7 @@ init flags =
         [ Task.perform WindowSize Window.size
         , Ports.send
             (Ports.StateSync
-                { keyboardShortcuts = keyboardShortcuts
-                , editingKeyboardShortcuts = False
-                , warnOnClose = Nothing
-                }
+                { emptyStateSyncModel | keyboardShortcuts = keyboardShortcuts }
             )
         ]
     )
@@ -315,7 +316,7 @@ update msg model =
                                     if String.length key == 1 then
                                         let
                                             keyboardShortcuts =
-                                                updateKeyboardShortcuts
+                                                KeyboardShortcuts.update
                                                     firstKey
                                                     key
                                                     model.keyboardShortcuts

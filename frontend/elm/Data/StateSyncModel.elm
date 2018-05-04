@@ -1,6 +1,6 @@
-module Data.StateSyncModel exposing (StateSyncModel, encodeStateSyncModel)
+module Data.StateSyncModel exposing (StateSyncModel, empty, encode)
 
-import Data.KeyboardShortcuts exposing (KeyboardShortcuts, encodeKeyboardShortcuts)
+import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcuts)
 import Json.Encode as Encode
 
 
@@ -11,11 +11,19 @@ type alias StateSyncModel =
     }
 
 
-encodeStateSyncModel : StateSyncModel -> Encode.Value
-encodeStateSyncModel model =
+empty : StateSyncModel
+empty =
+    { keyboardShortcuts = KeyboardShortcuts.empty
+    , editingKeyboardShortcuts = False
+    , warnOnClose = Nothing
+    }
+
+
+encode : StateSyncModel -> Encode.Value
+encode model =
     Encode.object
         [ ( "keyboardShortcuts"
-          , encodeKeyboardShortcuts model.keyboardShortcuts
+          , KeyboardShortcuts.encode model.keyboardShortcuts
           )
         , ( "editingKeyboardShortcuts"
           , Encode.bool model.editingKeyboardShortcuts

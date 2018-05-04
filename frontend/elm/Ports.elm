@@ -1,9 +1,9 @@
 port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
-import Data.Area exposing (Area, areaDecoder)
-import Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, invalidFileDecoder, openedFileDecoder)
-import Data.KeydownDetails exposing (KeydownDetails, keydownDetailsDecoder)
-import Data.StateSyncModel exposing (StateSyncModel, encodeStateSyncModel)
+import Data.Area as Area exposing (Area)
+import Data.File as File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails)
+import Data.KeydownDetails as KeydownDetails exposing (KeydownDetails)
+import Data.StateSyncModel as StateSyncModel exposing (StateSyncModel)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
@@ -90,7 +90,7 @@ encode outgoingMessage =
             { tag = "OpenFile"
             , data =
                 Encode.object
-                    [ ( "fileType", encodeFileType fileType )
+                    [ ( "fileType", File.encodeFileType fileType )
                     ]
             }
 
@@ -110,7 +110,7 @@ encode outgoingMessage =
 
         StateSync model ->
             { tag = "StateSync"
-            , data = encodeStateSyncModel model
+            , data = StateSyncModel.encode model
             }
 
 
@@ -121,17 +121,17 @@ decoder tag =
             Ok areaMeasurementDecoder
 
         "OpenedFile" ->
-            openedFileDecoder
+            File.openedFileDecoder
                 |> Decode.map OpenedFile
                 |> Ok
 
         "InvalidFile" ->
-            invalidFileDecoder
+            File.invalidFileDecoder
                 |> Decode.map InvalidFile
                 |> Ok
 
         "ErroredFile" ->
-            erroredFileDecoder
+            File.erroredFileDecoder
                 |> Decode.map ErroredFile
                 |> Ok
 
@@ -144,7 +144,7 @@ decoder tag =
                 |> Ok
 
         "Keydown" ->
-            keydownDetailsDecoder
+            KeydownDetails.decoder
                 |> Decode.map Keydown
                 |> Ok
 
@@ -191,5 +191,5 @@ encodeMouseButton mouseButton =
 areaMeasurementDecoder : Decoder IncomingMessage
 areaMeasurementDecoder =
     Decode.map2 AreaMeasurement
-        (Decode.field "id" DomId.decode)
-        (Decode.field "area" areaDecoder)
+        (Decode.field "id" DomId.decoder)
+        (Decode.field "area" Area.decoder)
