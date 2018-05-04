@@ -3,6 +3,7 @@ port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subs
 import Data.Area exposing (Area, areaDecoder)
 import Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, invalidFileDecoder, openedFileDecoder)
 import Data.KeyboardShortcuts exposing (KeyboardShortcuts, encodeKeyboardShortcuts)
+import Data.KeydownDetails exposing (KeydownDetails, keydownDetailsDecoder)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
@@ -44,15 +45,6 @@ type IncomingMessage
     | DragEnter
     | DragLeave
     | Keydown KeydownDetails
-
-
-type alias KeydownDetails =
-    { key : String
-    , altKey : Bool
-    , ctrlKey : Bool
-    , metaKey : Bool
-    , shiftKey : Bool
-    }
 
 
 type alias StateSyncModel =
@@ -176,7 +168,8 @@ decoder tag =
                 |> Ok
 
         "Keydown" ->
-            keydownDecoder
+            keydownDetailsDecoder
+                |> Decode.map Keydown
                 |> Ok
 
         _ ->
@@ -231,14 +224,3 @@ domIdDecoder =
     Decode.string
         |> Decode.andThen
             (DomId.fromString >> Json.Decode.Custom.fromResult)
-
-
-keydownDecoder : Decoder IncomingMessage
-keydownDecoder =
-    Decode.map5 KeydownDetails
-        (Decode.field "key" Decode.string)
-        (Decode.field "altKey" Decode.bool)
-        (Decode.field "ctrlKey" Decode.bool)
-        (Decode.field "metaKey" Decode.bool)
-        (Decode.field "shiftKey" Decode.bool)
-        |> Decode.map Keydown
