@@ -1,6 +1,6 @@
 module Data.Error exposing (Error(..))
 
-import Data.File exposing (ErroredFileDetails, InvalidFileDetails, OpenedFileDetails)
+import Data.File exposing (ErroredFileDetails, InvalidFileDetails)
 
 
 type Error

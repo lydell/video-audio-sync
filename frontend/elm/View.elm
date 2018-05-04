@@ -6,44 +6,23 @@ import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWi
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
-import Html exposing (Attribute, Html, audio, button, code, div, kbd, p, strong, text, video)
-import Html.Attributes exposing (class, classList, disabled, src, style, type_)
+import Html exposing (Attribute, Html, audio, button, div, kbd, p, text, video)
+import Html.Attributes exposing (class, classList, disabled, src, type_, width)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
-import Html.Events.Custom exposing (MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
+import Html.Events.Custom exposing (onAudioMetaData, onClickWithButton, onError, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import ModelUtils
-import Svg
-import Svg.Attributes as Svg
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
+import View.Graphics as Graphics
 import View.Modals.ConfirmOpenPoints as ConfirmOpenPointsModal
 import View.Modals.ConfirmRemoveAllPoints as ConfirmRemoveAllPointsModal
 import View.Modals.Errors as ErrorsModal
 import View.Modals.Help as HelpModal
 import View.Modals.PointsWarnings as PointsWarningsModal
-
-
-progressBarHeight : Float
-progressBarHeight =
-    10
-
-
-progressBarSpacing : Float
-progressBarSpacing =
-    15
-
-
-progressBarMouseAreaExtra : Float
-progressBarMouseAreaExtra =
-    progressBarSpacing - 4
-
-
-svgHeight : Float
-svgHeight =
-    (progressBarHeight * 2) + progressBarSpacing
 
 
 view : Model -> Html Msg
@@ -90,7 +69,7 @@ viewMedia model =
                     Just url ->
                         video
                             ([ src url
-                             , Html.Attributes.width (truncate clampedWidth)
+                             , width (truncate clampedWidth)
                              , muted True
                              , onError (MediaErrorMsg Video)
                              , onVideoMetaData (MetaData Video)
@@ -222,7 +201,7 @@ viewControls model =
             model.loopState
             shownKeyboardShortcuts
             model.editKeyboardShortcuts
-        , viewGraphics model
+        , Graphics.view model
         , mediaPlayerToolbar Audio
             model.audio
             model.loopState
@@ -230,183 +209,6 @@ viewControls model =
             model.editKeyboardShortcuts
         , generalToolbar model shownKeyboardShortcuts
         ]
-
-
-viewGraphics : Model -> Html Msg
-viewGraphics model =
-    let
-        svgWidth =
-            model.controlsArea.width
-
-        viewBoxString =
-            [ 0, 0, svgWidth, svgHeight ]
-                |> List.map toString
-                |> String.join " "
-
-        progressBarX =
-            0
-
-        maxProgressBarWidth =
-            max 1 svgWidth
-
-        longestDuration =
-            max model.video.duration model.audio.duration
-
-        scale =
-            longestDuration / maxProgressBarWidth
-
-        toScale number =
-            if scale == 0 then
-                0
-            else
-                number / scale
-
-        videoY =
-            0
-
-        audioY =
-            videoY + progressBarHeight + progressBarSpacing
-
-        ( audioCurrentTime, videoCurrentTime ) =
-            ModelUtils.getCurrentTimes model
-
-        videoProgressBarDetails =
-            { maxValue = toScale model.video.duration
-            , currentValue = toScale videoCurrentTime
-            , x = progressBarX
-            , y = videoY
-            , onDragStart = DragStart Video
-            }
-
-        audioProgressBarDetails =
-            { maxValue = toScale model.audio.duration
-            , currentValue = toScale audioCurrentTime
-            , x = progressBarX
-            , y = audioY
-            , onDragStart = DragStart Audio
-            }
-
-        points =
-            model.points
-                |> List.filter
-                    (\{ audioTime, videoTime } ->
-                        (audioTime >= 0 && audioTime <= model.audio.duration)
-                            && (videoTime >= 0 && videoTime <= model.video.duration)
-                    )
-                |> List.map
-                    (\{ audioTime, videoTime } ->
-                        { x1 = toScale videoTime
-                        , x2 = toScale audioTime
-                        }
-                    )
-    in
-    div
-        [ DomId.toHtml DomId.GraphicsArea
-        , class "Graphics"
-        , style [ ( "height", toString svgHeight ++ "px" ) ]
-        ]
-        [ Svg.svg
-            [ Svg.viewBox viewBoxString
-            , Svg.class "Graphics-svg"
-            ]
-            [ progressBarBackground videoProgressBarDetails
-            , progressBarBackground audioProgressBarDetails
-            , Svg.g [] <|
-                List.map
-                    (\{ x1, x2 } ->
-                        Svg.polyline
-                            [ Svg.points
-                                (toPoints
-                                    [ ( x1, videoY )
-                                    , ( x1, videoY + progressBarHeight )
-                                    , ( x2, audioY )
-                                    , ( x2, audioY + progressBarHeight )
-                                    ]
-                                )
-                            , Svg.class "Point"
-                            ]
-                            []
-                    )
-                    points
-            , progressBarForeground videoProgressBarDetails
-            , progressBarForeground audioProgressBarDetails
-            ]
-        ]
-
-
-type alias ProgressBarDetails msg =
-    { maxValue : Float
-    , currentValue : Float
-    , x : Float
-    , y : Float
-    , onDragStart : DragBar -> MouseDownDetails -> msg
-    }
-
-
-progressBarBackground : ProgressBarDetails msg -> Html msg
-progressBarBackground { maxValue, currentValue, x, y } =
-    let
-        width =
-            maxValue
-
-        progressWidth =
-            currentValue
-    in
-    Svg.g [ Svg.class "ProgressBarBackground" ]
-        [ Svg.rect
-            [ Svg.x (toString x)
-            , Svg.y (toString y)
-            , Svg.width (toString width)
-            , Svg.height (toString progressBarHeight)
-            , Svg.class "ProgressBarBackground-background"
-            ]
-            []
-        , Svg.rect
-            [ Svg.x (toString x)
-            , Svg.y (toString y)
-            , Svg.width (toString progressWidth)
-            , Svg.height (toString progressBarHeight)
-            , Svg.class "ProgressBarBackground-progress"
-            ]
-            []
-        ]
-
-
-progressBarForeground : ProgressBarDetails msg -> Html msg
-progressBarForeground { maxValue, currentValue, x, y, onDragStart } =
-    let
-        width =
-            maxValue
-
-        progressWidth =
-            currentValue
-    in
-    if width <= 0 then
-        none
-    else
-        Svg.g [ Svg.class "ProgressBarForeground" ]
-            [ Svg.line
-                [ Svg.x1 (toString progressWidth)
-                , Svg.y1 (toString y)
-                , Svg.x2 (toString progressWidth)
-                , Svg.y2 (toString (y + progressBarHeight))
-                , Svg.class "ProgressBarForeground-current"
-                ]
-                []
-            , Svg.rect
-                [ Svg.x (toString x)
-                , Svg.y (toString (y - progressBarMouseAreaExtra / 2))
-                , Svg.width (toString width)
-                , Svg.height (toString (progressBarHeight + progressBarMouseAreaExtra))
-                , Svg.class "ProgressBarForeground-mouseArea"
-                , onMouseDown <|
-                    onDragStart
-                        { x = x
-                        , width = width
-                        }
-                ]
-                []
-            ]
 
 
 mediaPlayerToolbar :
@@ -848,10 +650,3 @@ decodePlayState id =
                 else
                     ExternalPlay id
             )
-
-
-toPoints : List ( number, number ) -> String
-toPoints coords =
-    coords
-        |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
-        |> String.join " "
