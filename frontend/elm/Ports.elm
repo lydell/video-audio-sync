@@ -7,7 +7,6 @@ import Data.StateSyncModel exposing (StateSyncModel, encodeStateSyncModel)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Custom
 import Json.Encode as Encode
 import Time exposing (Time)
 
@@ -192,12 +191,5 @@ encodeMouseButton mouseButton =
 areaMeasurementDecoder : Decoder IncomingMessage
 areaMeasurementDecoder =
     Decode.map2 AreaMeasurement
-        (Decode.field "id" domIdDecoder)
+        (Decode.field "id" DomId.decode)
         (Decode.field "area" areaDecoder)
-
-
-domIdDecoder : Decoder DomId
-domIdDecoder =
-    Decode.string
-        |> Decode.andThen
-            (DomId.fromString >> Json.Decode.Custom.fromResult)
