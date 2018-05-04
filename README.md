@@ -40,7 +40,7 @@ I haven’t really tested anything other than Firefox and Chrome.
 
 1.  Run `python3 extract.py summer94.mp4 aac` to separate the video and audio of
     `summer94.mp4` their own files (assuming `aac` is the audio format).
-2.  Open the separated video and audio files to the [browser-based sync
+2.  Open the separated video and audio files in the [browser-based sync
     tool][app].
 3.  Find matching points of video and audio using the tool and download the
     resulting points file.
