@@ -1,12 +1,28 @@
-module Data.KeyboardShortcuts exposing (KeyboardShortcuts, decoder, empty, encode, update)
+module Data.KeyboardShortcuts exposing (KeyboardShortcutState(..), KeyboardShortcuts, KeyboardShortcutsWithState, decoder, empty, encode, update)
 
 import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+type alias Key =
+    String
+
+
 type alias KeyboardShortcuts =
-    Dict String String
+    Dict Key String
+
+
+type alias KeyboardShortcutsWithState =
+    { keyboardShortcuts : KeyboardShortcuts
+    , highlighted : List ( Key, KeyboardShortcutState )
+    }
+
+
+type KeyboardShortcutState
+    = Regular
+    | ToBeChanged
+    | JustChanged
 
 
 empty : KeyboardShortcuts
@@ -26,7 +42,7 @@ encode =
         >> Encode.object
 
 
-update : String -> String -> KeyboardShortcuts -> KeyboardShortcuts
+update : Key -> Key -> KeyboardShortcuts -> KeyboardShortcuts
 update firstKey secondKey keyboardShortcuts =
     let
         firstKeyShortcut =

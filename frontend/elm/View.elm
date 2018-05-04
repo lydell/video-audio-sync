@@ -2,7 +2,7 @@ module View exposing (view)
 
 import Buttons exposing (JumpAction)
 import Data.File as File
-import Data.KeyboardShortcuts as KeyboardShortcuts
+import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWithState)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import DomId
@@ -195,10 +195,10 @@ viewControls model =
                                 []
 
                             WaitingForFirstKey { justChangedKeys } ->
-                                List.map (\key -> ( key, JustChanged )) justChangedKeys
+                                List.map (\key -> ( key, KeyboardShortcuts.JustChanged )) justChangedKeys
 
                             WaitingForSecondKey { firstKey } ->
-                                [ ( firstKey, ToBeChanged ) ]
+                                [ ( firstKey, KeyboardShortcuts.ToBeChanged ) ]
                 in
                 { keyboardShortcuts = model.keyboardShortcuts
                 , highlighted = highlighted

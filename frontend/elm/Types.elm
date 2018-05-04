@@ -81,18 +81,6 @@ type alias InvalidPointsDetails =
     }
 
 
-type alias KeyboardShortcutsWithState =
-    { keyboardShortcuts : KeyboardShortcuts
-    , highlighted : List ( String, KeyboardShortcutState )
-    }
-
-
-type KeyboardShortcutState
-    = Regular
-    | ToBeChanged
-    | JustChanged
-
-
 type EditKeyboardShortcuts
     = NotEditing
     | WaitingForFirstKey { unavailableKey : Maybe String, justChangedKeys : List String }

@@ -1,11 +1,11 @@
 module View.ButtonGroup exposing (ButtonDetails, ButtonLabel(..), buttonGroup, emptyButton, formatKey)
 
 import Buttons
+import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutState, KeyboardShortcutsWithState)
 import Html exposing (Attribute, Html, button, div, span, text)
 import Html.Attributes exposing (attribute, class, classList, id, title, type_)
 import Html.Custom exposing (none)
 import List.Extra
-import Types exposing (KeyboardShortcutState(..), KeyboardShortcutsWithState)
 import View.Fontawesome exposing (Icon(Icon), fontawesome)
 
 
@@ -50,7 +50,7 @@ buttonGroup { keyboardShortcuts, highlighted } buttons =
                             |> Maybe.andThen
                                 (\string ->
                                     List.Extra.find (Tuple.first >> (==) string) highlighted
-                                        |> Maybe.withDefault ( string, Regular )
+                                        |> Maybe.withDefault ( string, KeyboardShortcuts.Regular )
                                         |> Just
                                 )
                 in
@@ -105,8 +105,8 @@ buttonGroupButton shortcut buttonDetails =
                 span
                     [ classList
                         [ ( "ButtonGroup-keyboardShortcut", True )
-                        , ( "is-toBeChanged", highlight == ToBeChanged )
-                        , ( "is-justChanged", highlight == JustChanged )
+                        , ( "is-toBeChanged", highlight == KeyboardShortcuts.ToBeChanged )
+                        , ( "is-justChanged", highlight == KeyboardShortcuts.JustChanged )
                         ]
                     ]
                     [ text (formatKey string) ]
