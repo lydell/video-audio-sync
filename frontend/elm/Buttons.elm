@@ -1,5 +1,6 @@
 module Buttons exposing (ButtonId(..), JumpAction, defaultKeyboardShortCuts, jumpActionsBackward, jumpActionsForward, shortcutsFromId, toString)
 
+import Data.KeyboardShortcuts exposing (KeyboardShortcuts)
 import Data.Point exposing (Direction(Backward, Forward))
 import Dict
 import Time exposing (Time)

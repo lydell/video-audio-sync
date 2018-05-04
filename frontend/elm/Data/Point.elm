@@ -44,11 +44,10 @@ encode points =
 
 
 encodePoints : List Point -> Encode.Value
-encodePoints points =
-    points
-        |> toTempoPoints
-        |> List.map encodeTempoPoint
-        |> Encode.list
+encodePoints =
+    toTempoPoints
+        >> List.map encodeTempoPoint
+        >> Encode.list
 
 
 toTempoPoints : List Point -> List TempoPoint

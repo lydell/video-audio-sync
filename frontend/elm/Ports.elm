@@ -1,8 +1,8 @@
-port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), keyboardShortcutsDecoder, send, subscribe)
+port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
 import Data.Area exposing (Area, areaDecoder)
 import Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, invalidFileDecoder, openedFileDecoder)
-import Dict exposing (Dict)
+import Data.KeyboardShortcuts exposing (KeyboardShortcuts, encodeKeyboardShortcuts)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode exposing (Decoder)
@@ -56,7 +56,7 @@ type alias KeydownDetails =
 
 
 type alias StateSyncModel =
-    { keyboardShortcuts : Dict String String
+    { keyboardShortcuts : KeyboardShortcuts
     , editingKeyboardShortcuts : Bool
     , warnOnClose : Maybe String
     }
@@ -129,10 +129,7 @@ encode outgoingMessage =
             , data =
                 Encode.object
                     [ ( "keyboardShortcuts"
-                      , model.keyboardShortcuts
-                            |> Dict.map (always Encode.string)
-                            |> Dict.toList
-                            |> Encode.object
+                      , encodeKeyboardShortcuts model.keyboardShortcuts
                       )
                     , ( "editingKeyboardShortcuts"
                       , Encode.bool model.editingKeyboardShortcuts
@@ -245,8 +242,3 @@ keydownDecoder =
         (Decode.field "metaKey" Decode.bool)
         (Decode.field "shiftKey" Decode.bool)
         |> Decode.map Keydown
-
-
-keyboardShortcutsDecoder : Decoder (Maybe (Dict String String))
-keyboardShortcutsDecoder =
-    Decode.nullable (Decode.dict Decode.string)

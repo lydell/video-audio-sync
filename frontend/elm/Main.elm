@@ -3,6 +3,7 @@ module Main exposing (..)
 import Buttons
 import Data.Area exposing (emptyArea)
 import Data.File as File
+import Data.KeyboardShortcuts exposing (keyboardShortcutsDecoder, updateKeyboardShortcuts)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Dict
@@ -59,7 +60,8 @@ init flags =
                     empty
 
         keyboardShortcutsResult =
-            Decode.decodeValue Ports.keyboardShortcutsDecoder flags.keyboardShortcuts
+            Decode.decodeValue (Decode.nullable keyboardShortcutsDecoder)
+                flags.keyboardShortcuts
 
         keyboardShortcuts =
             case keyboardShortcutsResult of
@@ -984,17 +986,3 @@ pointsSaveFilename audioName =
         suffix
     else
         base ++ "_" ++ suffix
-
-
-updateKeyboardShortcuts : String -> String -> KeyboardShortcuts -> KeyboardShortcuts
-updateKeyboardShortcuts firstKey secondKey keyboardShortcuts =
-    let
-        firstKeyShortcut =
-            Dict.get firstKey keyboardShortcuts
-
-        secondKeyShortcut =
-            Dict.get secondKey keyboardShortcuts
-    in
-    keyboardShortcuts
-        |> Dict.update firstKey (always secondKeyShortcut)
-        |> Dict.update secondKey (always firstKeyShortcut)
