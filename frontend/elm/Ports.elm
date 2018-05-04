@@ -1,5 +1,6 @@
-port module Ports exposing (Area, ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), keyboardShortcutsDecoder, send, subscribe)
+port module Ports exposing (ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), keyboardShortcutsDecoder, send, subscribe)
 
+import Data.Area exposing (Area, areaDecoder)
 import Dict exposing (Dict)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
@@ -36,14 +37,6 @@ type IncomingMessage
     | DragEnter
     | DragLeave
     | Keydown KeydownDetails
-
-
-type alias Area =
-    { width : Float
-    , height : Float
-    , x : Float
-    , y : Float
-    }
 
 
 type alias File =
@@ -263,15 +256,6 @@ domIdDecoder =
     Decode.string
         |> Decode.andThen
             (DomId.fromString >> Json.Decode.Custom.fromResult)
-
-
-areaDecoder : Decoder Area
-areaDecoder =
-    Decode.map4 Area
-        (Decode.field "width" Decode.float)
-        (Decode.field "height" Decode.float)
-        (Decode.field "x" Decode.float)
-        (Decode.field "y" Decode.float)
 
 
 openedFileDecoder : Decoder IncomingMessage

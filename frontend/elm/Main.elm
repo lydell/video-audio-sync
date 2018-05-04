@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Buttons
+import Data.Area exposing (Area, emptyArea)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Dict
@@ -11,7 +12,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import ModelUtils
 import Mouse
-import Ports exposing (Area)
+import Ports
 import Task
 import Time exposing (Time)
 import Types exposing (..)
@@ -105,15 +106,6 @@ init flags =
             )
         ]
     )
-
-
-emptyArea : Area
-emptyArea =
-    { width = 0
-    , height = 0
-    , x = 0
-    , y = 0
-    }
 
 
 subscriptions : Model -> Sub Msg
