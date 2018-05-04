@@ -1,13 +1,12 @@
 module Main exposing (..)
 
-import Data.Area as Area
 import Data.Buttons as Buttons
 import Data.DomId as DomId exposing (DomId)
 import Data.Error as Error exposing (Error)
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
-import Data.Model exposing (..)
+import Data.Model as Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Data.StateSyncModel as StateSyncModel
 import Dict
@@ -76,27 +75,16 @@ init flags =
                     in
                     Buttons.defaultKeyboardShortCuts
 
+        emptyModel =
+            Model.empty
+
         emptyStateSyncModel =
             StateSyncModel.empty
     in
-    ( { audio = withLocalName flags.audio
-      , video = withLocalName flags.video
-      , loopState = Normal
-      , drag = NoDrag
-      , videoArea = Area.empty
-      , controlsArea = Area.empty
-      , windowSize = { width = 0, height = 0 }
-      , points = []
-      , pointsWarningsModalOpen = False
-      , isDraggingFile = False
-      , confirmRemoveAllPointsModalOpen = False
-      , confirmOpenPoints = Nothing
-      , errors = []
-      , keyboardShortcuts = keyboardShortcuts
-      , undoKeyboardShortcuts = Nothing
-      , showKeyboardShortcuts = False
-      , editKeyboardShortcuts = NotEditing
-      , helpModalOpen = False
+    ( { emptyModel
+        | audio = withLocalName flags.audio
+        , video = withLocalName flags.video
+        , keyboardShortcuts = keyboardShortcuts
       }
     , Cmd.batch
         [ Task.perform WindowSize Window.size

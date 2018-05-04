@@ -1,9 +1,9 @@
 module Data.Model exposing (..)
 
-import Data.Area exposing (Area)
+import Data.Area as Area exposing (Area)
 import Data.Error as Error exposing (Error)
-import Data.KeyboardShortcuts exposing (KeyboardShortcuts)
-import Data.MediaPlayer exposing (MediaPlayer)
+import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcuts)
+import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
 import Data.Point exposing (Direction, Point)
 import Html.Events.Custom exposing (MetaDataDetails, MouseButton, MouseDownDetails)
 import Mouse
@@ -31,6 +31,29 @@ type alias Model =
     , showKeyboardShortcuts : Bool
     , editKeyboardShortcuts : EditKeyboardShortcuts
     , helpModalOpen : Bool
+    }
+
+
+empty : Model
+empty =
+    { audio = MediaPlayer.empty
+    , video = MediaPlayer.empty
+    , loopState = Normal
+    , drag = NoDrag
+    , videoArea = Area.empty
+    , controlsArea = Area.empty
+    , windowSize = { width = 0, height = 0 }
+    , points = []
+    , pointsWarningsModalOpen = False
+    , isDraggingFile = False
+    , confirmRemoveAllPointsModalOpen = False
+    , confirmOpenPoints = Nothing
+    , errors = []
+    , keyboardShortcuts = KeyboardShortcuts.empty
+    , undoKeyboardShortcuts = Nothing
+    , showKeyboardShortcuts = False
+    , editKeyboardShortcuts = NotEditing
+    , helpModalOpen = False
     }
 
 
