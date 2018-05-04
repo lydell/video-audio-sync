@@ -1,7 +1,7 @@
 module ModelUtils exposing (..)
 
 import Time exposing (Time)
-import Types exposing (..)
+import Types exposing (LoopState(Looping, Normal), Model)
 
 
 getCurrentTimes : Model -> ( Time, Time )

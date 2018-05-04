@@ -1,7 +1,7 @@
 port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subscribe)
 
 import Data.Area as Area exposing (Area)
-import Data.File as File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails)
+import Data.File as File exposing (ErroredFileDetails, File, FileType, InvalidFileDetails, OpenedFileDetails)
 import Data.KeydownDetails as KeydownDetails exposing (KeydownDetails)
 import Data.StateSyncModel as StateSyncModel exposing (StateSyncModel)
 import DomId exposing (DomId)

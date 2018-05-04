@@ -4,7 +4,7 @@ import Data.KeyboardShortcuts exposing (KeyboardShortcuts)
 import Data.Point exposing (Direction(Backward, Forward))
 import Dict
 import Time exposing (Time)
-import Types exposing (..)
+import Types exposing (MediaPlayerId(Audio, Video))
 
 
 type ButtonId
