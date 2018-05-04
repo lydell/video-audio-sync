@@ -75,12 +75,9 @@ init flags =
                     Buttons.defaultKeyboardShortCuts
 
                 Err message ->
-                    let
-                        _ =
-                            Debug.log "Failed to decode saved keyboardShortcuts"
-                                { message = message, data = flags.keyboardShortcuts }
-                    in
-                    Buttons.defaultKeyboardShortCuts
+                    warn "Failed to decode saved keyboardShortcuts"
+                        { message = message, data = flags.keyboardShortcuts }
+                        Buttons.defaultKeyboardShortCuts
     in
     ( { emptyModel
         | audio = withLocalName flags.audio
@@ -154,13 +151,7 @@ update msg model =
                     updateIncoming incomingMessage model
 
                 Err message ->
-                    let
-                        _ =
-                            Debug.log "incomingMessage error" message
-                    in
-                    ( model
-                    , Cmd.none
-                    )
+                    warn "incomingMessage error" message ( model, Cmd.none )
 
         MediaErrorMsg id ->
             let
@@ -454,13 +445,7 @@ updateIncoming msg model =
                     )
 
                 _ ->
-                    let
-                        _ =
-                            Debug.log "unexpected AreaMeasurement" id
-                    in
-                    ( model
-                    , Cmd.none
-                    )
+                    warn "unexpected AreaMeasurement" id ( model, Cmd.none )
 
         Ports.OpenedFileAsText { name, fileType, text } ->
             let
@@ -470,11 +455,7 @@ updateIncoming msg model =
                             openPointsJson name text model
 
                         _ ->
-                            let
-                                _ =
-                                    Debug.log "unexpected OpenedFileAsText" fileType
-                            in
-                            model
+                            warn "unexpected OpenedFileAsText" fileType model
             in
             ( newModel
             , Cmd.none
@@ -497,11 +478,7 @@ updateIncoming msg model =
                             { model | video = newMediaPlayer }
 
                         _ ->
-                            let
-                                _ =
-                                    Debug.log "unexpected OpenedFileAsUrl" fileType
-                            in
-                            model
+                            warn "unexpected OpenedFileAsUrl" fileType model
             in
             ( newModel
             , Cmd.none
@@ -535,9 +512,7 @@ updateIncoming msg model =
                     )
 
                 "Tab" ->
-                    ( model
-                    , Cmd.none
-                    )
+                    ( model, Cmd.none )
 
                 _ ->
                     handleKeyboardShortcuts keydownDetails model
@@ -1031,3 +1006,12 @@ handleKeyboardShortcuts { key, altKey, ctrlKey, metaKey } model =
                   }
                 , Cmd.none
                 )
+
+
+warn : String -> a -> b -> b
+warn message logValue returnValue =
+    let
+        _ =
+            Debug.log ("Warning: " ++ message) logValue
+    in
+    returnValue
