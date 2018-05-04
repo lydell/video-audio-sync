@@ -534,7 +534,7 @@ update msg model =
             , Ports.send Ports.OpenMultipleFiles
             )
 
-        CloseErrorModal ->
+        CloseErrorsModal ->
             ( { model | errors = [] }, Cmd.none )
 
         OpenPointsWarningsModal ->

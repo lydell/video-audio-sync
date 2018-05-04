@@ -115,7 +115,7 @@ type Msg
     | OpenConfirmedPoints (List Point)
     | CloseOpenPoints
     | OpenMultiple
-    | CloseErrorModal
+    | CloseErrorsModal
     | OpenPointsWarningsModal
     | ClosePointsWarningsModal
     | ToggleShowKeyboardShortcuts

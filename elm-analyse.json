@@ -5,7 +5,6 @@
     "ImportAll": false
   },
   "excludedPaths": [
-    "frontend/elm/Types.elm",
-    "frontend/elm/View.elm"
+    "frontend/elm/Data/Model.elm"
   ]
 }

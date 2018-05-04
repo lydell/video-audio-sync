@@ -1,4 +1,4 @@
-module View.Help exposing (view)
+module View.Modals.Help exposing (view)
 
 import Html exposing (Html, a, h1, li, p, strong, text, ul)
 import Html.Attributes exposing (href)

@@ -2,17 +2,16 @@ module View exposing (view)
 
 import Data.Buttons as Buttons exposing (JumpAction)
 import Data.DomId as DomId
-import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWithState)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
-import Html exposing (Attribute, Html, a, audio, button, code, div, h1, kbd, li, p, pre, strong, text, ul, video)
-import Html.Attributes exposing (class, classList, disabled, href, src, style, type_, width)
+import Html exposing (Attribute, Html, audio, button, code, div, kbd, p, strong, text, video)
+import Html.Attributes exposing (class, classList, disabled, src, style, type_)
 import Html.Attributes.Custom exposing (muted)
 import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
-import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
+import Html.Events.Custom exposing (MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import ModelUtils
 import Svg
@@ -20,8 +19,10 @@ import Svg.Attributes as Svg
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
-import View.Help as Help
 import View.Modal as Modal
+import View.Modals.Errors as ErrorsModal
+import View.Modals.Help as HelpModal
+import View.Modals.PointsWarnings as PointsWarningsModal
 
 
 progressBarHeight : Float
@@ -88,7 +89,7 @@ viewMedia model =
                     Just url ->
                         video
                             ([ src url
-                             , width (truncate clampedWidth)
+                             , Html.Attributes.width (truncate clampedWidth)
                              , muted True
                              , onError (MediaErrorMsg Video)
                              , onVideoMetaData (MetaData Video)
@@ -485,8 +486,8 @@ mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortc
                         Paused ->
                             False
                 , attributes =
-                    [ disabled (not hasMedia) ]
-                        ++ (onClickWithButton <|
+                    disabled (not hasMedia)
+                        :: (onClickWithButton <|
                                 case mediaPlayer.playState of
                                     Playing ->
                                         Pause id
@@ -506,16 +507,16 @@ mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortc
                 , icon = Icon "step-backward"
                 , title = "Previous point"
                 , attributes =
-                    [ disabled (not backwardEnabled) ]
-                        ++ onClickWithButton (JumpByPoint id Backward)
+                    disabled (not backwardEnabled)
+                        :: onClickWithButton (JumpByPoint id Backward)
               }
             , { emptyButton
                 | id = Buttons.toString (Buttons.JumpByPoint id Forward)
                 , icon = Icon "step-forward"
                 , title = "Next point"
                 , attributes =
-                    [ disabled (not forwardEnabled) ]
-                        ++ onClickWithButton (JumpByPoint id Forward)
+                    disabled (not forwardEnabled)
+                        :: onClickWithButton (JumpByPoint id Forward)
               }
             ]
         , if mediaPlayer.duration > 0 then
@@ -540,8 +541,8 @@ buttonDetailsFromJumpAction id enabled jumpAction =
         base =
             { emptyButton
                 | attributes =
-                    [ disabled (not enabled) ]
-                        ++ onClickWithButton (JumpByTime id jumpAction.timeOffset)
+                    disabled (not enabled)
+                        :: onClickWithButton (JumpByTime id jumpAction.timeOffset)
             }
     in
     if jumpAction.timeOffset < 0 then
@@ -787,52 +788,8 @@ viewModals : Model -> Html Msg
 viewModals model =
     div []
         [ if model.pointsWarningsModalOpen then
-            let
-                warnings =
-                    Point.validate model.points
-            in
             Modal.alert ClosePointsWarningsModal
-                [ p []
-                    [ strong [] [ text "There are problems with your points." ]
-                    ]
-                , p []
-                    [ text "The syncing program can handle slowing down audio down to "
-                    , strong []
-                        [ text <|
-                            toString Point.tempoMin
-                                ++ " times"
-                        ]
-                    , text " or speeding up audio up to "
-                    , strong []
-                        [ text <|
-                            toString Point.tempoMax
-                                ++ " times."
-                        ]
-                    ]
-                , p []
-                    [ text "The audio between some points would need to be slowed down or sped up more than that."
-                    ]
-                , ul [] <|
-                    List.map
-                        (\( index, tempo ) ->
-                            let
-                                start =
-                                    if index == 0 then
-                                        "From the start to point 1"
-                                    else
-                                        "Between point " ++ toString index ++ " and point " ++ toString (index + 1)
-                            in
-                            li []
-                                [ text <| start ++ ": "
-                                , strong []
-                                    [ text <|
-                                        Utils.precision 4 tempo
-                                            ++ " times."
-                                    ]
-                                ]
-                        )
-                        warnings
-                ]
+                (PointsWarningsModal.view model.points)
           else
             none
         , if model.confirmRemoveAllPointsModalOpen then
@@ -866,75 +823,13 @@ viewModals model =
                 none
 
             errors ->
-                Modal.alert CloseErrorModal
-                    [ p []
-                        [ strong []
-                            [ text <|
-                                case errors of
-                                    [ _ ] ->
-                                        "There was an error with your file."
-
-                                    _ ->
-                                        "There were some errors with your files."
-                            ]
-                        ]
-                    , ul []
-                        (List.map (\error -> li [] [ viewError error ])
-                            (List.reverse errors)
-                        )
-                    ]
+                Modal.alert CloseErrorsModal
+                    (ErrorsModal.view (List.reverse errors))
         , if model.helpModalOpen then
-            Modal.alert CloseHelpModal Help.view
+            Modal.alert CloseHelpModal HelpModal.view
           else
             none
         ]
-
-
-viewError : Error -> Html msg
-viewError error =
-    case error of
-        InvalidFileError { name, expectedFileTypes } ->
-            let
-                expected =
-                    case expectedFileTypes of
-                        [] ->
-                            "nothing"
-
-                        _ ->
-                            Utils.humanList "or"
-                                (List.map File.fileTypeToHumanString expectedFileTypes)
-            in
-            p []
-                [ code [] [ text name ]
-                , text <| " is invalid. Expected " ++ expected ++ "."
-                ]
-
-        ErroredFileError { name, fileType } ->
-            p []
-                [ text "Failed to read "
-                , code [] [ text name ]
-                , text <| " as " ++ File.fileTypeToHumanString fileType ++ "."
-                ]
-
-        MediaError { name, fileType } ->
-            p []
-                [ text "Failed to play "
-                , code [] [ text name ]
-                , text <|
-                    " as "
-                        ++ File.fileTypeToHumanString fileType
-                        ++ ". The file is either unsupported, broken or invalid."
-                ]
-
-        InvalidPointsError { name, message } ->
-            div []
-                [ p []
-                    [ text "Failed to parse "
-                    , code [] [ text name ]
-                    , text <| " as " ++ File.fileTypeToHumanString File.JsonFile ++ ". "
-                    ]
-                , p [] [ code [] [ text (Utils.truncateJsonDecodeErrorMessage message) ] ]
-                ]
 
 
 playEvents : MediaPlayerId -> List (Attribute Msg)
@@ -958,12 +853,10 @@ decodePlayState id =
     Decode.at [ "currentTarget", "paused" ] Decode.bool
         |> Decode.map
             (\paused ->
-                case paused of
-                    True ->
-                        ExternalPause id
-
-                    False ->
-                        ExternalPlay id
+                if paused then
+                    ExternalPause id
+                else
+                    ExternalPlay id
             )
 
 
