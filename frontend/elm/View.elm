@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Buttons exposing (JumpAction)
+import Data.Buttons as Buttons exposing (JumpAction)
 import Data.DomId as DomId
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWithState)

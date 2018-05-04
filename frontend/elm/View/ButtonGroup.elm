@@ -1,6 +1,6 @@
 module View.ButtonGroup exposing (ButtonDetails, ButtonLabel(..), buttonGroup, emptyButton, formatKey)
 
-import Buttons
+import Data.Buttons as Buttons
 import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutState, KeyboardShortcutsWithState)
 import Html exposing (Attribute, Html, button, div, span, text)
 import Html.Attributes exposing (attribute, class, classList, id, title, type_)
@@ -47,11 +47,10 @@ buttonGroup { keyboardShortcuts, highlighted } buttons =
                     shortcutWithHighlight =
                         Buttons.shortcutsFromId buttonDetails.id keyboardShortcuts
                             |> List.head
-                            |> Maybe.andThen
+                            |> Maybe.map
                                 (\string ->
                                     List.Extra.find (Tuple.first >> (==) string) highlighted
                                         |> Maybe.withDefault ( string, KeyboardShortcuts.Regular )
-                                        |> Just
                                 )
                 in
                 buttonGroupButton shortcutWithHighlight buttonDetails

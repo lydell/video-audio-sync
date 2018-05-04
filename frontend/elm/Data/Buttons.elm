@@ -1,4 +1,4 @@
-module Buttons exposing (ButtonId(..), JumpAction, defaultKeyboardShortCuts, jumpActionsBackward, jumpActionsForward, shortcutsFromId, toString)
+module Data.Buttons exposing (ButtonId(..), JumpAction, defaultKeyboardShortCuts, jumpActionsBackward, jumpActionsForward, shortcutsFromId, toString)
 
 import Data.KeyboardShortcuts exposing (KeyboardShortcuts)
 import Data.Model exposing (MediaPlayerId(Audio, Video))

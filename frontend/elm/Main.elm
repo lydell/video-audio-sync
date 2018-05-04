@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Buttons
 import Data.Area as Area
+import Data.Buttons as Buttons
 import Data.DomId as DomId exposing (DomId)
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts
