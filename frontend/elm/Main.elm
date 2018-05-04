@@ -44,16 +44,22 @@ type alias Flags =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
-        empty =
+        emptyModel =
+            Model.empty
+
+        emptyMediaPlayer =
             MediaPlayer.empty
+
+        emptyStateSyncModel =
+            StateSyncModel.empty
 
         withLocalName maybeName =
             case maybeName of
                 Just name ->
-                    { empty | name = name, url = Just ("/" ++ name) }
+                    { emptyMediaPlayer | name = name, url = Just ("/" ++ name) }
 
                 Nothing ->
-                    empty
+                    emptyMediaPlayer
 
         keyboardShortcutsResult =
             Decode.decodeValue (Decode.nullable KeyboardShortcuts.decoder)
@@ -74,12 +80,6 @@ init flags =
                                 { message = message, data = flags.keyboardShortcuts }
                     in
                     Buttons.defaultKeyboardShortCuts
-
-        emptyModel =
-            Model.empty
-
-        emptyStateSyncModel =
-            StateSyncModel.empty
     in
     ( { emptyModel
         | audio = withLocalName flags.audio
