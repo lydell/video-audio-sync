@@ -5,6 +5,7 @@ import Data.DomId as DomId exposing (DomId)
 import Data.Error as Error exposing (Error)
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts
+import Data.KeydownDetails exposing (KeydownDetails)
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
 import Data.Model as Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
@@ -526,29 +527,10 @@ updateIncoming msg model =
             , Cmd.none
             )
 
-        Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
-            let
-                mouseButton =
-                    if altKey || ctrlKey || metaKey then
-                        Right
-                    else
-                        Left
-
-                buttonId =
-                    Dict.get key model.keyboardShortcuts
-            in
+        Ports.Keydown ({ key } as keydownDetails) ->
             case key of
                 "Escape" ->
-                    ( { model
-                        | pointsWarningsModalOpen = False
-                        , confirmRemoveAllPointsModalOpen = False
-                        , confirmOpenPoints = Nothing
-                        , errors = []
-                        , showKeyboardShortcuts = False
-                        , editKeyboardShortcuts = NotEditing
-                        , undoKeyboardShortcuts = Nothing
-                        , helpModalOpen = False
-                      }
+                    ( closeAllModals model
                     , Cmd.none
                     )
 
@@ -558,67 +540,7 @@ updateIncoming msg model =
                     )
 
                 _ ->
-                    case model.editKeyboardShortcuts of
-                        NotEditing ->
-                            ( model
-                            , case buttonId of
-                                Just id ->
-                                    Ports.send (Ports.ClickButton id mouseButton)
-
-                                Nothing ->
-                                    Cmd.none
-                            )
-
-                        WaitingForFirstKey _ ->
-                            ( { model
-                                | editKeyboardShortcuts =
-                                    case buttonId of
-                                        Just _ ->
-                                            WaitingForSecondKey
-                                                { unavailableKey = Nothing
-                                                , firstKey = key
-                                                }
-
-                                        _ ->
-                                            WaitingForFirstKey
-                                                { unavailableKey = Just key
-                                                , justChangedKeys = []
-                                                }
-                              }
-                            , Cmd.none
-                            )
-
-                        WaitingForSecondKey { firstKey } ->
-                            if String.length key == 1 then
-                                let
-                                    keyboardShortcuts =
-                                        KeyboardShortcuts.update
-                                            firstKey
-                                            key
-                                            model.keyboardShortcuts
-                                in
-                                ( { model
-                                    | editKeyboardShortcuts =
-                                        WaitingForFirstKey
-                                            { unavailableKey = Nothing
-                                            , justChangedKeys = [ firstKey, key ]
-                                            }
-                                    , keyboardShortcuts =
-                                        keyboardShortcuts
-                                    , undoKeyboardShortcuts = Nothing
-                                  }
-                                , Cmd.none
-                                )
-                            else
-                                ( { model
-                                    | editKeyboardShortcuts =
-                                        WaitingForSecondKey
-                                            { unavailableKey = Just key
-                                            , firstKey = firstKey
-                                            }
-                                  }
-                                , Cmd.none
-                                )
+                    handleKeyboardShortcuts keydownDetails model
 
 
 openPointsJson : String -> String -> Model -> Model
@@ -1021,3 +943,91 @@ pointsSaveFilename audioName =
         suffix
     else
         base ++ "_" ++ suffix
+
+
+closeAllModals : Model -> Model
+closeAllModals model =
+    { model
+        | pointsWarningsModalOpen = False
+        , confirmRemoveAllPointsModalOpen = False
+        , confirmOpenPoints = Nothing
+        , errors = []
+        , showKeyboardShortcuts = False
+        , editKeyboardShortcuts = NotEditing
+        , undoKeyboardShortcuts = Nothing
+        , helpModalOpen = False
+    }
+
+
+handleKeyboardShortcuts : KeydownDetails -> Model -> ( Model, Cmd Msg )
+handleKeyboardShortcuts { key, altKey, ctrlKey, metaKey } model =
+    let
+        mouseButton =
+            if altKey || ctrlKey || metaKey then
+                Right
+            else
+                Left
+
+        buttonId =
+            Dict.get key model.keyboardShortcuts
+    in
+    case model.editKeyboardShortcuts of
+        NotEditing ->
+            ( model
+            , case buttonId of
+                Just id ->
+                    Ports.send (Ports.ClickButton id mouseButton)
+
+                Nothing ->
+                    Cmd.none
+            )
+
+        WaitingForFirstKey _ ->
+            ( { model
+                | editKeyboardShortcuts =
+                    case buttonId of
+                        Just _ ->
+                            WaitingForSecondKey
+                                { unavailableKey = Nothing
+                                , firstKey = key
+                                }
+
+                        _ ->
+                            WaitingForFirstKey
+                                { unavailableKey = Just key
+                                , justChangedKeys = []
+                                }
+              }
+            , Cmd.none
+            )
+
+        WaitingForSecondKey { firstKey } ->
+            if String.length key == 1 then
+                let
+                    keyboardShortcuts =
+                        KeyboardShortcuts.update
+                            firstKey
+                            key
+                            model.keyboardShortcuts
+                in
+                ( { model
+                    | editKeyboardShortcuts =
+                        WaitingForFirstKey
+                            { unavailableKey = Nothing
+                            , justChangedKeys = [ firstKey, key ]
+                            }
+                    , keyboardShortcuts = keyboardShortcuts
+                    , undoKeyboardShortcuts = Nothing
+                  }
+                , Cmd.none
+                )
+            else
+                ( { model
+                    | editKeyboardShortcuts =
+                        WaitingForSecondKey
+                            { unavailableKey = Just key
+                            , firstKey = firstKey
+                            }
+                  }
+                , Cmd.none
+                )
