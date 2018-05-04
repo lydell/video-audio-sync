@@ -152,210 +152,19 @@ update msg model =
             , Cmd.none
             )
 
-        JsMessage (Ok incomingMessage) ->
-            case incomingMessage of
-                Ports.AreaMeasurement id area ->
-                    case id of
-                        DomId.VideoArea ->
-                            ( { model | videoArea = area }
-                            , Cmd.none
-                            )
+        JsMessage messageResult ->
+            case messageResult of
+                Ok incomingMessage ->
+                    updateIncoming incomingMessage model
 
-                        DomId.GraphicsArea ->
-                            ( { model | controlsArea = area }
-                            , Cmd.none
-                            )
-
-                        _ ->
-                            let
-                                _ =
-                                    Debug.log "unexpected AreaMeasurement" id
-                            in
-                            ( model
-                            , Cmd.none
-                            )
-
-                Ports.OpenedFile { name, fileType, content } ->
+                Err message ->
                     let
-                        empty =
-                            MediaPlayer.empty
-
-                        newModel =
-                            case fileType of
-                                File.AudioFile ->
-                                    { model
-                                        | audio =
-                                            { empty
-                                                | name = name
-                                                , url = Just content
-                                            }
-                                    }
-
-                                File.VideoFile ->
-                                    { model
-                                        | video =
-                                            { empty
-                                                | name = name
-                                                , url = Just content
-                                            }
-                                    }
-
-                                File.JsonFile ->
-                                    let
-                                        decoded =
-                                            Decode.decodeString
-                                                Point.decoder
-                                                content
-                                    in
-                                    case decoded of
-                                        Ok points ->
-                                            case model.points of
-                                                [] ->
-                                                    { model | points = points }
-
-                                                _ ->
-                                                    { model
-                                                        | confirmOpenPoints =
-                                                            Just
-                                                                { name = name
-                                                                , points = points
-                                                                }
-                                                    }
-
-                                        Err message ->
-                                            addError
-                                                (Error.InvalidPoints
-                                                    { name = name
-                                                    , message = message
-                                                    }
-                                                )
-                                                model
+                        _ =
+                            Debug.log "incomingMessage error" message
                     in
-                    ( newModel
+                    ( model
                     , Cmd.none
                     )
-
-                Ports.InvalidFile details ->
-                    ( addError (Error.InvalidFile details) model
-                    , Cmd.none
-                    )
-
-                Ports.ErroredFile details ->
-                    ( addError (Error.ErroredFile details) model
-                    , Cmd.none
-                    )
-
-                Ports.DragEnter ->
-                    ( { model | isDraggingFile = True }
-                    , Cmd.none
-                    )
-
-                Ports.DragLeave ->
-                    ( { model | isDraggingFile = False }
-                    , Cmd.none
-                    )
-
-                Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
-                    let
-                        mouseButton =
-                            if altKey || ctrlKey || metaKey then
-                                Right
-                            else
-                                Left
-
-                        buttonId =
-                            Dict.get key model.keyboardShortcuts
-                    in
-                    case key of
-                        "Escape" ->
-                            ( { model
-                                | pointsWarningsModalOpen = False
-                                , confirmRemoveAllPointsModalOpen = False
-                                , confirmOpenPoints = Nothing
-                                , showKeyboardShortcuts = False
-                                , editKeyboardShortcuts = NotEditing
-                                , undoKeyboardShortcuts = Nothing
-                                , helpModalOpen = False
-                              }
-                            , Cmd.none
-                            )
-
-                        "Tab" ->
-                            ( model
-                            , Cmd.none
-                            )
-
-                        _ ->
-                            case model.editKeyboardShortcuts of
-                                NotEditing ->
-                                    ( model
-                                    , case buttonId of
-                                        Just id ->
-                                            Ports.send (Ports.ClickButton id mouseButton)
-
-                                        Nothing ->
-                                            Cmd.none
-                                    )
-
-                                WaitingForFirstKey _ ->
-                                    ( { model
-                                        | editKeyboardShortcuts =
-                                            case buttonId of
-                                                Just _ ->
-                                                    WaitingForSecondKey
-                                                        { unavailableKey = Nothing
-                                                        , firstKey = key
-                                                        }
-
-                                                _ ->
-                                                    WaitingForFirstKey
-                                                        { unavailableKey = Just key
-                                                        , justChangedKeys = []
-                                                        }
-                                      }
-                                    , Cmd.none
-                                    )
-
-                                WaitingForSecondKey { firstKey } ->
-                                    if String.length key == 1 then
-                                        let
-                                            keyboardShortcuts =
-                                                KeyboardShortcuts.update
-                                                    firstKey
-                                                    key
-                                                    model.keyboardShortcuts
-                                        in
-                                        ( { model
-                                            | editKeyboardShortcuts =
-                                                WaitingForFirstKey
-                                                    { unavailableKey = Nothing
-                                                    , justChangedKeys = [ firstKey, key ]
-                                                    }
-                                            , keyboardShortcuts =
-                                                keyboardShortcuts
-                                            , undoKeyboardShortcuts = Nothing
-                                          }
-                                        , Cmd.none
-                                        )
-                                    else
-                                        ( { model
-                                            | editKeyboardShortcuts =
-                                                WaitingForSecondKey
-                                                    { unavailableKey = Just key
-                                                    , firstKey = firstKey
-                                                    }
-                                          }
-                                        , Cmd.none
-                                        )
-
-        JsMessage (Err message) ->
-            let
-                _ =
-                    Debug.log "incomingMessage error" message
-            in
-            ( model
-            , Cmd.none
-            )
 
         MediaErrorMsg id ->
             let
@@ -631,6 +440,196 @@ update msg model =
                 , Ports.send (Ports.MeasureArea DomId.GraphicsArea)
                 ]
             )
+
+
+updateIncoming : Ports.IncomingMessage -> Model -> ( Model, Cmd Msg )
+updateIncoming msg model =
+    case msg of
+        Ports.AreaMeasurement id area ->
+            case id of
+                DomId.VideoArea ->
+                    ( { model | videoArea = area }
+                    , Cmd.none
+                    )
+
+                DomId.GraphicsArea ->
+                    ( { model | controlsArea = area }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    let
+                        _ =
+                            Debug.log "unexpected AreaMeasurement" id
+                    in
+                    ( model
+                    , Cmd.none
+                    )
+
+        Ports.OpenedFile { name, fileType, content } ->
+            let
+                empty =
+                    MediaPlayer.empty
+
+                newModel =
+                    case fileType of
+                        File.AudioFile ->
+                            { model
+                                | audio =
+                                    { empty | name = name, url = Just content }
+                            }
+
+                        File.VideoFile ->
+                            { model
+                                | video =
+                                    { empty | name = name, url = Just content }
+                            }
+
+                        File.JsonFile ->
+                            let
+                                decoded =
+                                    Decode.decodeString Point.decoder content
+                            in
+                            case decoded of
+                                Ok points ->
+                                    case model.points of
+                                        [] ->
+                                            { model | points = points }
+
+                                        _ ->
+                                            { model
+                                                | confirmOpenPoints =
+                                                    Just
+                                                        { name = name
+                                                        , points = points
+                                                        }
+                                            }
+
+                                Err message ->
+                                    addError
+                                        (Error.InvalidPoints
+                                            { name = name
+                                            , message = message
+                                            }
+                                        )
+                                        model
+            in
+            ( newModel
+            , Cmd.none
+            )
+
+        Ports.InvalidFile details ->
+            ( addError (Error.InvalidFile details) model
+            , Cmd.none
+            )
+
+        Ports.ErroredFile details ->
+            ( addError (Error.ErroredFile details) model
+            , Cmd.none
+            )
+
+        Ports.DragEnter ->
+            ( { model | isDraggingFile = True }
+            , Cmd.none
+            )
+
+        Ports.DragLeave ->
+            ( { model | isDraggingFile = False }
+            , Cmd.none
+            )
+
+        Ports.Keydown { key, altKey, ctrlKey, metaKey } ->
+            let
+                mouseButton =
+                    if altKey || ctrlKey || metaKey then
+                        Right
+                    else
+                        Left
+
+                buttonId =
+                    Dict.get key model.keyboardShortcuts
+            in
+            case key of
+                "Escape" ->
+                    ( { model
+                        | pointsWarningsModalOpen = False
+                        , confirmRemoveAllPointsModalOpen = False
+                        , confirmOpenPoints = Nothing
+                        , showKeyboardShortcuts = False
+                        , editKeyboardShortcuts = NotEditing
+                        , undoKeyboardShortcuts = Nothing
+                        , helpModalOpen = False
+                      }
+                    , Cmd.none
+                    )
+
+                "Tab" ->
+                    ( model
+                    , Cmd.none
+                    )
+
+                _ ->
+                    case model.editKeyboardShortcuts of
+                        NotEditing ->
+                            ( model
+                            , case buttonId of
+                                Just id ->
+                                    Ports.send (Ports.ClickButton id mouseButton)
+
+                                Nothing ->
+                                    Cmd.none
+                            )
+
+                        WaitingForFirstKey _ ->
+                            ( { model
+                                | editKeyboardShortcuts =
+                                    case buttonId of
+                                        Just _ ->
+                                            WaitingForSecondKey
+                                                { unavailableKey = Nothing
+                                                , firstKey = key
+                                                }
+
+                                        _ ->
+                                            WaitingForFirstKey
+                                                { unavailableKey = Just key
+                                                , justChangedKeys = []
+                                                }
+                              }
+                            , Cmd.none
+                            )
+
+                        WaitingForSecondKey { firstKey } ->
+                            if String.length key == 1 then
+                                let
+                                    keyboardShortcuts =
+                                        KeyboardShortcuts.update
+                                            firstKey
+                                            key
+                                            model.keyboardShortcuts
+                                in
+                                ( { model
+                                    | editKeyboardShortcuts =
+                                        WaitingForFirstKey
+                                            { unavailableKey = Nothing
+                                            , justChangedKeys = [ firstKey, key ]
+                                            }
+                                    , keyboardShortcuts =
+                                        keyboardShortcuts
+                                    , undoKeyboardShortcuts = Nothing
+                                  }
+                                , Cmd.none
+                                )
+                            else
+                                ( { model
+                                    | editKeyboardShortcuts =
+                                        WaitingForSecondKey
+                                            { unavailableKey = Just key
+                                            , firstKey = firstKey
+                                            }
+                                  }
+                                , Cmd.none
+                                )
 
 
 updateMediaPlayer : (MediaPlayer -> MediaPlayer) -> MediaPlayerId -> Model -> Model
