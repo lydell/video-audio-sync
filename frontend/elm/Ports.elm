@@ -1,6 +1,7 @@
-port module Ports exposing (ErroredFileDetails, File, FileType(..), IncomingMessage(..), InvalidFileDetails, OpenedFileDetails, OutgoingMessage(..), keyboardShortcutsDecoder, send, subscribe)
+port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), keyboardShortcutsDecoder, send, subscribe)
 
 import Data.Area exposing (Area, areaDecoder)
+import Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, invalidFileDecoder, openedFileDecoder)
 import Dict exposing (Dict)
 import DomId exposing (DomId)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
@@ -37,38 +38,6 @@ type IncomingMessage
     | DragEnter
     | DragLeave
     | Keydown KeydownDetails
-
-
-type alias File =
-    { filename : String
-    , content : String
-    , mimeType : String
-    }
-
-
-type FileType
-    = AudioFile
-    | VideoFile
-    | JsonFile
-
-
-type alias OpenedFileDetails =
-    { name : String
-    , fileType : FileType
-    , content : String
-    }
-
-
-type alias InvalidFileDetails =
-    { name : String
-    , expectedFileTypes : List FileType
-    }
-
-
-type alias ErroredFileDetails =
-    { name : String
-    , fileType : FileType
-    }
 
 
 type alias KeydownDetails =
@@ -131,7 +100,7 @@ encode outgoingMessage =
             { tag = "OpenFile"
             , data =
                 Encode.object
-                    [ ( "fileType", Encode.string (toString fileType) )
+                    [ ( "fileType", encodeFileType fileType )
                     ]
             }
 
@@ -181,13 +150,19 @@ decoder tag =
             Ok areaMeasurementDecoder
 
         "OpenedFile" ->
-            Ok openedFileDecoder
+            openedFileDecoder
+                |> Decode.map OpenedFile
+                |> Ok
 
         "InvalidFile" ->
-            Ok invalidFileDecoder
+            invalidFileDecoder
+                |> Decode.map InvalidFile
+                |> Ok
 
         "ErroredFile" ->
-            Ok erroredFileDecoder
+            erroredFileDecoder
+                |> Decode.map ErroredFile
+                |> Ok
 
         "DragEnter" ->
             Ok <| Decode.succeed DragEnter
@@ -256,53 +231,6 @@ domIdDecoder =
     Decode.string
         |> Decode.andThen
             (DomId.fromString >> Json.Decode.Custom.fromResult)
-
-
-openedFileDecoder : Decoder IncomingMessage
-openedFileDecoder =
-    Decode.map3 OpenedFileDetails
-        (Decode.field "name" Decode.string)
-        (Decode.field "fileType" fileTypeDecoder)
-        (Decode.field "content" Decode.string)
-        |> Decode.map OpenedFile
-
-
-invalidFileDecoder : Decoder IncomingMessage
-invalidFileDecoder =
-    Decode.map2 InvalidFileDetails
-        (Decode.field "name" Decode.string)
-        (Decode.field "expectedFileTypes" (Decode.list fileTypeDecoder))
-        |> Decode.map InvalidFile
-
-
-erroredFileDecoder : Decoder IncomingMessage
-erroredFileDecoder =
-    Decode.map2 ErroredFileDetails
-        (Decode.field "name" Decode.string)
-        (Decode.field "fileType" fileTypeDecoder)
-        |> Decode.map ErroredFile
-
-
-fileTypeDecoder : Decoder FileType
-fileTypeDecoder =
-    Decode.string
-        |> Decode.andThen (stringToFileType >> Json.Decode.Custom.fromResult)
-
-
-stringToFileType : String -> Result String FileType
-stringToFileType string =
-    case string of
-        "AudioFile" ->
-            Ok AudioFile
-
-        "VideoFile" ->
-            Ok VideoFile
-
-        "JsonFile" ->
-            Ok JsonFile
-
-        _ ->
-            Err ("Unknown fileType: " ++ string)
 
 
 keydownDecoder : Decoder IncomingMessage

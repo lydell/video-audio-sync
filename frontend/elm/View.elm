@@ -1,6 +1,7 @@
 module View exposing (view)
 
 import Buttons exposing (JumpAction)
+import Data.File as File
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Dict
@@ -13,7 +14,6 @@ import Html.Events exposing (on, onClick)
 import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
 import ModelUtils
-import Ports
 import Svg
 import Svg.Attributes as Svg
 import Types exposing (..)
@@ -930,7 +930,7 @@ viewError error =
                 [ p []
                     [ text "Failed to parse "
                     , code [] [ text name ]
-                    , text <| " as " ++ fileTypeToString Ports.JsonFile ++ ". "
+                    , text <| " as " ++ fileTypeToString File.JsonFile ++ ". "
                     ]
                 , p [] [ code [] [ text (Utils.truncateJsonDecodeErrorMessage message) ] ]
                 ]
@@ -992,14 +992,14 @@ humanList joinWord strings =
             start ++ " " ++ joinWord ++ " " ++ last
 
 
-fileTypeToString : Ports.FileType -> String
+fileTypeToString : File.FileType -> String
 fileTypeToString fileType =
     case fileType of
-        Ports.AudioFile ->
+        File.AudioFile ->
             "audio"
 
-        Ports.VideoFile ->
+        File.VideoFile ->
             "video"
 
-        Ports.JsonFile ->
+        File.JsonFile ->
             "JSON"

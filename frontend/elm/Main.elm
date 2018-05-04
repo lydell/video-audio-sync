@@ -1,7 +1,8 @@
 module Main exposing (..)
 
 import Buttons
-import Data.Area exposing (Area, emptyArea)
+import Data.Area exposing (emptyArea)
+import Data.File as File
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
 import Data.Point as Point exposing (Direction(Backward, Forward))
 import Dict
@@ -186,7 +187,7 @@ update msg model =
 
                         newModel =
                             case fileType of
-                                Ports.AudioFile ->
+                                File.AudioFile ->
                                     { model
                                         | audio =
                                             { empty
@@ -195,7 +196,7 @@ update msg model =
                                             }
                                     }
 
-                                Ports.VideoFile ->
+                                File.VideoFile ->
                                     { model
                                         | video =
                                             { empty
@@ -204,7 +205,7 @@ update msg model =
                                             }
                                     }
 
-                                Ports.JsonFile ->
+                                File.JsonFile ->
                                     let
                                         decoded =
                                             Decode.decodeString
@@ -353,12 +354,12 @@ update msg model =
                     case id of
                         Audio ->
                             { name = model.audio.name
-                            , fileType = Ports.AudioFile
+                            , fileType = File.AudioFile
                             }
 
                         Video ->
                             { name = model.video.name
-                            , fileType = Ports.VideoFile
+                            , fileType = File.VideoFile
                             }
 
                 newModel =
@@ -503,10 +504,10 @@ update msg model =
                 fileType =
                     case id of
                         Audio ->
-                            Ports.AudioFile
+                            File.AudioFile
 
                         Video ->
-                            Ports.VideoFile
+                            File.VideoFile
             in
             ( model
             , Ports.send (Ports.OpenFile fileType)
@@ -514,7 +515,7 @@ update msg model =
 
         OpenPoints ->
             ( model
-            , Ports.send (Ports.OpenFile Ports.JsonFile)
+            , Ports.send (Ports.OpenFile File.JsonFile)
             )
 
         OpenConfirmedPoints points ->
