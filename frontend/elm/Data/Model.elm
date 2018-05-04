@@ -1,7 +1,7 @@
 module Data.Model exposing (..)
 
 import Data.Area exposing (Area)
-import Data.File exposing (ErroredFileDetails, InvalidFileDetails, OpenedFileDetails)
+import Data.Error as Error exposing (Error)
 import Data.KeyboardShortcuts exposing (KeyboardShortcuts)
 import Data.MediaPlayer exposing (MediaPlayer)
 import Data.Point exposing (Direction, Point)
@@ -65,19 +65,6 @@ type alias DragDetails =
 type alias DragBar =
     { x : Float
     , width : Float
-    }
-
-
-type Error
-    = InvalidFileError InvalidFileDetails
-    | ErroredFileError ErroredFileDetails
-    | MediaError ErroredFileDetails
-    | InvalidPointsError InvalidPointsDetails
-
-
-type alias InvalidPointsDetails =
-    { name : String
-    , message : String
     }
 
 

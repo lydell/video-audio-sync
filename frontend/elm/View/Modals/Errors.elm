@@ -1,7 +1,7 @@
 module View.Modals.Errors exposing (view)
 
+import Data.Error as Error exposing (Error)
 import Data.File as File
-import Data.Model exposing (Error(..))
 import Html exposing (Html, code, li, p, strong, text, ul)
 import Utils
 
@@ -30,7 +30,7 @@ view errors =
 viewError : Error -> List (Html msg)
 viewError error =
     case error of
-        InvalidFileError { name, expectedFileTypes } ->
+        Error.InvalidFile { name, expectedFileTypes } ->
             let
                 expected =
                     case expectedFileTypes of
@@ -45,13 +45,13 @@ viewError error =
             , text <| " is invalid. Expected " ++ expected ++ "."
             ]
 
-        ErroredFileError { name, fileType } ->
+        Error.ErroredFile { name, fileType } ->
             [ text "Failed to read "
             , code [] [ text name ]
             , text <| " as " ++ File.fileTypeToHumanString fileType ++ "."
             ]
 
-        MediaError { name, fileType } ->
+        Error.Media { name, fileType } ->
             [ text "Failed to play "
             , code [] [ text name ]
             , text <|
@@ -60,7 +60,7 @@ viewError error =
                     ++ ". The file is either unsupported, broken or invalid."
             ]
 
-        InvalidPointsError { name, message } ->
+        Error.InvalidPoints { name, message } ->
             [ p []
                 [ text "Failed to parse "
                 , code [] [ text name ]

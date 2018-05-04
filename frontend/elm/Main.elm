@@ -3,6 +3,7 @@ module Main exposing (..)
 import Data.Area as Area
 import Data.Buttons as Buttons
 import Data.DomId as DomId exposing (DomId)
+import Data.Error as Error exposing (Error)
 import Data.File as File
 import Data.KeyboardShortcuts as KeyboardShortcuts
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
@@ -227,7 +228,7 @@ update msg model =
 
                                         Err message ->
                                             addError
-                                                (InvalidPointsError
+                                                (Error.InvalidPoints
                                                     { name = name
                                                     , message = message
                                                     }
@@ -237,10 +238,10 @@ update msg model =
                     ( newModel, Cmd.none )
 
                 Ports.InvalidFile details ->
-                    ( addError (InvalidFileError details) model, Cmd.none )
+                    ( addError (Error.InvalidFile details) model, Cmd.none )
 
                 Ports.ErroredFile details ->
-                    ( addError (ErroredFileError details) model, Cmd.none )
+                    ( addError (Error.ErroredFile details) model, Cmd.none )
 
                 Ports.DragEnter ->
                     ( { model | isDraggingFile = True }, Cmd.none )
@@ -365,7 +366,7 @@ update msg model =
                         |> updateMediaPlayer
                             (always MediaPlayer.empty)
                             id
-                        |> addError (MediaError name)
+                        |> addError (Error.Media name)
             in
             ( newModel, Cmd.none )
 
