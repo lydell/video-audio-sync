@@ -1,6 +1,8 @@
 module View exposing (view)
 
 import Buttons exposing (JumpAction)
+import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
+import Data.Point as Point exposing (Direction(Backward, Forward))
 import Dict
 import DomId
 import Html exposing (Attribute, Html, a, audio, button, code, div, h1, kbd, li, p, pre, strong, text, ul, video)
@@ -10,9 +12,7 @@ import Html.Custom exposing (none)
 import Html.Events exposing (on, onClick)
 import Html.Events.Custom exposing (MetaDataDetails, MouseDownDetails, onAudioMetaData, onClickWithButton, onError, onMouseDown, onTimeUpdate, onVideoMetaData, preventContextMenu)
 import Json.Decode as Decode exposing (Decoder)
-import MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import ModelUtils
-import Points exposing (Direction(Backward, Forward))
 import Ports
 import Svg
 import Svg.Attributes as Svg
@@ -582,13 +582,13 @@ generalToolbar model keyboardShortcuts =
             }
 
         selectedPoint =
-            Points.getSelectedPoint potentialNewPoint model.points
+            Point.getSelectedPoint potentialNewPoint model.points
 
         canAddPoint =
-            Points.canAddPoint model.points potentialNewPoint
+            Point.canAddPoint model.points potentialNewPoint
 
         warnings =
-            Points.validate model.points
+            Point.validate model.points
 
         numWarnings =
             List.length warnings
@@ -789,7 +789,7 @@ viewModals model =
         [ if model.pointsWarningsModalOpen then
             let
                 warnings =
-                    Points.validate model.points
+                    Point.validate model.points
             in
             alertModal ClosePointsWarningsModal
                 [ p []
@@ -799,13 +799,13 @@ viewModals model =
                     [ text "The syncing program can handle slowing down audio down to "
                     , strong []
                         [ text <|
-                            toString Points.tempoMin
+                            toString Point.tempoMin
                                 ++ " times"
                         ]
                     , text " or speeding up audio up to "
                     , strong []
                         [ text <|
-                            toString Points.tempoMax
+                            toString Point.tempoMax
                                 ++ " times."
                         ]
                     ]

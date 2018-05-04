@@ -1,4 +1,4 @@
-module MediaPlayer exposing (MediaPlayer, PlayState(..), empty, hasMedia, pause, play, updateCurrentTime, updateMetaData)
+module Data.MediaPlayer exposing (MediaPlayer, PlayState(..), empty, hasMedia, pause, play, updateCurrentTime, updateMetaData)
 
 import Html.Events.Custom exposing (MetaDataDetails)
 import Time exposing (Time)

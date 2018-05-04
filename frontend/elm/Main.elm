@@ -1,16 +1,16 @@
 module Main exposing (..)
 
 import Buttons
+import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer)
+import Data.Point as Point exposing (Direction(Backward, Forward))
 import Dict
 import DomId exposing (DomId)
 import Html
 import Html.Events.Custom exposing (MouseButton(Left, Right))
 import Json.Decode as Decode
 import Json.Encode as Encode
-import MediaPlayer exposing (MediaPlayer)
 import ModelUtils
 import Mouse
-import Points exposing (Direction(Backward, Forward))
 import Ports exposing (Area)
 import Task
 import Time exposing (Time)
@@ -216,7 +216,7 @@ update msg model =
                                     let
                                         decoded =
                                             Decode.decodeString
-                                                Points.decoder
+                                                Point.decoder
                                                 content
                                     in
                                     case decoded of
@@ -493,7 +493,7 @@ update msg model =
             let
                 content =
                     model.points
-                        |> Points.encode
+                        |> Point.encode
                         |> Encode.encode 0
             in
             ( model
@@ -771,7 +771,7 @@ jumpByPoint lockState id direction model =
             ModelUtils.getCurrentTimes model
 
         calculateTime getTime currentTime mediaPlayer =
-            Points.getClosestPoint getTime direction currentTime model.points
+            Point.getClosestPoint getTime direction currentTime model.points
                 |> Maybe.map getTime
                 |> Maybe.withDefault
                     (case direction of

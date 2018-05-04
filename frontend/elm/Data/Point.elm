@@ -1,9 +1,24 @@
-module Points exposing (Direction(..), Point, canAddPoint, decoder, encode, getClosestPoint, getSelectedPoint, tempoMax, tempoMin, validate)
+module Data.Point exposing (Direction(..), Point, canAddPoint, decoder, encode, getClosestPoint, getSelectedPoint, tempoMax, tempoMin, validate)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra
 import Time exposing (Time)
+
+
+type alias Point =
+    { audioTime : Time
+    , videoTime : Time
+    }
+
+
+type alias TempoPoint =
+    ( Time, Float )
+
+
+type Direction
+    = Forward
+    | Backward
 
 
 tempoMin : Float
@@ -19,21 +34,6 @@ tempoMax =
 maxPointOffset : Time
 maxPointOffset =
     0.05 * Time.second
-
-
-type alias TempoPoint =
-    ( Time, Float )
-
-
-type alias Point =
-    { audioTime : Time
-    , videoTime : Time
-    }
-
-
-type Direction
-    = Forward
-    | Backward
 
 
 encode : List Point -> Encode.Value

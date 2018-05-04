@@ -1,10 +1,10 @@
 module Types exposing (..)
 
+import Data.MediaPlayer exposing (MediaPlayer)
+import Data.Point exposing (Direction, Point)
 import Dict exposing (Dict)
 import Html.Events.Custom exposing (MetaDataDetails, MouseButton, MouseDownDetails)
-import MediaPlayer exposing (MediaPlayer)
 import Mouse
-import Points exposing (Direction, Point)
 import Ports exposing (Area, ErroredFileDetails, IncomingMessage, InvalidFileDetails, OpenedFileDetails)
 import Time exposing (Time)
 import Window
