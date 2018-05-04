@@ -901,7 +901,7 @@ viewError error =
                             "nothing"
 
                         _ ->
-                            humanList "or" (List.map fileTypeToString expectedFileTypes)
+                            humanList "or" (List.map File.fileTypeToHumanString expectedFileTypes)
             in
             p []
                 [ code [] [ text name ]
@@ -912,7 +912,7 @@ viewError error =
             p []
                 [ text "Failed to read "
                 , code [] [ text name ]
-                , text <| " as " ++ fileTypeToString fileType ++ "."
+                , text <| " as " ++ File.fileTypeToHumanString fileType ++ "."
                 ]
 
         MediaError { name, fileType } ->
@@ -921,7 +921,7 @@ viewError error =
                 , code [] [ text name ]
                 , text <|
                     " as "
-                        ++ fileTypeToString fileType
+                        ++ File.fileTypeToHumanString fileType
                         ++ ". The file is either unsupported, broken or invalid."
                 ]
 
@@ -930,7 +930,7 @@ viewError error =
                 [ p []
                     [ text "Failed to parse "
                     , code [] [ text name ]
-                    , text <| " as " ++ fileTypeToString File.JsonFile ++ ". "
+                    , text <| " as " ++ File.fileTypeToHumanString File.JsonFile ++ ". "
                     ]
                 , p [] [ code [] [ text (Utils.truncateJsonDecodeErrorMessage message) ] ]
                 ]
@@ -990,16 +990,3 @@ humanList joinWord strings =
                         |> String.join ", "
             in
             start ++ " " ++ joinWord ++ " " ++ last
-
-
-fileTypeToString : File.FileType -> String
-fileTypeToString fileType =
-    case fileType of
-        File.AudioFile ->
-            "audio"
-
-        File.VideoFile ->
-            "video"
-
-        File.JsonFile ->
-            "JSON"

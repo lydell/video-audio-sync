@@ -1,4 +1,4 @@
-module Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, invalidFileDecoder, openedFileDecoder)
+module Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, fileTypeToHumanString, invalidFileDecoder, openedFileDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Custom
@@ -92,3 +92,16 @@ encodeFileType fileType =
 
         JsonFile ->
             Encode.string "JsonFile"
+
+
+fileTypeToHumanString : FileType -> String
+fileTypeToHumanString fileType =
+    case fileType of
+        AudioFile ->
+            "audio"
+
+        VideoFile ->
+            "video"
+
+        JsonFile ->
+            "JSON"
