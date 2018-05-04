@@ -6,158 +6,41 @@ import Data.KeyboardShortcuts as KeyboardShortcuts exposing (KeyboardShortcutsWi
 import Data.MediaPlayer as MediaPlayer exposing (MediaPlayer, PlayState(Paused, Playing))
 import Data.Model exposing (..)
 import Data.Point as Point exposing (Direction(Backward, Forward))
-import Html exposing (Attribute, Html, audio, button, div, kbd, p, text, video)
-import Html.Attributes exposing (class, classList, disabled, src, type_, width)
-import Html.Attributes.Custom exposing (muted)
+import Html exposing (Html, div, p, text)
+import Html.Attributes exposing (class, classList, disabled)
 import Html.Custom exposing (none)
-import Html.Events exposing (on, onClick)
-import Html.Events.Custom exposing (onAudioMetaData, onClickWithButton, onError, onTimeUpdate, onVideoMetaData, preventContextMenu)
-import Json.Decode as Decode exposing (Decoder)
+import Html.Events exposing (onClick)
+import Html.Events.Custom exposing (onClickWithButton, preventContextMenu)
 import ModelUtils
 import Utils
-import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton, formatKey)
+import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton)
+import View.EditKeyboardShortcuts
 import View.Fontawesome exposing (Icon(CustomIcon, Icon), fontawesome)
-import View.Graphics as Graphics
-import View.Modals.ConfirmOpenPoints as ConfirmOpenPointsModal
-import View.Modals.ConfirmRemoveAllPoints as ConfirmRemoveAllPointsModal
-import View.Modals.Errors as ErrorsModal
-import View.Modals.Help as HelpModal
-import View.Modals.PointsWarnings as PointsWarningsModal
+import View.Graphics
+import View.Media
+import View.Modals.ConfirmOpenPoints
+import View.Modals.ConfirmRemoveAllPoints
+import View.Modals.Errors
+import View.Modals.Help
+import View.Modals.PointsWarnings
 
 
 view : Model -> Html Msg
 view model =
     div [ class "Layout" ]
-        [ viewMedia model
+        [ div [ class "Layout-videoWrapper", DomId.toHtml DomId.VideoArea ] <|
+            case View.EditKeyboardShortcuts.view model of
+                Just content ->
+                    [ content ]
+
+                Nothing ->
+                    View.Media.view model
         , viewControls model
         , viewModals model
         , if model.isDraggingFile then
             fileDragOverlay
           else
             none
-        ]
-
-
-viewMedia : Model -> Html Msg
-viewMedia model =
-    let
-        aspectRatio =
-            if model.video.size.height == 0 then
-                1
-            else
-                model.video.size.width / model.video.size.height
-
-        maxWidth =
-            model.videoArea.width
-
-        maxHeight =
-            model.videoArea.height
-
-        heightIfMaxWidth =
-            maxWidth / aspectRatio
-
-        clampedWidth =
-            if heightIfMaxWidth <= maxHeight then
-                maxWidth
-            else
-                maxHeight * aspectRatio
-    in
-    div [ class "Layout-videoWrapper", DomId.toHtml DomId.VideoArea ]
-        [ case model.editKeyboardShortcuts of
-            NotEditing ->
-                case model.video.url of
-                    Just url ->
-                        video
-                            ([ src url
-                             , width (truncate clampedWidth)
-                             , muted True
-                             , onError (MediaErrorMsg Video)
-                             , onVideoMetaData (MetaData Video)
-                             , onTimeUpdate (CurrentTime Video)
-                             , DomId.toHtml DomId.Video
-                             , class "Layout-video"
-                             ]
-                                ++ playEvents Video
-                            )
-                            []
-
-                    Nothing ->
-                        p [ class "Layout-videoMessage" ] [ text "Drag and drop files or use the buttons below to open a video file, the corresponding audio file, and optionally a points file." ]
-
-            WaitingForFirstKey { unavailableKey } ->
-                div [ class "Layout-videoMessage Layout-videoMessage--short" ]
-                    [ case unavailableKey of
-                        Just key ->
-                            p [ class "Layout-videoMessageBefore" ]
-                                [ kbd [] [ text (formatKey key) ]
-                                , text " has no shortcut."
-                                ]
-
-                        Nothing ->
-                            none
-                    , p [] [ text "Press the keyboard shortcut you want to change." ]
-                    , case model.undoKeyboardShortcuts of
-                        Just _ ->
-                            p [ class "Layout-videoMessageAfter" ]
-                                [ text "All reset! ("
-                                , button
-                                    [ type_ "button"
-                                    , class "LinkButton"
-                                    , onClick UndoResetKeyboardShortcuts
-                                    ]
-                                    [ text "Undo" ]
-                                , text ")"
-                                ]
-
-                        Nothing ->
-                            if model.keyboardShortcuts == Buttons.defaultKeyboardShortCuts then
-                                none
-                            else
-                                p [ class "Layout-videoMessageAfter" ]
-                                    [ button
-                                        [ type_ "button"
-                                        , class "OutlineButton"
-                                        , onClick ResetKeyboardShortcuts
-                                        ]
-                                        [ text "Reset all shortcuts" ]
-                                    ]
-                    ]
-
-            WaitingForSecondKey { unavailableKey, firstKey } ->
-                div [ class "Layout-videoMessage Layout-videoMessage--short" ] <|
-                    case unavailableKey of
-                        Just key ->
-                            [ p [ class "Layout-videoMessageBefore" ]
-                                [ kbd [] [ text (formatKey key) ]
-                                , text <| " cannot be used."
-                                ]
-                            , p []
-                                [ text "Press a new keyboard shortcut for:" ]
-                            , p [ class "Layout-videoMessageAfter" ]
-                                [ kbd [] [ text (formatKey firstKey) ] ]
-                            ]
-
-                        Nothing ->
-                            [ p []
-                                [ text "Now press a new keyboard shortcut for:" ]
-                            , p [ class "Layout-videoMessageAfter" ]
-                                [ kbd [] [ text (formatKey firstKey) ] ]
-                            ]
-        , case model.audio.url of
-            Just url ->
-                audio
-                    ([ src url
-                     , onError (MediaErrorMsg Audio)
-                     , onAudioMetaData (MetaData Audio)
-                     , onTimeUpdate (CurrentTime Audio)
-                     , DomId.toHtml DomId.Audio
-                     ]
-                        ++ playEvents Audio
-                    )
-                    []
-
-            Nothing ->
-                none
         ]
 
 
@@ -201,7 +84,7 @@ viewControls model =
             model.loopState
             shownKeyboardShortcuts
             model.editKeyboardShortcuts
-        , Graphics.view model
+        , View.Graphics.view model
         , mediaPlayerToolbar Audio
             model.audio
             model.loopState
@@ -591,11 +474,11 @@ viewModals : Model -> Html Msg
 viewModals model =
     div []
         [ if model.pointsWarningsModalOpen then
-            PointsWarningsModal.view ClosePointsWarningsModal model.points
+            View.Modals.PointsWarnings.view ClosePointsWarningsModal model.points
           else
             none
         , if model.confirmRemoveAllPointsModalOpen then
-            ConfirmRemoveAllPointsModal.view
+            View.Modals.ConfirmRemoveAllPoints.view
                 { cancel = CloseRemoveAllPoints
                 , confirm = RemoveAllPoints
                 }
@@ -603,7 +486,7 @@ viewModals model =
             none
         , case model.confirmOpenPoints of
             Just { name, points } ->
-                ConfirmOpenPointsModal.view
+                View.Modals.ConfirmOpenPoints.view
                     { cancel = CloseOpenPoints
                     , confirm = OpenConfirmedPoints points
                     , name = name
@@ -616,37 +499,9 @@ viewModals model =
                 none
 
             errors ->
-                ErrorsModal.view CloseErrorsModal (List.reverse errors)
+                View.Modals.Errors.view CloseErrorsModal (List.reverse errors)
         , if model.helpModalOpen then
-            HelpModal.view CloseHelpModal
+            View.Modals.Help.view CloseHelpModal
           else
             none
         ]
-
-
-playEvents : MediaPlayerId -> List (Attribute Msg)
-playEvents id =
-    let
-        decoder =
-            decodePlayState id
-    in
-    [ on "abort" decoder
-    , on "ended" decoder
-    , on "pause" decoder
-    , on "play" decoder
-    , on "playing" decoder
-    , on "stalled" decoder
-    , on "suspend" decoder
-    ]
-
-
-decodePlayState : MediaPlayerId -> Decoder Msg
-decodePlayState id =
-    Decode.at [ "currentTarget", "paused" ] Decode.bool
-        |> Decode.map
-            (\paused ->
-                if paused then
-                    ExternalPause id
-                else
-                    ExternalPlay id
-            )

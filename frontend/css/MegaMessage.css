@@ -1,0 +1,21 @@
+.MegaMessage {
+  width: 15em;
+  margin: auto;
+  color: white;
+  font-size: 4vmin;
+}
+
+.MegaMessage--short {
+  width: auto;
+  text-align: center;
+}
+
+.MegaMessage-before {
+  margin-bottom: 1em;
+  font-size: 0.8em;
+}
+
+.MegaMessage-after {
+  margin-top: 1em;
+  font-size: 0.8em;
+}
