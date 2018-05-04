@@ -98,8 +98,7 @@ type EditKeyboardShortcuts
 
 
 type Msg
-    = NoOp
-    | JsMessage (Result String IncomingMessage)
+    = JsMessage (Result String IncomingMessage)
     | MediaErrorMsg MediaPlayerId
     | MetaData MediaPlayerId MetaDataDetails
     | CurrentTime MediaPlayerId Time

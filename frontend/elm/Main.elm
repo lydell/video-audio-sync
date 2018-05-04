@@ -147,11 +147,6 @@ updateWithCmds msg model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model
-            , Cmd.none
-            )
-
         JsMessage messageResult ->
             case messageResult of
                 Ok incomingMessage ->
