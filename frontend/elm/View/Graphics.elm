@@ -9,6 +9,7 @@ import Html.Events.Custom exposing (MouseDownDetails, onMouseDown)
 import ModelUtils
 import Svg
 import Svg.Attributes as SvgAttr
+import Svg.Attributes.Custom
 
 
 progressBarHeight : Float
@@ -114,14 +115,12 @@ view model =
                 List.map
                     (\{ x1, x2 } ->
                         Svg.polyline
-                            [ SvgAttr.points
-                                (toPoints
-                                    [ ( x1, videoY )
-                                    , ( x1, videoY + progressBarHeight )
-                                    , ( x2, audioY )
-                                    , ( x2, audioY + progressBarHeight )
-                                    ]
-                                )
+                            [ Svg.Attributes.Custom.points
+                                [ ( x1, videoY )
+                                , ( x1, videoY + progressBarHeight )
+                                , ( x2, audioY )
+                                , ( x2, audioY + progressBarHeight )
+                                ]
                             , SvgAttr.class "Point"
                             ]
                             []
@@ -206,10 +205,3 @@ progressBarForeground { maxValue, currentValue, x, y, onDragStart } =
                 ]
                 []
             ]
-
-
-toPoints : List ( number, number ) -> String
-toPoints coords =
-    coords
-        |> List.map (\( x, y ) -> toString x ++ "," ++ toString y)
-        |> String.join " "
