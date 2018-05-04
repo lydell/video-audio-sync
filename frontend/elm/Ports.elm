@@ -2,7 +2,7 @@ port module Ports exposing (IncomingMessage(..), OutgoingMessage(..), send, subs
 
 import Data.Area as Area exposing (Area)
 import Data.DomId as DomId exposing (DomId)
-import Data.File as File exposing (ErroredFileDetails, File, FileType, InvalidFileDetails, OpenedFileDetails)
+import Data.File as File exposing (ErroredFileDetails, File, FileType, InvalidFileDetails, OpenedFileAsTextDetails, OpenedFileAsUrlDetails)
 import Data.KeydownDetails as KeydownDetails exposing (KeydownDetails)
 import Data.StateSyncModel as StateSyncModel exposing (StateSyncModel)
 import Html.Events.Custom exposing (MouseButton(Left, Right))
@@ -38,7 +38,8 @@ type OutgoingMessage
 
 type IncomingMessage
     = AreaMeasurement DomId Area
-    | OpenedFile OpenedFileDetails
+    | OpenedFileAsText OpenedFileAsTextDetails
+    | OpenedFileAsUrl OpenedFileAsUrlDetails
     | InvalidFile InvalidFileDetails
     | ErroredFile ErroredFileDetails
     | DragEnter
@@ -120,9 +121,14 @@ decoder tag =
         "AreaMeasurement" ->
             Ok areaMeasurementDecoder
 
-        "OpenedFile" ->
-            File.openedFileDecoder
-                |> Decode.map OpenedFile
+        "OpenedFileAsText" ->
+            File.openedFileAsTextDecoder
+                |> Decode.map OpenedFileAsText
+                |> Ok
+
+        "OpenedFileAsUrl" ->
+            File.openedFileAsUrlDecoder
+                |> Decode.map OpenedFileAsUrl
                 |> Ok
 
         "InvalidFile" ->

@@ -1,4 +1,4 @@
-module Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileDetails, encodeFileType, erroredFileDecoder, fileTypeToHumanString, invalidFileDecoder, openedFileDecoder)
+module Data.File exposing (ErroredFileDetails, File, FileType(..), InvalidFileDetails, OpenedFileAsTextDetails, OpenedFileAsUrlDetails, encodeFileType, erroredFileDecoder, fileTypeToHumanString, invalidFileDecoder, openedFileAsTextDecoder, openedFileAsUrlDecoder)
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Custom
@@ -18,10 +18,17 @@ type FileType
     | JsonFile
 
 
-type alias OpenedFileDetails =
+type alias OpenedFileAsTextDetails =
     { name : String
     , fileType : FileType
-    , content : String
+    , text : String
+    }
+
+
+type alias OpenedFileAsUrlDetails =
+    { name : String
+    , fileType : FileType
+    , url : String
     }
 
 
@@ -37,12 +44,20 @@ type alias ErroredFileDetails =
     }
 
 
-openedFileDecoder : Decoder OpenedFileDetails
-openedFileDecoder =
-    Decode.map3 OpenedFileDetails
+openedFileAsTextDecoder : Decoder OpenedFileAsTextDetails
+openedFileAsTextDecoder =
+    Decode.map3 OpenedFileAsTextDetails
         (Decode.field "name" Decode.string)
         (Decode.field "fileType" fileTypeDecoder)
         (Decode.field "content" Decode.string)
+
+
+openedFileAsUrlDecoder : Decoder OpenedFileAsUrlDetails
+openedFileAsUrlDecoder =
+    Decode.map3 OpenedFileAsUrlDetails
+        (Decode.field "name" Decode.string)
+        (Decode.field "fileType" fileTypeDecoder)
+        (Decode.field "url" Decode.string)
 
 
 invalidFileDecoder : Decoder InvalidFileDetails

@@ -248,13 +248,18 @@ export default class App {
 
     const { fileType, info } = maybeInfo;
 
-    const promise = info.openAsUrl
-      ? Promise.resolve(this.openAsUrl(file, fileType))
-      : readFileAsText(file);
+    if (info.openAsUrl) {
+      this.sendToElm("OpenedFileAsUrl", {
+        name: file.name,
+        fileType,
+        url: this.openAsUrl(file, fileType),
+      });
+      return;
+    }
 
-    promise.then(
+    readFileAsText(file).then(
       content => {
-        this.sendToElm("OpenedFile", {
+        this.sendToElm("OpenedFileAsText", {
           name: file.name,
           fileType,
           content,

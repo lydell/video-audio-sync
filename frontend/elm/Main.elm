@@ -461,53 +461,46 @@ updateIncoming msg model =
                     , Cmd.none
                     )
 
-        Ports.OpenedFile { name, fileType, content } ->
+        Ports.OpenedFileAsText { name, fileType, text } ->
+            let
+                newModel =
+                    case fileType of
+                        File.JsonFile ->
+                            openPointsJson name text model
+
+                        _ ->
+                            let
+                                _ =
+                                    Debug.log "unexpected OpenedFileAsText" fileType
+                            in
+                            model
+            in
+            ( newModel
+            , Cmd.none
+            )
+
+        Ports.OpenedFileAsUrl { name, fileType, url } ->
             let
                 empty =
                     MediaPlayer.empty
 
+                newMediaPlayer =
+                    { empty | name = name, url = Just url }
+
                 newModel =
                     case fileType of
                         File.AudioFile ->
-                            { model
-                                | audio =
-                                    { empty | name = name, url = Just content }
-                            }
+                            { model | audio = newMediaPlayer }
 
                         File.VideoFile ->
-                            { model
-                                | video =
-                                    { empty | name = name, url = Just content }
-                            }
+                            { model | video = newMediaPlayer }
 
-                        File.JsonFile ->
+                        _ ->
                             let
-                                decoded =
-                                    Decode.decodeString Point.decoder content
+                                _ =
+                                    Debug.log "unexpected OpenedFileAsUrl" fileType
                             in
-                            case decoded of
-                                Ok points ->
-                                    case model.points of
-                                        [] ->
-                                            { model | points = points }
-
-                                        _ ->
-                                            { model
-                                                | confirmOpenPoints =
-                                                    Just
-                                                        { name = name
-                                                        , points = points
-                                                        }
-                                            }
-
-                                Err message ->
-                                    addError
-                                        (Error.InvalidPoints
-                                            { name = name
-                                            , message = message
-                                            }
-                                        )
-                                        model
+                            model
             in
             ( newModel
             , Cmd.none
@@ -625,6 +618,30 @@ updateIncoming msg model =
                                   }
                                 , Cmd.none
                                 )
+
+
+openPointsJson : String -> String -> Model -> Model
+openPointsJson name text model =
+    let
+        decoded =
+            Decode.decodeString Point.decoder text
+    in
+    case decoded of
+        Ok points ->
+            case model.points of
+                [] ->
+                    { model | points = points }
+
+                _ ->
+                    { model
+                        | confirmOpenPoints =
+                            Just { name = name, points = points }
+                    }
+
+        Err message ->
+            addError
+                (Error.InvalidPoints { name = name, message = message })
+                model
 
 
 updateMediaPlayer : (MediaPlayer -> MediaPlayer) -> MediaPlayerId -> Model -> Model
