@@ -44,9 +44,9 @@ I haven’t really tested anything other than Firefox and Chrome.
     tool][app].
 3.  Find matching points of video and audio using the tool and download the
     resulting points file.
-4.  Run `python3 sync.py summer94_video.mp4 summer94_audio.aac points.json` to
-    speed up and slow down segments of `summer94_audio.aac` according to
-    `points.json` and then produce a single file again.
+4.  Run `python3 sync.py summer94_video.mp4 summer94_audio.aac summer94_audio_points.json` to speed up and slow down segments of
+    `summer94_audio.aac` according to `summer94_audio_points.json` and then produce
+    a single file again.
 
 ## Development
 
