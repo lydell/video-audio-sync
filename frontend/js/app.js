@@ -25,6 +25,9 @@ export default class App {
     this.keyboardShortcuts = {};
     this.editingKeyboardShortcuts = false;
 
+    // "NotRestarting" | "RestartingPaused" | "RestartingPlaying"
+    this.restartingState = "NotRestarting";
+
     this.onDragEnter = this.onDragEnter.bind(this);
     this.onDragLeave = this.onDragLeave.bind(this);
     this.onDrop = this.onDrop.bind(this);
@@ -63,7 +66,23 @@ export default class App {
         case "Play": {
           const id = message.data;
           withElement(id, message, element => {
-            element.play();
+            switch (this.restartingState) {
+              case "NotRestarting":
+                element.play();
+                break;
+              case "RestartingPaused":
+                this.restartingState = "RestartingPlaying";
+                break;
+              case "RestartingPlaying":
+                // Do nothing.
+                break;
+              default:
+                console.warn(
+                  "Unknown this.restartingState",
+                  this.restartingState,
+                  message,
+                );
+            }
           });
           break;
         }
@@ -71,7 +90,23 @@ export default class App {
         case "Pause": {
           const id = message.data;
           withElement(id, message, element => {
-            element.pause();
+            switch (this.restartingState) {
+              case "NotRestarting":
+                element.pause();
+                break;
+              case "RestartingPaused":
+                // Do nothing.
+                break;
+              case "RestartingPlaying":
+                this.restartingState = "RestartingPaused";
+                break;
+              default:
+                console.warn(
+                  "Unknown this.restartingState",
+                  this.restartingState,
+                  message,
+                );
+            }
           });
           break;
         }
@@ -103,15 +138,29 @@ export default class App {
                 return;
               }
 
+              // If the user pressed Pause at the very end of the loop, that can
+              // actually happen a couple of milliseconds _after_ the loop end,
+              // before the app has received a time update and knows to restart.
+              // In such a case we should still go back to the start of the
+              // loop, but not start playing again.
+              const bothPaused = audioElement.paused && videoElement.paused;
+
+              this.restartingState = bothPaused
+                ? "RestartingPaused"
+                : "RestartingPlaying";
+
               audioElement.pause();
               videoElement.pause();
 
-              function callback() {
+              const callback = () => {
                 if (!audioElement.seeking && !videoElement.seeking) {
-                  audioElement.play();
-                  videoElement.play();
+                  if (this.restartingState === "RestartingPlaying") {
+                    audioElement.play();
+                    videoElement.play();
+                  }
+                  this.restartingState = "NotRestarting";
                 }
-              }
+              };
 
               seek(audioElement, audio.time, callback);
               seek(videoElement, video.time, callback);
