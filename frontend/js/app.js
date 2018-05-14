@@ -79,10 +79,10 @@ export default class App {
         case "Seek": {
           const { id, time } = message.data;
           withElement(id, message, element => {
-            // Pass `null` as callback to clear previously queued seeks.
             if (element.seeking) {
               element.onseeked = seek.bind(null, element, time, null);
             } else {
+              // Pass `null` as callback to clear previously queued seeks.
               seek(element, time, null);
             }
           });
