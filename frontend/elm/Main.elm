@@ -250,9 +250,19 @@ update msg model =
             )
 
         GoNormal ->
-            ( { model | loopState = Normal }
-            , Cmd.none
-            )
+            case model.loopState of
+                Normal ->
+                    ( model, Cmd.none )
+
+                Looping { audioTime, videoTime } ->
+                    ( { model | loopState = Normal }
+                    , Ports.send
+                        (Ports.EndLoop
+                            { audioTime = audioTime
+                            , videoTime = videoTime
+                            }
+                        )
+                    )
 
         GoLooping ->
             ( { model
@@ -263,7 +273,10 @@ update msg model =
                         , restarting = False
                         }
               }
-            , Cmd.none
+            , Cmd.batch
+                [ Ports.send (Ports.Play DomId.Audio)
+                , Ports.send (Ports.Play DomId.Video)
+                ]
             )
 
         AddPoint point ->

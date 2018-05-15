@@ -29,6 +29,7 @@ type OutgoingMessage
     | Pause DomId
     | Seek DomId Time
     | RestartLoop { audioTime : Time, videoTime : Time }
+    | EndLoop { audioTime : Time, videoTime : Time }
     | SaveFile File
     | OpenFile FileType
     | OpenMultipleFiles
@@ -70,6 +71,15 @@ encode outgoingMessage =
 
         RestartLoop { audioTime, videoTime } ->
             { tag = "RestartLoop"
+            , data =
+                Encode.object
+                    [ ( "audio", encodeLoopMedia DomId.Audio audioTime )
+                    , ( "video", encodeLoopMedia DomId.Video videoTime )
+                    ]
+            }
+
+        EndLoop { audioTime, videoTime } ->
+            { tag = "EndLoop"
             , data =
                 Encode.object
                     [ ( "audio", encodeLoopMedia DomId.Audio audioTime )

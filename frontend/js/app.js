@@ -169,6 +169,23 @@ export default class App {
           break;
         }
 
+        case "EndLoop": {
+          const { audio, video } = message.data;
+
+          withElement(audio.id, message, audioElement => {
+            withElement(video.id, message, videoElement => {
+              audioElement.pause();
+              videoElement.pause();
+
+              seek(audioElement, audio.time, null);
+              seek(videoElement, video.time, null);
+
+              this.restartingState = "NotRestarting";
+            });
+          });
+          break;
+        }
+
         case "SaveFile": {
           const { filename, content, mimeType } = message.data;
           const blob = new window.Blob([content], {
