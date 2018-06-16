@@ -17,3 +17,7 @@
 .FileDragOverlay > * + * {
   margin-top: 0.5em;
 }
+
+.FileDragOverlay-icon {
+  font-size: 4em;
+}

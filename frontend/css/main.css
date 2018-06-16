@@ -15,3 +15,12 @@
 @import "./ProgressBarBackground.css";
 @import "./ProgressBarForeground.css";
 @import "./Toolbar.css";
+
+.feather {
+  display: inline-block;
+  width: auto;
+  height: 1em;
+  overflow: visible;
+  font-size: inherit;
+  vertical-align: -0.125em;
+}

@@ -3,19 +3,17 @@
 }
 
 .ButtonGroup-button {
-  --size: 32px;
   --border-width: 1px;
   --border-radius: 4px;
 
   position: relative;
   z-index: 1;
-  min-width: var(--size);
-  height: var(--size);
   margin: 0;
   padding: 5px;
   border: var(--border-width) solid var(--grey-luke);
   border-radius: 0;
   background: var(--grey-leia);
+  font-size: 1.25rem;
 }
 
 .ButtonGroup-button:first-child {
@@ -84,23 +82,22 @@
 }
 
 .ButtonGroup-buttonLabel {
-  font-size: 0.75em;
+  font-size: 0.7em;
 }
 
 .ButtonGroup-buttonBadge {
-  --size: 1.5em;
+  --size: 1.33em;
 
   position: absolute;
   top: 0;
   right: 0;
   min-width: var(--size);
   height: var(--size);
-  padding: 0 0.33em;
   transform: translate(25%, -25%);
   border-radius: calc(var(--size) / 2);
   background-color: var(--blue);
   color: white;
-  font-size: 0.75em;
+  font-size: 0.6em;
   font-weight: bold;
   line-height: var(--size);
   text-align: center;
@@ -119,7 +116,7 @@
   border-radius: var(--border-radius);
   background-color: var(--blue);
   color: white;
-  font-size: 0.75em;
+  font-size: 0.7em;
   font-weight: bold;
   line-height: 1;
   pointer-events: none;
