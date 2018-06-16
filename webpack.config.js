@@ -4,12 +4,13 @@ const ExtractPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
 const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
+const SWPrecacheWebpackPlugin = require("sw-precache-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const webpack = require("webpack");
 
 const DEBUG = process.env.NODE_ENV !== "production";
 const OUTPUT_PATH = path.resolve(__dirname, "build");
-const PUBLIC_PATH = DEBUG ? "/" : "/video-audio-sync/";
+const PUBLIC_PATH = DEBUG ? "/" : "https://lydell.github.io/video-audio-sync/";
 
 const constants = {
   DEBUG: JSON.stringify(DEBUG),
@@ -154,5 +155,14 @@ module.exports = {
       inline: !DEBUG && /manifest/,
       defaultAttribute: "defer",
     }),
+
+    !DEBUG &&
+      new SWPrecacheWebpackPlugin({
+        cacheId: "video-audio-sync",
+        dontCacheBustUrlsMatching: /\.[\da-f]{8,}\./,
+        minify: false,
+        navigateFallback: `${PUBLIC_PATH}index.html`,
+        staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
+      }),
   ].filter(Boolean),
 };
