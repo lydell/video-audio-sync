@@ -66,15 +66,15 @@ Magic GET parameters:
 
 Additional tasks:
 
-* `yarn run elm-analyse` runs [elm-analyse].
-* `yarn run elm-format` runs [elm-format]. `yarn run elm-forma -- --yes` to
+* `npm run elm-analyse` runs [elm-analyse].
+* `npm run elm-format` runs [elm-format]. `npm run elm-forma -- --yes` to
   avoid the prompt.
-* `yarn run eslint` runs [ESLint]. `yarn run eslint -- --fix` fixes most errors.
-* `yarn run stylelint` runs [stylelint]. `yarn run stylelint -- --fix` fixes
+* `npm run eslint` runs [ESLint]. `npm run eslint -- --fix` fixes most errors.
+* `npm run stylelint` runs [stylelint]. `npm run stylelint -- --fix` fixes
   most errors.
-* `yarn run fix` runs all format/lint tools in autofix mode.
-* `yarn run build` makes a production build.
-* `yarn run test` is run by [Travis CI].
+* `npm run fix` runs all format/lint tools in autofix mode.
+* `npm run build` makes a production build.
+* `npm run test` is run by [Travis CI].
 
 ## License
 
