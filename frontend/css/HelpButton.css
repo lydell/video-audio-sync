@@ -1,0 +1,10 @@
+.HelpButton {
+  display: inline-block;
+  padding: 2px;
+  padding-top: 1px;
+  border: var(--ButtonGroup-border-width) solid var(--ButtonGroup-border-color);
+  border-radius: var(--ButtonGroup-border-radius);
+  background: var(--ButtonGroup-background-color);
+  line-height: 0;
+  vertical-align: -0.2em;
+}

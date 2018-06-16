@@ -12,7 +12,7 @@ import Html.Events exposing (onClick)
 import Html.Events.Custom exposing (onClickWithButton)
 import Utils
 import View.ButtonGroup exposing (ButtonDetails, ButtonLabel(LeftLabel, RightLabel), buttonGroup, emptyButton)
-import View.Fontawesome exposing (Icon(CustomIcon, Icon))
+import View.Icons as Icons
 import View.Toolbar exposing (toolbar)
 
 
@@ -37,31 +37,31 @@ mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortc
         ( name, icon ) =
             case id of
                 Audio ->
-                    ( "Audio", Icon "file-audio" )
+                    ( "Audio", Icons.volume2 )
 
                 Video ->
-                    ( "Video", Icon "file-video" )
+                    ( "Video", Icons.film )
 
         ( playPauseTitle, playPauseIcon ) =
             case ( mediaPlayer.playState, loopState ) of
                 ( Playing, Normal ) ->
                     ( name ++ " is playing. Click to pause."
-                    , Icon "pause"
+                    , Icons.pause
                     )
 
                 ( Playing, Looping _ ) ->
                     ( "Looping. Click to pause."
-                    , CustomIcon "pause-circle" "fa-1.25"
+                    , Icons.pauseCircle
                     )
 
                 ( Paused, Normal ) ->
                     ( name ++ " is paused. Click to play."
-                    , Icon "play"
+                    , Icons.play
                     )
 
                 ( Paused, Looping _ ) ->
                     ( "Paused. Click to loop."
-                    , CustomIcon "play-circle" "fa-1.25"
+                    , Icons.playCircle
                     )
     in
     toolbar
@@ -112,7 +112,7 @@ mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortc
         , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString (Buttons.JumpByPoint id Backward)
-                , icon = Icon "step-backward"
+                , icon = Icons.skipBack
                 , title = "Previous point"
                 , attributes =
                     disabled (not backwardEnabled)
@@ -120,7 +120,7 @@ mediaPlayerToolbar id mediaPlayer loopState keyboardShortcuts editKeyboardShortc
               }
             , { emptyButton
                 | id = Buttons.toString (Buttons.JumpByPoint id Forward)
-                , icon = Icon "step-forward"
+                , icon = Icons.skipForward
                 , title = "Next point"
                 , attributes =
                     disabled (not forwardEnabled)
@@ -158,7 +158,7 @@ buttonDetailsFromJumpAction id enabled jumpAction =
             | id =
                 Buttons.toString
                     (Buttons.JumpByTime id Backward jumpAction.timeOffset)
-            , icon = Icon "backward"
+            , icon = Icons.rewind
             , title = "Jump backward: " ++ jumpAction.label
             , label = RightLabel jumpAction.label
         }
@@ -167,7 +167,7 @@ buttonDetailsFromJumpAction id enabled jumpAction =
             | id =
                 Buttons.toString
                     (Buttons.JumpByTime id Forward jumpAction.timeOffset)
-            , icon = Icon "forward"
+            , icon = Icons.fastForward
             , title = "Jump forward: " ++ jumpAction.label
             , label = LeftLabel jumpAction.label
         }

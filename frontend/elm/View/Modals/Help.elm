@@ -1,10 +1,10 @@
 module View.Modals.Help exposing (view)
 
-import Html exposing (Html, a, h1, li, p, strong, text, ul)
-import Html.Attributes exposing (href)
+import Html exposing (Html, a, h1, li, p, span, strong, text, ul)
+import Html.Attributes exposing (class, href)
 import ModelUtils
 import Utils
-import View.Fontawesome exposing (Icon(Icon), fontawesome)
+import View.Icons as Icons
 import View.Modal as Modal
 
 
@@ -40,24 +40,24 @@ content =
         [ text "Open the "
         , projectLink "#usage" [ text "separated" ]
         , text " "
-        , icon "file-video"
+        , icon Icons.film
         , text " video and "
-        , icon "file-audio"
+        , icon Icons.volume2
         , text " audio files."
         ]
     , p []
         [ text "Use the "
-        , icon "play"
+        , icon Icons.play
         , text " "
-        , icon "backward"
+        , icon Icons.rewind
         , text " "
-        , icon "forward"
+        , icon Icons.fastForward
         , text " Playback buttons to find a spot where you’d like to sync the video and audio."
         ]
     , p []
         [ strong [] [ text "Tip: " ]
         , text "Right-click a button to make it control both audio and video at the same time. If you use the "
-        , icon "keyboard"
+        , icon Icons.command
         , text " keyboard: Hold Control, Command or Alt while pressing a keyboard shortcut."
         ]
     , p []
@@ -70,12 +70,12 @@ content =
         ]
     , p []
         [ text "When you’ve found a good spot, "
-        , icon "pause"
+        , icon Icons.pause
         , text " pause the video and find roughly the corresponding audio spot."
         ]
     , p []
         [ text "Now press the "
-        , icon "sync-alt"
+        , icon Icons.repeat
         , text <| " Loop button. It will loop around your spot, from " ++ loopRadius ++ " before to " ++ loopRadius ++ " after."
         ]
     , p []
@@ -83,24 +83,25 @@ content =
         ]
     , p []
         [ text "When satisfied, press the "
-        , icon "plus"
+        , icon Icons.plus
         , text " Plus button to save the point."
         ]
     , p []
-        [ text "Then repeat for as many points you want. You can use the "
-        , icon "step-backward"
-        , icon "step-forward"
+        [ text "Then repeat for as many points you want. Use the "
+        , icon Icons.skipBack
+        , text " "
+        , icon Icons.skipForward
         , text " Jump buttons to go back to earlier points if you made a mistake. Points can be "
-        , icon "minus"
+        , icon Icons.minus
         , text " removed and "
-        , icon "plus"
+        , icon Icons.plus
         , text " replaced with new ones."
         ]
     , p []
         [ text "Finally, click the "
-        , icon "save"
+        , icon Icons.save
         , text " Save button to save your points to a file. You can also "
-        , icon "file-alt"
+        , icon Icons.fileText
         , text " open previous files you’ve made if you want to tweak them."
         ]
     , p []
@@ -111,9 +112,9 @@ content =
     ]
 
 
-icon : String -> Html msg
-icon name =
-    fontawesome (Icon name)
+icon : Html msg -> Html msg
+icon iconHtml =
+    span [ class "HelpButton" ] [ iconHtml ]
 
 
 projectLink : String -> List (Html msg) -> Html msg

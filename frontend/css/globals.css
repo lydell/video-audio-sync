@@ -6,4 +6,8 @@
   --grey-luke: #adb5bd;
   --spacing: 15px;
   --pulsate-animation: Pulsate 2s infinite ease-in-out;
+  --ButtonGroup-border-width: 1px;
+  --ButtonGroup-border-radius: 4px;
+  --ButtonGroup-border-color: var(--grey-luke);
+  --ButtonGroup-background-color: var(--grey-leia);
 }

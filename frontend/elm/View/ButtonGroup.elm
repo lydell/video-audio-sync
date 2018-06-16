@@ -6,12 +6,11 @@ import Html exposing (Attribute, Html, button, div, span, text)
 import Html.Attributes exposing (attribute, class, classList, id, title, type_)
 import Html.Custom exposing (none)
 import List.Extra
-import View.Fontawesome exposing (Icon(Icon), fontawesome)
 
 
 type alias ButtonDetails msg =
     { id : String
-    , icon : Icon
+    , icon : Html msg
     , title : String
     , label : ButtonLabel
     , badge : Maybe String
@@ -29,7 +28,7 @@ type ButtonLabel
 emptyButton : ButtonDetails msg
 emptyButton =
     { id = ""
-    , icon = Icon ""
+    , icon = text ""
     , title = ""
     , label = NoLabel
     , badge = Nothing
@@ -69,8 +68,8 @@ buttonGroupButton shortcut buttonDetails =
                 ]
                 [ text labelText ]
 
-        icon =
-            fontawesome buttonDetails.icon
+        { icon } =
+            buttonDetails
     in
     button
         ([ type_ "button"

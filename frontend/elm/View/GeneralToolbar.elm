@@ -10,7 +10,7 @@ import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import ModelUtils
 import View.ButtonGroup exposing (buttonGroup, emptyButton)
-import View.Fontawesome exposing (Icon(Icon))
+import View.Icons as Icons
 import View.Toolbar exposing (toolbar)
 
 
@@ -47,7 +47,7 @@ generalToolbar model keyboardShortcuts =
         [ buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.OpenPoints
-                , icon = Icon "file-alt"
+                , icon = Icons.fileText
                 , title = "Open points"
                 , attributes =
                     [ onClick OpenPoints
@@ -66,7 +66,7 @@ generalToolbar model keyboardShortcuts =
         , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.Loop
-                , icon = Icon "sync-alt"
+                , icon = Icons.repeat
                 , title =
                     case model.loopState of
                         Normal ->
@@ -98,7 +98,7 @@ generalToolbar model keyboardShortcuts =
                 Just point ->
                     { emptyButton
                         | id = Buttons.toString Buttons.AddRemovePoint
-                        , icon = Icon "minus"
+                        , icon = Icons.minus
                         , title = "Remove point"
                         , attributes =
                             [ onClick (RemovePoint point)
@@ -109,7 +109,7 @@ generalToolbar model keyboardShortcuts =
                 Nothing ->
                     { emptyButton
                         | id = Buttons.toString Buttons.AddRemovePoint
-                        , icon = Icon "plus"
+                        , icon = Icons.plus
                         , title = "Add point"
                         , attributes =
                             [ onClick (AddPoint potentialNewPoint)
@@ -118,7 +118,7 @@ generalToolbar model keyboardShortcuts =
                     }
             , { emptyButton
                 | id = Buttons.toString Buttons.Warnings
-                , icon = Icon "exclamation-triangle "
+                , icon = Icons.alertTriangle
                 , title =
                     case numWarnings of
                         0 ->
@@ -143,7 +143,7 @@ generalToolbar model keyboardShortcuts =
         , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.Save
-                , icon = Icon "save"
+                , icon = Icons.save
                 , title = "Save points"
                 , attributes =
                     [ onClick Save
@@ -152,7 +152,7 @@ generalToolbar model keyboardShortcuts =
               }
             , { emptyButton
                 | id = Buttons.toString Buttons.RemoveAll
-                , icon = Icon "trash"
+                , icon = Icons.trash2
                 , title = "Remove all points"
                 , attributes =
                     [ onClick ConfirmRemoveAllPoints
@@ -161,7 +161,7 @@ generalToolbar model keyboardShortcuts =
               }
             , { emptyButton
                 | id = Buttons.toString Buttons.OpenMultiple
-                , icon = Icon "copy"
+                , icon = Icons.copy
                 , title = "Open multiple files in one go"
                 , attributes =
                     [ onClick OpenMultiple
@@ -180,7 +180,7 @@ generalToolbar model keyboardShortcuts =
         , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.ToggleShowKeyboardShortcuts
-                , icon = Icon "keyboard"
+                , icon = Icons.command
                 , title =
                     if model.showKeyboardShortcuts then
                         "Showing keyboard shortcuts. Click to hide."
@@ -193,7 +193,7 @@ generalToolbar model keyboardShortcuts =
               }
             , { emptyButton
                 | id = Buttons.toString Buttons.ToggleEditKeyboardShortcuts
-                , icon = Icon "cog"
+                , icon = Icons.settings
                 , title =
                     if model.showKeyboardShortcuts then
                         "Editing keyboard shortcuts. Click to finish."
@@ -208,7 +208,7 @@ generalToolbar model keyboardShortcuts =
         , buttonGroup keyboardShortcuts
             [ { emptyButton
                 | id = Buttons.toString Buttons.HelpModal
-                , icon = Icon "question-circle"
+                , icon = Icons.helpCircle
                 , title = "Help"
                 , pressed = model.helpModalOpen
                 , attributes =
