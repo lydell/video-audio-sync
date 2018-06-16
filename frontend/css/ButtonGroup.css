@@ -83,6 +83,7 @@
 
 .ButtonGroup-buttonLabel {
   font-size: 0.7em;
+  line-height: 0;
 }
 
 .ButtonGroup-buttonBadge {
@@ -110,18 +111,21 @@
 .ButtonGroup-keyboardShortcut {
   --transform: translateX(-50%);
 
+  display: flex;
   position: absolute;
   top: calc(100% - 5px);
   left: 50%;
-  padding: 2px 4px;
+  align-items: center;
+  height: calc(1.5em);
+  padding: 0 4px;
   transform: var(--transform);
   transition: transform 400ms ease-out;
   border-radius: var(--border-radius);
   background-color: var(--blue);
   color: white;
-  font-size: 0.7em;
+  font-size: 0.6em;
   font-weight: bold;
-  line-height: 1;
+  line-height: 0;
   pointer-events: none;
 }
 
